@@ -1,0 +1,7 @@
+{
+  "data": [
+    {"url": "https://json-phish.test/login"},
+    {"phish_id": "missing-url"},
+    "https://string-entry.test/"
+  ]
+}

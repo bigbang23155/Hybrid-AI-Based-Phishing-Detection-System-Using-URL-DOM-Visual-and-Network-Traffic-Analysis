@@ -1,0 +1,6 @@
+rank,domain
+1,good.test
+2,second.test
+3,conflict.test
+not-a-rank,broken.test
+4,third.test

@@ -1,0 +1,5 @@
+https://open.test/login
+https://duplicate.test/
+HTTPS://DUPLICATE.TEST:443/#fragment
+
+malformed-url

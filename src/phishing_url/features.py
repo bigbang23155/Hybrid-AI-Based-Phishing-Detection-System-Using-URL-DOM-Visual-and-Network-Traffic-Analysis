@@ -13,6 +13,15 @@ SUSPICIOUS_KEYWORDS = (
     "account", "bank", "confirm", "login", "password", "secure", "signin", "update", "verify"
 )
 
+FEATURE_NAMES = (
+    "url_length", "hostname_length", "path_length", "query_length", "dot_count",
+    "subdomain_count", "slash_count", "digit_count", "digit_ratio", "hyphen_count",
+    "at_count", "question_count", "equals_count", "ampersand_count", "uses_https",
+    "is_ip_hostname", "suspicious_keyword_count", "url_entropy",
+)
+BINARY_FEATURES = frozenset(("uses_https", "is_ip_hostname"))
+FLOAT_FEATURES = frozenset(("digit_ratio", "url_entropy"))
+
 
 def _entropy(text: str) -> float:
     length = len(text)

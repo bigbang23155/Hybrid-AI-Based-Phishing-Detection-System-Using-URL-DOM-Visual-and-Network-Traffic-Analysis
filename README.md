@@ -51,6 +51,29 @@ records = prepare_records([
 ])
 ```
 
+## URL feature extraction and statistics
+
+After preparing `data/processed/urls.csv`, extract the existing lexical URL
+features and write label-level statistics and quality checks with:
+
+```bash
+PYTHONPATH=src python -m phishing_url.feature_analysis --root . --expected-per-label 2000
+```
+
+This command treats URLs only as text and does not perform network requests. It
+retains the five input dataset columns in their original order, appends the fixed
+features from `phishing_url.features`, and writes:
+
+- `data/processed/url_features.csv`
+- `reports/tables/feature_summary_by_label.csv`
+- `reports/tables/feature_quality_summary.csv`
+
+Numeric summaries contain count, mean, median, sample standard deviation, minimum,
+and maximum. Binary summaries contain the count and proportion equal to one.
+Because preparation constructs every Tranco record with an `https://` scheme, the
+`uses_https` feature contains source-specific collection bias and must not be
+interpreted as an independently observed security property for those records.
+
 
 
 ```bash

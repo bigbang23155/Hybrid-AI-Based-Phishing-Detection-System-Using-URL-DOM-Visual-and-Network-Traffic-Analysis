@@ -95,13 +95,14 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
     sample_size = min(target_per_label, len(by_label[0]), len(by_label[1]))
     rng = random.Random(seed)
     selected: list[URLRecord] = []
+    source_rows_by_record = {id(record): row for row, record in valid}
     for label in (0, 1):
         indices = sorted(rng.sample(range(len(by_label[label])), sample_size))
         chosen = {by_label[label][index].url_clean for index in indices}
         selected.extend(by_label[label][index] for index in indices)
         for record in by_label[label]:
             if record.url_clean not in chosen:
-                row = next(row for row, candidate in valid if candidate is record)
+                row = source_rows_by_record[id(record)]
                 rejected.append(_reject(row, "not_sampled"))
     selected.sort(key=lambda record: (record.label, record.url_clean, record.source, record.url_raw))
 

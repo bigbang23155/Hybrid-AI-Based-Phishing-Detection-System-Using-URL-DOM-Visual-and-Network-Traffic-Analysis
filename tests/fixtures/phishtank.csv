@@ -1,0 +1,7 @@
+phish_id,url
+1,HTTPS://bad.test:443/login#fragment
+2,https://duplicate.test/
+3,
+4,not-a-url
+5,https://conflict.test/
+6,https://phish-extra.test/

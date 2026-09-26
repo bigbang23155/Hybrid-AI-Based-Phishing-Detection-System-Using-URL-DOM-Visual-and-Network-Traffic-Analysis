@@ -71,58 +71,70 @@ Because preparation constructs every Tranco record with an `https://` scheme, th
 `uses_https` feature contains source-specific collection bias and must not be
 interpreted as an independently observed security property for those records.
 
-## Assignment 02: reproducible baseline experiment
+## Assignment 02: model and sampling foundation
 
-The preferred input is the archived Assignment 01 file
-`data/processed/urls.csv`; when it exists, run the experiment directly and do
-not rebuild it. Only if that processed file is unavailable, reconstruction needs
-the following local inputs (not committed because feeds may be licensed/sensitive):
+Current status (September 26, 2026): the existing Assignment 02 implementation is
+preserved and revised. No approved Dataset v2 exists and no formal model metrics
+are claimed. Do not repeat the closed Assignment 01 recovery search.
 
-* exactly one of `data/raw/phishtank.csv` or `data/raw/phishtank.json`;
-* `data/raw/openphish.txt`;
-* `data/raw/tranco.csv`.
+See [current report](docs/assignment02_progress_report_en.md),
+[model/sampling methods](docs/model_sampling_method.md),
+[feature rationale](docs/feature_rationale.md), and
+[final data protocol](docs/final_research_protocol.md).
 
-To reconstruct a missing processed file, run the first command. Then run the
-second command for the audit, locked domain-aware split, five-seed validation,
-both models, and required no-HTTPS sensitivity comparison:
+For a prospective study, generate one recorded seed plan before inspecting outcomes:
 
 ```bash
-PYTHONPATH=src python -m phishing_url.prepare --root . --target-per-label 2000 --seed 42
-PYTHONPATH=src python -m phishing_url.experiment run \
-  --input data/processed/urls.csv --output results/assignment02
+PYTHONPATH=src python -m phishing_url.randomness --output config/study_seeds.json
 ```
 
-The second command creates `dataset_audit.csv`, domain groups and feature
-distribution/correlation tables, `split_manifest.csv`, `split_summary.csv`,
-`validation_seed_metrics.csv`, `validation_summary.csv`, `final_test_metrics.csv`,
-`model_comparison.csv`, feature importance, defanged error analysis, the experiment
-manifest, feature schemas, and fitted pipelines under `results/assignment02/models/`.
-Seed 2025 locks the test domains; seeds 11, 23, 37, 53 and 71 are development-only.
-The positive class is phishing (`1`) and the baseline threshold is 0.5.
+This uses system entropy once, derives independent sampling/test/development/model
+seeds, and refuses to overwrite the plan. Use `--master-seed INTEGER` for an explicit
+reproducible plan. Never regenerate seeds to seek a better score. Without a plan,
+legacy split seeds 2025 and 11/23/37/53/71 remain available.
 
-Predict locally with an artifact (no network access):
+Once approved original data and provenance are available, the existing preparation
+CLI accepts `--seed-plan config/study_seeds.json` instead of `--seed`. Its original
+PhishTank/OpenPhish/Tranco parsers remain; the Tranco parser constructs roots and
+must not be confused with observed URL ingestion. No new source is automatically approved.
+
+Development only, after dataset approval and freezing:
+
+```bash
+PYTHONPATH=src python -m phishing_url.experiment run \
+  --input data/processed/urls.csv --output results/assignment02/development \
+  --seed-plan config/study_seeds.json --feature-sets baseline no_https
+```
+
+This saves all shared split manifests, development-only feature audits,
+validation metrics/mean/SD, selected parameters and paired model differences.
+It does not evaluate test or create final models. Named schemas also include
+`compact16`, `expanded21`, and genuinely `hostname_only` (4 features). Declare
+optional comparisons before final evaluation; every row has the same schema.
+
+Explicit finalization requires the completed development evidence and the same
+input hash, source-code hashes, dependency versions, seeds and configuration:
+
+```bash
+PYTHONPATH=src python -m phishing_url.experiment run \
+  --input data/processed/urls.csv --output results/assignment02/final \
+  --seed-plan config/study_seeds.json --feature-sets baseline no_https \
+  --evaluate-test --development-run results/assignment02/development
+```
+
+It replays and verifies development splits, selections and validation metrics before
+planned test comparisons, then saves actual test metrics, importance, errors,
+latency and model artifacts. Threshold is 0.5 and phishing is class 1. It refuses
+to overwrite populated evidence, including with the retained legacy `--overwrite`
+argument. Research discipline is still required: these checks are not access control.
+
+Predict with a finalized trusted artifact without visiting the URL:
 
 ```bash
 PYTHONPATH=src python -m phishing_url.experiment predict \
-  --model results/assignment02/models/baseline_logistic_regression.joblib \
+  --model results/assignment02/final/models/baseline_logistic_regression.joblib \
   'https://example.com/'
 ```
-
-Named feature sets are `baseline`, `no_https`, and `hostname_only`; library callers
-may pass any comma-separated ordered subset through `resolve_feature_set`. Unknown,
-duplicate, empty, and metadata columns are rejected. The saved artifact is a dict
-containing the fitted sklearn pipeline and its exact ordered schema.
-
-The runner refuses to replace a populated result directory. Preserve the old
-run or select a new output directory. `--overwrite` is available only for an
-explicitly intentional replacement. The protocol is frozen in
-`experiment_config.json` before model fitting; the execution manifest includes
-the bundled PSL snapshot SHA-256 and Git state captured before result files are
-created. Serialized pipelines and raw URL datasets should normally remain local.
-
-See `docs/feature_rationale.md`, `docs/dataset_bias_and_limitations.md`, and the
-English/Traditional-Chinese progress reports. No formal results are claimed unless
-the real input checksum and generated manifest accompany them.
 
 ## Observed legitimate URL acquisition
 

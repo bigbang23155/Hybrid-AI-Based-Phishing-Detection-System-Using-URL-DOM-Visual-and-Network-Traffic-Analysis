@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import json
 import random
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
@@ -13,6 +15,7 @@ from typing import Iterable, Sequence
 from .dataset import SCHEMA, URLRecord
 from .ingestion import ParsedRow, read_sources
 from .url_cleaning import InvalidURLError, clean_url, registered_domain
+from .randomness import derive_seed, load_seed_plan, validate_seed
 
 SOURCES = ("phishtank", "openphish", "tranco")
 
@@ -40,6 +43,7 @@ class PreparationResult:
     source_summary: list[dict[str, str | int]]
     rejected_records: list[RejectedRecord]
     conflicts: list[ConflictRecord]
+    sampling_manifest: dict
 
 
 def _reject(row: ParsedRow, reason: str) -> RejectedRecord:
@@ -50,10 +54,13 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
     """Validate, deduplicate, remove conflicts, and deterministically balance records."""
     if target_per_label < 1:
         raise ValueError("target_per_label must be at least 1")
+    validate_seed(seed)
     input_rows = list(rows)
     rejected: list[RejectedRecord] = []
     valid: list[tuple[ParsedRow, URLRecord]] = []
     for row in input_rows:
+        if type(row.label) is not int or row.label not in (0, 1):
+            raise ValueError("label must be integer 0 or 1")
         if row.error or row.url_raw is None:
             rejected.append(_reject(row, f"invalid: {row.error or 'missing URL'}"))
             continue
@@ -71,7 +78,9 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
     candidates: list[URLRecord] = []
     conflicts: list[ConflictRecord] = []
     for cleaned in sorted(groups):
-        group = groups[cleaned]
+        group = sorted(groups[cleaned], key=lambda item: (
+            SOURCES.index(item[1].source) if item[1].source in SOURCES else len(SOURCES),
+            item[1].source, item[1].url_raw, item[0].row_number))
         labels = {record.label for _, record in group}
         if len(labels) > 1:
             conflicts.append(ConflictRecord(
@@ -93,10 +102,10 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
 
     by_label = {label: sorted((record for record in candidates if record.label == label), key=lambda r: (r.url_clean, r.source, r.url_raw)) for label in (0, 1)}
     sample_size = min(target_per_label, len(by_label[0]), len(by_label[1]))
-    rng = random.Random(seed)
     selected: list[URLRecord] = []
     source_rows_by_record = {id(record): row for row, record in valid}
     for label in (0, 1):
+        rng = random.Random(derive_seed(seed, f"class:{label}"))
         indices = sorted(rng.sample(range(len(by_label[label])), sample_size))
         chosen = {by_label[label][index].url_clean for index in indices}
         selected.extend(by_label[label][index] for index in indices)
@@ -109,7 +118,8 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
     accepted_counts = Counter(record.source for record in candidates)
     selected_counts = Counter(record.source for record in selected)
     reason_counts = Counter((record.source, record.reason) for record in rejected)
-    conflict_counts = Counter(row.source for cleaned in {item.url_clean for item in conflicts} for row, record in valid if record.url_clean == cleaned)
+    conflict_urls = {item.url_clean for item in conflicts}
+    conflict_counts = Counter(row.source for row, record in valid if record.url_clean in conflict_urls)
     summary = []
     for source in (*SOURCES, "total"):
         source_rows = input_rows if source == "total" else [row for row in input_rows if row.source == source]
@@ -135,7 +145,17 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
         "selected_records": selected_counts[source],
         "unique_registered_domains": len({record.registered_domain for record in selected if record.source == source}),
     } for source in SOURCES]
-    return PreparationResult(selected, summary, source_summary, rejected, conflicts)
+    pool_bytes = json.dumps([r.as_dict() for r in sorted(candidates, key=lambda r:r.url_clean)], sort_keys=True).encode()
+    manifest = {"sampling_version": 2, "sampling_seed": seed,
+                "duplicate_representative": "fixed source priority phishtank/openphish/tranco, then source/raw URL; all rejected rows retained",
+                "class_seeds": {str(label): derive_seed(seed, f"class:{label}") for label in (0, 1)},
+                "method": "uniform URL sampling without replacement within each class after conflicts/deduplication",
+                "candidate_pool_sha256": hashlib.sha256(pool_bytes).hexdigest(),
+                "target_per_label": target_per_label, "actual_per_label": sample_size,
+                "shortfall": sample_size < target_per_label,
+                "candidate_counts": {str(label):len(by_label[label]) for label in (0, 1)},
+                "note": "Uniform URL sampling is not uniform domain sampling; no distribution matching or score-based retries."}
+    return PreparationResult(selected, summary, source_summary, rejected, conflicts, manifest)
 
 
 def _write_dicts(path: Path, columns: Sequence[str], rows: Iterable[dict[str, object]]) -> None:
@@ -155,6 +175,9 @@ def write_outputs(result: PreparationResult, root: str | Path = ".") -> None:
     _write_dicts(root / "reports/tables/source_summary.csv", tuple(result.source_summary[0]), result.source_summary)
     _write_dicts(root / "reports/tables/rejected_records.csv", tuple(RejectedRecord.__dataclass_fields__), (asdict(item) for item in result.rejected_records))
     _write_dicts(root / "reports/tables/conflicting_labels.csv", tuple(ConflictRecord.__dataclass_fields__), (asdict(item) for item in result.conflicts))
+    manifest = dict(result.sampling_manifest)
+    manifest["dataset_sha256"] = hashlib.sha256((root / "data/processed/urls.csv").read_bytes()).hexdigest()
+    (root / "reports/tables/sampling_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
 def _default_phishtank(raw_dir: Path) -> Path:
@@ -168,11 +191,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("."), help="project/data root (default: current directory)")
     parser.add_argument("--target-per-label", type=int, default=2_000)
-    parser.add_argument("--seed", type=int, default=42)
+    seeds = parser.add_mutually_exclusive_group()
+    seeds.add_argument("--seed", type=int)
+    seeds.add_argument("--seed-plan", type=Path)
     args = parser.parse_args(argv)
     raw_dir = args.root / "data/raw"
     rows = read_sources(_default_phishtank(raw_dir), raw_dir / "openphish.txt", raw_dir / "tranco.csv")
-    result = prepare_dataset(rows, args.target_per_label, args.seed)
+    seed = load_seed_plan(args.seed_plan)["sampling_seed"] if args.seed_plan else (42 if args.seed is None else args.seed)
+    result = prepare_dataset(rows, args.target_per_label, seed)
+    result.sampling_manifest["input_sha256"] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (_default_phishtank(raw_dir), raw_dir / "openphish.txt", raw_dir / "tranco.csv")}
+    if args.seed_plan:
+        result.sampling_manifest["seed_plan_sha256"] = hashlib.sha256(args.seed_plan.read_bytes()).hexdigest()
     write_outputs(result, args.root)
     print(f"Wrote {len(result.records)} records ({len(result.records) // 2} per label).")
     return 0

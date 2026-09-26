@@ -39,3 +39,31 @@ Correlated variables are retained to document the initial baseline, then examine
 standardized logistic coefficients, tree impurity importance, and permutation importance. Coefficients
 refer to class `1 = phishing`; impurity importance may prefer features with more split points, and
 permutation importance can understate correlated variables. None is a causal effect.
+
+## Current schema extension
+
+The original extractor still returns exactly 18 features. The registry adds these
+three candidate definitions, not a claim of demonstrated performance improvement:
+
+| Feature | Definition | Hypothesis and limitation |
+|---|---|---|
+| `hostname_digit_ratio` | Decimal digits / normalized hostname characters | Isolates host digits from path/query IDs; benign infrastructure also uses digits |
+| `percent_encoded_count` | Number of `%` plus two hexadecimal character sequences in normalized URL | Measures encoding; ordinary applications also encode text |
+| `has_nondefault_port` | Whether the normalized URL retains a port | Alternative endpoint; benign services also use these ports; normalization removes default 80/443 |
+
+`expanded21` adds these to the unchanged baseline. `compact16` excludes HTTPS and
+the manual English keyword count, a predefined sensitivity to scheme/vocabulary
+assumptions, not a best subset selected from scores. `no_https` remains the primary
+ablation. No feature count is claimed optimal or an exact reproduction of cited papers.
+
+The former `hostname_only` subset still included full-URL length/entropy. Its corrected
+definition contains hostname length, subdomain count, IP-host indicator and hostname
+digit ratio only. Old artifacts retain their saved schemas and are not retroactively
+described as the new set. Each model has one fixed ordered schema for all rows.
+
+Registered extra values may be ignored when choosing a smaller schema. Unknown names
+raise; define/register an extractor and retrain to add features. The mapping adapter
+requires explicit `allow_missing=True` to represent missing values as NaN. An absent
+query legitimately has length zero; invalid URL extraction raises. Training-only
+imputation retains empty columns and appends missing indicators; importance uses
+the transformed names so indicators cannot cause a schema-length mismatch.

@@ -1,0 +1,15 @@
+{
+  "status": "user_reported_context_not_independently_reverified",
+  "expected_filename": "All.csv",
+  "available_in_execution_environment": false,
+  "reported_size": {
+    "records": 36707,
+    "columns": 80,
+    "precomputed_feature_columns": 79,
+    "class_label_columns": 1
+  },
+  "reported_original_url_column": false,
+  "reported_original_domain_identifier": false,
+  "decision": "unsuitable_for_dataset_v2_or_domain_disjoint_url_baseline",
+  "reason": "Precomputed features cannot support project URL cleaning, feature recomputation, or domain-disjoint grouping; URLs must not be reconstructed from feature values."
+}

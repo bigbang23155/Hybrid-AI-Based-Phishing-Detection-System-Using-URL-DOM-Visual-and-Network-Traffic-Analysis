@@ -1,0 +1,7 @@
+stage,reason_category,count
+homepage_https,ProxyError,998
+homepage_http,HTTPError,996
+homepage_http,dns_failure,201
+homepage_https,dns_failure,199
+homepage_http,non_public_destination,2
+homepage_https,non_public_destination,2

@@ -1,0 +1,21 @@
+{
+  "status": "reported_context_not_independently_reverified",
+  "package_expected_client_path": "C:\\Users\\USER\\Downloads\\PhiUSIIL_Audit_Package.zip",
+  "package_available_in_execution_environment": false,
+  "reported_counts": {
+    "legitimate": 134850,
+    "phishing": 100945,
+    "extra_normalized_duplicate_records": 1107,
+    "conflicting_normalized_url_keys": 1
+  },
+  "reported_structure": {
+    "legitimate_https_rate": 1.0,
+    "legitimate_non_root_rate": 0.0,
+    "legitimate_query_rate": 0.0,
+    "phishing_https_rate": 0.4874,
+    "phishing_non_root_rate": 0.2720,
+    "phishing_query_rate": 0.0602
+  },
+  "decision": "not_an_approved_dataset_v2",
+  "reason": "Reported legitimate URLs retain the all-HTTPS root-only construction bias, and the referenced package was not mounted for manifest verification."
+}

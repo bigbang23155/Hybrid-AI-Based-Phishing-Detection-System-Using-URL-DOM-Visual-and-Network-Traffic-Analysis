@@ -7,7 +7,14 @@ name = "phishing-url"
 version = "0.1.0"
 description = "Offline URL preparation and features for phishing research"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "joblib==1.5.2",
+    "numpy==2.2.6",
+    "pandas==2.3.2",
+    "scikit-learn==1.7.2",
+    "tldextract==5.3.0",
+    "requests==2.32.5",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

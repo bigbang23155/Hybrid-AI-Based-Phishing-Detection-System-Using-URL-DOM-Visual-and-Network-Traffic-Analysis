@@ -1,0 +1,5 @@
+artifacts/*.zip binary
+artifacts/*.bundle binary
+artifacts/export_transfer/*.txt text eol=lf
+artifacts/export_transfer/*.json text eol=lf
+artifacts/export_transfer/*.py text eol=lf

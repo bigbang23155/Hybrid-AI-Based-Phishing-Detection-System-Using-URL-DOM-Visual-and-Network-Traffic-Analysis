@@ -6,12 +6,16 @@ import ipaddress
 import re
 from urllib.parse import SplitResult, urlsplit, urlunsplit
 
+import tldextract
+
 _FORBIDDEN = re.compile(r"[\s\x00-\x1f\x7f]")
 _DNS_LABEL = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
-_COMPOUND_SUFFIXES = frozenset({
-    "co.uk", "org.uk", "ac.uk", "com.au", "net.au", "org.au", "co.nz", "co.jp",
-    "com.br", "com.cn",
-})
+# tldextract ships a PSL snapshot.  Empty update URLs are important: experiments
+# must never silently fetch a newer list.  Private suffixes are deliberately
+# excluded and this policy is recorded in the experiment manifest.
+DOMAIN_EXTRACTOR = tldextract.TLDExtract(suffix_list_urls=(), include_psl_private_domains=False)
+DOMAIN_PARSER = "tldextract"
+PRIVATE_SUFFIX_POLICY = "excluded"
 
 
 class InvalidURLError(ValueError):
@@ -67,16 +71,16 @@ def clean_url(value: str) -> str:
 
 
 def registered_domain(cleaned_url: str) -> str:
-    """Return an IP unchanged or a domain using the documented fixed suffix rule."""
+    """Return an IP unchanged or the PSL-aware registrable domain (eTLD+1)."""
     hostname = urlsplit(cleaned_url).hostname or ""
     try:
         ipaddress.ip_address(hostname)
         return hostname
     except ValueError:
-        labels = hostname.rstrip(".").split(".")
-        suffix_width = 2 if ".".join(labels[-2:]) in _COMPOUND_SUFFIXES else 1
-        width = min(len(labels), suffix_width + 1)
-        return ".".join(labels[-width:])
+        result = DOMAIN_EXTRACTOR(hostname)
+        # Single-label/reserved hosts have no suffix; retain the normalized host
+        # as an explicit, deterministic group rather than inventing a value.
+        return result.top_domain_under_public_suffix or hostname.rstrip(".")
 
 
 def subdomain_count(cleaned_url: str) -> int:

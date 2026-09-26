@@ -1,0 +1,14 @@
+{
+  "candidate_snapshot": "data/raw/tranco-top-1m-2026-09-26.csv",
+  "candidate_snapshot_sha256": "831476d0f554af0a5164d6977acc85c95b4cc176b47366be3caa3227f5e63f90",
+  "seed": 20250926,
+  "rank_min": 1001,
+  "rank_max": 100000,
+  "domains": 1200,
+  "per_domain_cap": 3,
+  "timeout_seconds": 4.0,
+  "workers": 20,
+  "request_delay_seconds": 0.25,
+  "diagnostic_subset": "config/windows_connectivity_domains.csv",
+  "diagnostic_subset_policy": "first 10 candidates after the frozen full-run seeded sample is sorted; diagnostic outcomes never replace candidates"
+}

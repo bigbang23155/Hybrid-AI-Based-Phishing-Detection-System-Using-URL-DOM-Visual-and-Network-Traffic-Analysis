@@ -1,0 +1,27 @@
+{
+  "decision": "unsuitable",
+  "reasons": [
+    "only 3 observed URLs; require at least 2000",
+    "only 1 domain groups; require at least 300"
+  ],
+  "thresholds": {
+    "min_urls": 2000,
+    "min_domains": 300,
+    "min_inner_page_rate": 0.2
+  },
+  "counts": {
+    "urls": 3,
+    "domains": 1,
+    "candidate_domains_with_evidence": 1,
+    "https_rate": 1.0,
+    "inner_page_rate": 1.0,
+    "query_rate": 0.0,
+    "normalized_duplicates": 0,
+    "failures": 2398
+  },
+  "input_sha256": {
+    "observations": "37af8d88b54be386d18dc97e41d39884375fe43db846397a5d19fab00bb050f6",
+    "failures": "7ea2183757497625da26dd9d63db0ff9892b2645c810a03d84c8abf494704061"
+  },
+  "interpretation": "Candidate membership and public observation support an assumed-legitimate label, not verified safety."
+}

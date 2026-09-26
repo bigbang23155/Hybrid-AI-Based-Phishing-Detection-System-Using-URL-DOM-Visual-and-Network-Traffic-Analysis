@@ -1,0 +1,4 @@
+category,sample_id,candidate_domain,observed_from,review_status,review_finding,note
+inner_page,5cf11dcc629cbf76f9fbda98483e6da5c5ce8259eb2d2ed59d375c950f85aa4f,java.com,homepage_link,not_reviewed,,Seeded queue only; no human verification claimed.
+inner_page,b909aa08df51b2d4da578ef72009b4d6fc9f6b013f7a9d7a66d73767eceabfa4,java.com,homepage_link,not_reviewed,,Seeded queue only; no human verification claimed.
+inner_page,99e6d44a7683da08699578a550e340e80af6f55dc974da233f4d154f1480dcce,java.com,homepage_response,not_reviewed,,Seeded queue only; no human verification claimed.

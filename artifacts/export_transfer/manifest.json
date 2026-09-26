@@ -1,0 +1,26 @@
+{
+  "format_version": 1,
+  "encoding": "base64",
+  "line_width": 76,
+  "chunk_max_bytes": 204800,
+  "original_filename": "assignment02_github_permitted_export_aa5d59c.zip",
+  "original_size_bytes": 328946,
+  "original_sha256": "faa6bedc50f28e8b7ffeb243ae64c0803f376ed0c18a1d7bf90ff20dc2003747",
+  "ordered_chunks": [
+    {
+      "filename": "assignment02_export.b64.part001.txt",
+      "size_bytes": 204743,
+      "sha256": "0e69c275e1931cdea41db880c53c496ba2a7619afd1a6be8afad9b5d8d2de169"
+    },
+    {
+      "filename": "assignment02_export.b64.part002.txt",
+      "size_bytes": 204743,
+      "sha256": "5bd15448e48b775b08c7b4de3c0dfea989a9e3538cd32db040dcc4a4aabd1e18"
+    },
+    {
+      "filename": "assignment02_export.b64.part003.txt",
+      "size_bytes": 34881,
+      "sha256": "e6072555a0e5c2e4c58378ee795f11020c2971e2e7b6ddb076bec2ed6a17d8d4"
+    }
+  ]
+}

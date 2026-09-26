@@ -220,4 +220,8 @@ __marimo__/
 # Locally obtained and generated dataset artifacts
 data/raw/*
 data/processed/*
+data/collection/*
 reports/tables/*
+artifacts/*.zip
+artifacts/*.bundle
+artifacts/export_staging/

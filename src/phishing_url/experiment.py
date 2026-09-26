@@ -10,6 +10,7 @@ import os
 import platform
 import subprocess
 import time
+import warnings
 from pathlib import Path
 from typing import Sequence
 
@@ -27,9 +28,11 @@ from sklearn.metrics import (accuracy_score, average_precision_score, confusion_
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.exceptions import ConvergenceWarning
 
 from .dataset import SCHEMA
-from .feature_registry import FeatureExtractor, resolve_feature_set
+from .feature_registry import FEATURE_SETS, FeatureExtractor, resolve_feature_set
+from .randomness import load_seed_plan
 from .url_cleaning import PRIVATE_SUFFIX_POLICY, clean_url, registered_domain
 
 TEST_SEED = 2025
@@ -61,7 +64,7 @@ def _load(path: Path) -> pd.DataFrame:
     missing = [column for column in SCHEMA if column not in frame]
     if missing:
         raise ValueError(f"dataset missing required columns: {', '.join(missing)}")
-    if frame["label"].isna().any() or not set(frame["label"].astype(int)).issubset({0, 1}):
+    if frame["label"].isna().any() or not frame["label"].isin([0, 1]).all():
         raise ValueError("label must contain only 0 (legitimate) and 1 (phishing)")
     frame["label"] = frame["label"].astype(int)
     if frame[list(SCHEMA)].isna().any().any():
@@ -82,10 +85,16 @@ def _load(path: Path) -> pd.DataFrame:
     if frame["url_clean"].duplicated().any():
         raise ValueError("dataset contains duplicate normalized URLs; audit/deduplicate before modeling")
     frame["domain_group"] = frame["url_clean"].map(registered_domain)
+    if not frame["registered_domain"].eq(frame["domain_group"]).all():
+        raise ValueError("stored registered_domain disagrees with the current PSL grouping")
+    if frame["source"].str.strip().eq("").any():
+        raise ValueError("source must not be empty")
+    if any(clean_url(raw) != cleaned for raw, cleaned in zip(frame.url_raw, frame.url_clean, strict=True)):
+        raise ValueError("url_raw does not normalize to url_clean")
     if (frame["domain_group"] == "").any():
         raise ValueError("one or more URLs have no deterministic domain group")
     frame["sample_id"] = frame["url_clean"].map(_stable_id)
-    return frame
+    return frame.sort_values("sample_id").reset_index(drop=True)
 
 
 def _choose_groups(frame: pd.DataFrame, fraction: float, seed: int) -> set[str]:
@@ -96,14 +105,15 @@ def _choose_groups(frame: pd.DataFrame, fraction: float, seed: int) -> set[str]:
     target_p = frame.label.mean()
     best: tuple[float, set[str]] | None = None
     names = groups.index.to_numpy()
+    sizes = groups["size"].to_numpy()
+    positives_by_group = groups["positives"].to_numpy()
     for _ in range(500):
-        order = rng.permutation(names)
-        selected: set[str] = set()
-        count = positives = 0
-        for name in order:
-            if count >= target_n:
-                break
-            selected.add(str(name)); count += int(groups.loc[name, "size"]); positives += int(groups.loc[name, "positives"])
+        order = rng.permutation(len(names))
+        stop = int(np.searchsorted(np.cumsum(sizes[order]), target_n)) + 1
+        selected_indices = order[:stop]
+        selected = set(names[selected_indices])
+        count = int(sizes[selected_indices].sum())
+        positives = int(positives_by_group[selected_indices].sum())
         ratio = positives / count if count else 0
         score = abs(count / len(frame) - fraction) + abs(ratio - target_p)
         if best is None or score < best[0]:
@@ -124,7 +134,7 @@ def make_split(frame: pd.DataFrame, test_seed: int = TEST_SEED, dev_seed: int = 
 
 
 def validate_split(frame: pd.DataFrame, split: pd.Series) -> None:
-    if len(split) != len(frame) or split.isna().any() or set(split) != {"train", "validation", "test"}:
+    if not split.index.equals(frame.index) or split.isna().any() or set(split) != {"train", "validation", "test"}:
         raise ValueError("split must assign every row exactly once to train/validation/test")
     for left, right in (("train", "validation"), ("train", "test"), ("validation", "test")):
         if set(frame.loc[split == left, "domain_group"]) & set(frame.loc[split == right, "domain_group"]):
@@ -142,14 +152,23 @@ def _matrix(frame: pd.DataFrame, names: tuple[str, ...]) -> pd.DataFrame:
 
 
 def _pipeline(model: str, params: dict[str, object], names: tuple[str, ...], seed: int) -> Pipeline:
+    if model not in SEARCH_GRIDS:
+        raise ValueError(f"unknown model: {model}")
     preprocess = ColumnTransformer([("numeric", Pipeline([
-        ("imputer", SimpleImputer(strategy="median", add_indicator=True)),
-        ("scale", StandardScaler()),
+        ("imputer", SimpleImputer(strategy="median", add_indicator=True, keep_empty_features=True)),
+        ("scale", StandardScaler() if model == "logistic_regression" else "passthrough"),
     ]), list(names))], remainder="drop", verbose_feature_names_out=False)
     classifier = (LogisticRegression(C=float(params["C"]), max_iter=2000, random_state=seed)
                   if model == "logistic_regression" else
                   DecisionTreeClassifier(max_depth=params["max_depth"], min_samples_leaf=int(params["min_samples_leaf"]), random_state=seed))
     return Pipeline([("preprocess", preprocess), ("classifier", classifier)])
+
+
+def _fit(pipe: Pipeline, X: pd.DataFrame, y: pd.Series) -> Pipeline:
+    # A nonconverged candidate must not silently enter the model comparison.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ConvergenceWarning)
+        return pipe.fit(X, y)
 
 
 def _metrics(y: pd.Series, score: np.ndarray, threshold: float = .5) -> dict[str, float | int]:
@@ -192,7 +211,10 @@ def _audit(frame: pd.DataFrame, features: pd.DataFrame, output: Path) -> None:
     ]
     for (source, label), part in frame.groupby(["source", "label"]):
         rows.append({"section": "https_rate", "key": f"{source}|{label}", "value": float(features.loc[part.index, "uses_https"].mean())})
-        rows.append({"section": "root_url_rate", "key": f"{source}|{label}", "value": float(((features.loc[part.index, "path_length"] == 1) & (features.loc[part.index, "query_length"] == 0)).mean())})
+        from urllib.parse import urlsplit
+        parts = part.url_clean.map(urlsplit)
+        rows.append({"section": "root_path_rate", "key": f"{source}|{label}", "value": float(parts.map(lambda p:p.path in ("", "/")).mean())})
+        rows.append({"section": "query_rate", "key": f"{source}|{label}", "value": float(parts.map(lambda p:bool(p.query)).mean())})
     for name in features:
         rows.extend(({"section": "feature_missing", "key": name, "value": int(features[name].isna().sum())},
                      {"section": "feature_infinite", "key": name, "value": int(np.isinf(features[name]).sum())},
@@ -203,38 +225,81 @@ def _audit(frame: pd.DataFrame, features: pd.DataFrame, output: Path) -> None:
     features.corr().to_csv(output / "feature_correlations.csv")
 
 
-def run(input_path: Path, output: Path, overwrite: bool = False) -> None:
+def run(input_path: Path, output: Path, overwrite: bool = False, *,
+        seed_plan: Path | None = None, feature_sets: tuple[str, ...] = FEATURE_SET_NAMES,
+        evaluate_test: bool = False, development_run: Path | None = None) -> None:
+    if not feature_sets or len(set(feature_sets)) != len(feature_sets) or any(name not in FEATURE_SETS for name in feature_sets):
+        raise ValueError("feature_sets must contain distinct registered set names")
+    seeds = load_seed_plan(seed_plan) if seed_plan else {
+        "test_seed": TEST_SEED, "development_seeds": list(DEV_SEEDS), "model_seed": TEST_SEED,
+        "origin": "legacy_split_seeds_with_fixed_model_seed"}
+    test_seed = seeds["test_seed"]; dev_seeds = tuple(seeds["development_seeds"]); model_seed = seeds["model_seed"]
     existing = [path for path in output.glob("*") if path.name != "README.md"] if output.exists() else []
     if existing and not overwrite:
-        raise FileExistsError(f"output directory already contains experiment artifacts: {output}; use --overwrite deliberately")
+        raise FileExistsError(f"output directory already contains experiment artifacts: {output}; choose a new directory")
+    if (output / "final_test_metrics.csv").exists():
+        raise FileExistsError("completed test evaluation cannot be overwritten; retain its evidence")
+    if existing and overwrite:
+        raise FileExistsError("use a new output directory to avoid mixing experiment evidence")
     provenance = _git_provenance()
-    output.mkdir(parents=True, exist_ok=True); (output / "models").mkdir(exist_ok=True); (output / "figures").mkdir(exist_ok=True)
     dataset_checksum = _sha256(input_path)
-    protocol = {"input": str(input_path), "dataset_sha256": dataset_checksum, "test_seed": TEST_SEED,
-                "development_seeds": list(DEV_SEEDS), "target_split_proportions": TARGET_SPLITS,
+    protocol = {"protocol_version": 2, "input": str(input_path), "dataset_sha256": dataset_checksum, "test_seed": test_seed,
+                "development_seeds": list(dev_seeds), "model_seed": model_seed, "seed_plan": seeds,
+                "evaluate_test": evaluate_test, "target_split_proportions": TARGET_SPLITS,
                 "domain_grouping": {"key": "PSL-aware eTLD+1 or normalized IP", "library": "tldextract", **_psl_snapshot()},
-                "feature_sets": {name: list(resolve_feature_set(name)) for name in FEATURE_SET_NAMES},
+                "feature_sets": {name: list(resolve_feature_set(name)) for name in feature_sets},
                 "hyperparameter_search": SEARCH_GRIDS, "selection_metric": "mean validation F1",
                 "classification_threshold": .5, "positive_class": "1=phishing",
-                "planned_final_comparisons": [f"{features}:{model}" for features in FEATURE_SET_NAMES for model in SEARCH_GRIDS]}
+                "implementation_sha256": {name:_sha256(Path(__file__).with_name(name)) for name in
+                    ("experiment.py", "feature_registry.py", "features.py", "url_cleaning.py", "randomness.py")},
+                "versions": {"python":platform.python_version(), "scikit_learn":sklearn.__version__, "numpy":np.__version__, "pandas":pd.__version__},
+                "split_search": "500 random group permutations; size/class balance only, never model scores",
+                "planned_final_comparisons": [f"{features}:{model}" for features in feature_sets for model in SEARCH_GRIDS]}
+    if evaluate_test:
+        if development_run is None:
+            raise ValueError("final evaluation requires --development-run with completed frozen development evidence")
+        previous = json.loads((development_run / "experiment_config.json").read_text())
+        state = json.loads((development_run / "experiment_manifest.json").read_text())
+        if state.get("status") != "development_complete" or state.get("test_evaluated") is not False:
+            raise ValueError("development evidence is not a completed development-only run")
+        comparable = lambda config: {key:value for key,value in config.items() if key not in {"input","evaluate_test"}}
+        if json.dumps(comparable(previous), sort_keys=True) != json.dumps(comparable(protocol), sort_keys=True):
+            raise ValueError("final protocol differs from frozen development configuration, code, or dataset")
+    elif development_run is not None:
+        raise ValueError("--development-run is only used with --evaluate-test")
+    output.mkdir(parents=True, exist_ok=True); (output / "models").mkdir(exist_ok=True); (output / "figures").mkdir(exist_ok=True)
     (output / "experiment_config.json").write_text(json.dumps(protocol, indent=2) + "\n")
-    frame = _load(input_path); all_features = _matrix(frame, resolve_feature_set("baseline")); _audit(frame, all_features, output)
-    canonical = make_split(frame)
+    frame = _load(input_path)
+    names_union = tuple(dict.fromkeys(name for key in ("baseline", *feature_sets) for name in resolve_feature_set(key)))
+    all_features = _matrix(frame, names_union)
+    splits = {seed: make_split(frame, test_seed, seed) for seed in dev_seeds}
+    canonical = splits[dev_seeds[0]]
+    _audit(frame.loc[canonical != "test"], all_features.loc[canonical != "test"], output)
+    (output / "audit_scope.json").write_text(json.dumps({"scope":"development only; test excluded from feature diagnostics"})+"\n")
+    split_records = []
+    for seed, split in splits.items():
+        if not split.eq("test").equals(canonical.eq("test")):
+            raise ValueError("test membership changed across development seeds")
+        part = frame[["sample_id", "domain_group", "label", "source"]].copy()
+        part["split"] = split; part["development_seed"] = seed
+        part["test_seed"] = test_seed; part["dataset_checksum"] = dataset_checksum
+        split_records.append(part)
+    pd.concat(split_records).to_csv(output / "development_split_manifest.csv", index=False)
     manifest = frame[["sample_id", "domain_group", "label", "source"]].copy(); manifest["split"] = canonical
-    manifest["random_seed"] = TEST_SEED; manifest["dataset_checksum"] = dataset_checksum; manifest.to_csv(output / "split_manifest.csv", index=False)
+    manifest["random_seed"] = test_seed; manifest["dataset_checksum"] = dataset_checksum; manifest.to_csv(output / "split_manifest.csv", index=False)
     summary = manifest.groupby("split").agg(sample_count=("sample_id", "size"), phishing_count=("label", "sum"), domain_count=("domain_group", "nunique")); summary["legitimate_count"] = summary.sample_count-summary.phishing_count; summary["fraction"] = summary.sample_count/len(frame); summary.to_csv(output / "split_summary.csv")
     grids = SEARCH_GRIDS
     validation_rows = []
     best: dict[tuple[str, str], dict[str, object]] = {}
-    for feature_set in FEATURE_SET_NAMES:
+    for feature_set in feature_sets:
         names = resolve_feature_set(feature_set); X = all_features.loc[:, names]
         for model, candidates in grids.items():
             candidate_scores = []
             for params in candidates:
                 scores = []
-                for seed in DEV_SEEDS:
-                    split = make_split(frame, TEST_SEED, seed); train = split == "train"; val = split == "validation"
-                    pipe = _pipeline(model, params, names, seed); pipe.fit(X.loc[train], frame.loc[train, "label"])
+                for seed in dev_seeds:
+                    split = splits[seed]; train = split == "train"; val = split == "validation"
+                    pipe = _fit(_pipeline(model, params, names, model_seed), X.loc[train], frame.loc[train, "label"])
                     row = {"feature_set": feature_set, "model": model, "parameters": json.dumps(params, sort_keys=True), "seed": seed, **_metrics(frame.loc[val, "label"], pipe.predict_proba(X.loc[val])[:, 1])}
                     validation_rows.append(row); scores.append(float(row["f1"]))
                 candidate_scores.append((float(np.mean(scores)), json.dumps(params, sort_keys=True), params))
@@ -243,24 +308,42 @@ def run(input_path: Path, output: Path, overwrite: bool = False) -> None:
     validation.groupby(["feature_set", "model", "parameters"])[list(METRIC_COLUMNS)].agg(["mean", "std"]).to_csv(output / "validation_summary.csv")
     pd.DataFrame([{"feature_set": feature_set, "model": model, "parameters": json.dumps(params, sort_keys=True),
                    "selection_metric": "mean_validation_f1"} for (feature_set, model), params in best.items()]).to_csv(output / "selected_hyperparameters.csv", index=False)
+    selected_rows = pd.concat([validation[(validation.feature_set == fs) & (validation.model == model) &
+        (validation.parameters == json.dumps(params, sort_keys=True))] for (fs, model), params in best.items()])
+    selected_rows.to_csv(output / "selected_validation_seed_metrics.csv", index=False)
+    paired = selected_rows.pivot(index=["feature_set", "seed"], columns="model", values="f1").reset_index()
+    paired["decision_tree_minus_logistic_regression_f1"] = paired.decision_tree - paired.logistic_regression
+    paired.to_csv(output / "paired_validation_comparison.csv", index=False)
+    metadata = {"created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "dataset_sha256": dataset_checksum, "git_provenance_at_start": provenance,
+                "seed_plan": seeds, "versions": {"python":platform.python_version(), "scikit_learn":sklearn.__version__, "tldextract":tldextract.__version__},
+                "status":"development_complete", "test_evaluated":False}
+    (output / "experiment_manifest.json").write_text(json.dumps(metadata, indent=2)+"\n")
+    (output / "feature_schema.json").write_text(json.dumps(protocol["feature_sets"], indent=2)+"\n")
+    if not evaluate_test:
+        return
+    for filename in ("development_split_manifest.csv", "selected_hyperparameters.csv", "validation_seed_metrics.csv"):
+        if _sha256(output / filename) != _sha256(development_run / filename):
+            raise ValueError(f"frozen development replay mismatch: {filename}; test remains unevaluated")
     final_rows=[]; importance_rows=[]; error_frames=[]; latency_rows=[]
     development = canonical != "test"; test = canonical == "test"
-    for feature_set in FEATURE_SET_NAMES:
+    for feature_set in feature_sets:
         names=resolve_feature_set(feature_set); X=all_features.loc[:, names]
         for model in grids:
             params=best[(feature_set, model)]
             train=canonical=="train"; validation_mask=canonical=="validation"
-            probe=_pipeline(model,params,names,TEST_SEED); probe.fit(X.loc[train],frame.loc[train,"label"])
-            perm=permutation_importance(probe,X.loc[validation_mask],frame.loc[validation_mask,"label"],scoring="f1",n_repeats=10,random_state=TEST_SEED)
-            for name,value,std in zip(names,perm.importances_mean,perm.importances_std,strict=True): importance_rows.append({"feature_set":feature_set,"model":model,"method":"validation_permutation","partition":"validation","seed":TEST_SEED,"feature":name,"importance":value,"std":std})
-            pipe=_pipeline(model, params, names, TEST_SEED); pipe.fit(X.loc[development], frame.loc[development,"label"])
+            probe=_fit(_pipeline(model,params,names,model_seed), X.loc[train],frame.loc[train,"label"])
+            perm=permutation_importance(probe,X.loc[validation_mask],frame.loc[validation_mask,"label"],scoring="f1",n_repeats=10,random_state=model_seed)
+            for name,value,std in zip(names,perm.importances_mean,perm.importances_std,strict=True): importance_rows.append({"feature_set":feature_set,"model":model,"method":"validation_permutation","partition":"validation","seed":model_seed,"feature":name,"importance":value,"std":std})
+            pipe=_fit(_pipeline(model, params, names, model_seed), X.loc[development], frame.loc[development,"label"])
             score=pipe.predict_proba(X.loc[test])[:,1]; metric={"feature_set":feature_set,"model":model,"parameters":json.dumps(params,sort_keys=True),**_metrics(frame.loc[test,"label"],score)}; final_rows.append(metric)
-            artifact={"pipeline":pipe,"feature_names":list(names),"feature_set":feature_set,"positive_class":1,"threshold":.5,"configuration":{"test_seed":TEST_SEED,"parameters":params}}
+            artifact={"pipeline":pipe,"feature_names":list(names),"feature_set":feature_set,"positive_class":1,"threshold":.5,"configuration":{"test_seed":test_seed,"model_seed":model_seed,"parameters":params}}
             joblib.dump(artifact,output/"models"/f"{feature_set}_{model}.joblib")
             classifier=pipe.named_steps["classifier"]
             raw=classifier.coef_[0] if model=="logistic_regression" else classifier.feature_importances_
             kind="standardized_coefficient" if model=="logistic_regression" else "impurity_importance"
-            for name,value in zip(names,raw,strict=True): importance_rows.append({"feature_set":feature_set,"model":model,"method":kind,"partition":"full_development_fit","seed":TEST_SEED,"feature":name,"importance":value})
+            transformed_names = pipe.named_steps["preprocess"].get_feature_names_out()
+            for name,value in zip(transformed_names,raw,strict=True): importance_rows.append({"feature_set":feature_set,"model":model,"method":kind,"partition":"full_development_fit","seed":model_seed,"feature":name,"importance":value})
             test_urls=frame.loc[test,"url_clean"].tolist(); test_X=X.loc[test]
             single_X=test_X.iloc[[0]]; single_url=test_urls[0]
             for _ in range(3): pipe.predict_proba(test_X); pipe.predict_proba(single_X); FeatureExtractor(names).transform_one(single_url)
@@ -281,8 +364,10 @@ def run(input_path: Path, output: Path, overwrite: bool = False) -> None:
     final=pd.DataFrame(final_rows); final.to_csv(output/"final_test_metrics.csv",index=False); final.to_csv(output/"model_comparison.csv",index=False)
     pd.DataFrame(importance_rows).to_csv(output/"feature_importance.csv",index=False); pd.concat(error_frames).to_csv(output/"error_analysis.csv",index=False)
     pd.DataFrame(latency_rows).to_csv(output/"latency.csv",index=False)
-    schema={name:list(resolve_feature_set(name)) for name in ("baseline","no_https","hostname_only")}; (output/"feature_schema.json").write_text(json.dumps(schema,indent=2)+"\n")
+    schema={name:list(resolve_feature_set(name)) for name in feature_sets}; (output/"feature_schema.json").write_text(json.dumps(schema,indent=2)+"\n")
     metadata={"created_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),"input":str(input_path),"dataset_sha256":dataset_checksum,"test_seed":TEST_SEED,"development_seeds":DEV_SEEDS,"positive_class":"1=phishing","threshold":.5,"versions":{"python":platform.python_version(),"scikit_learn":sklearn.__version__,"tldextract":tldextract.__version__},"domain_parser":{"library":"tldextract",**_psl_snapshot()},"hardware":{"platform":platform.platform(),"processor":platform.processor(),"cpu_count":os.cpu_count()},"latency":{"warmup_batches":3,"measured_batches":30,"scope":"single-request and batch local URL-only; model timing includes preprocessing; not hybrid-system latency"},"git_provenance_at_start":provenance,"selection_metric":"mean validation F1; deterministic tie-break","notes":"Feature changes and parameter selection use development data only."}
+    metadata.update({"test_seed":test_seed, "development_seeds":dev_seeds, "model_seed":model_seed,
+                     "seed_plan":seeds, "test_evaluated":True, "status":"planned_test_comparisons_complete"})
     (output/"experiment_manifest.json").write_text(json.dumps(metadata,indent=2)+"\n")
 
 
@@ -294,9 +379,14 @@ def predict(model_path: Path, urls: list[str]) -> None:
 def main(argv: Sequence[str] | None=None) -> int:
     parser=argparse.ArgumentParser(description=__doc__); sub=parser.add_subparsers(dest="command",required=True)
     run_parser=sub.add_parser("run"); run_parser.add_argument("--input",type=Path,default=Path("data/processed/urls.csv")); run_parser.add_argument("--output",type=Path,default=Path("results/assignment02")); run_parser.add_argument("--overwrite", action="store_true")
+    run_parser.add_argument("--seed-plan", type=Path)
+    run_parser.add_argument("--feature-sets", nargs="+", choices=tuple(FEATURE_SETS), default=list(FEATURE_SET_NAMES))
+    run_parser.add_argument("--evaluate-test", action="store_true", help="Explicitly execute preregistered final comparisons; default is development only")
+    run_parser.add_argument("--development-run", type=Path, help="Frozen completed development directory required for final evaluation")
     pred=sub.add_parser("predict"); pred.add_argument("--model",type=Path,required=True); pred.add_argument("urls",nargs="+")
     args=parser.parse_args(argv)
-    if args.command=="run": run(args.input,args.output,args.overwrite)
+    if args.command=="run": run(args.input,args.output,args.overwrite, seed_plan=args.seed_plan,
+                                feature_sets=tuple(args.feature_sets), evaluate_test=args.evaluate_test, development_run=args.development_run)
     else: predict(args.model,args.urls)
     return 0
 

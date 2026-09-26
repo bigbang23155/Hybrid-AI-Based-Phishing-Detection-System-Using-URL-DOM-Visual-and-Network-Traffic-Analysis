@@ -1,0 +1,79 @@
+{
+  "decision": "hold_before_dataset_v2_label_policy_and_phishing_source_confirmation",
+  "dataset_v2_created": false,
+  "training_performed": false,
+  "checksums_verified": 31,
+  "observation_rows": 2643,
+  "observation_columns": [
+    "candidate_rank",
+    "candidate_domain",
+    "url_raw",
+    "url_clean",
+    "observed_from",
+    "evidence_url",
+    "retrieved_utc",
+    "same_domain",
+    "label_basis"
+  ],
+  "observation_missing_fields": {
+    "candidate_rank": 0,
+    "candidate_domain": 0,
+    "url_raw": 0,
+    "url_clean": 0,
+    "observed_from": 0,
+    "evidence_url": 0,
+    "retrieved_utc": 0,
+    "same_domain": 0,
+    "label_basis": 0
+  },
+  "normalization_disagreements": 0,
+  "same_domain_flag_false": 0,
+  "candidate_domain_mismatches": 0,
+  "evidence_domain_mismatches": 0,
+  "label_basis_counts": {
+    "assumed_legitimate_tranco_candidate_public_observation": 2643
+  },
+  "review_status_counts": {
+    "not_reviewed": 15
+  },
+  "collection_start_utc": "2026-09-26T06:45:29+00:00",
+  "collection_end_utc": "2026-09-26T07:51:19+00:00",
+  "logged_failures": 11541,
+  "sampled_candidates": 1800,
+  "candidate_groups_with_observation": 1043,
+  "phiusiil_source": "https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset",
+  "phiusiil_archive": {
+    "filename": "phiusiil_original.zip",
+    "size_bytes": 15376007,
+    "sha256": "0a639fd03aea6308c5b1c10c92aa23c2ce1505447a9137271865cd0badc9a59a",
+    "structure": [
+      {
+        "filename": "PhiUSIIL_Phishing_URL_Dataset.csv",
+        "size_bytes": 56854345
+      }
+    ]
+  },
+  "phiusiil_csv_sha256": "a236549cd369cd80bd478ff8e1779cbf44c58d5c3f79f7a51a1adbed7d06d1c6",
+  "phiusiil_original_label_counts": {
+    "1": 134850,
+    "0": 100945
+  },
+  "phiusiil_label_mapping_if_authorized": {
+    "0": "phishing -> project 1",
+    "1": "benign reference only; excluded from proposed mixture"
+  },
+  "phiusiil_conflicting_normalized_urls": 1,
+  "observed_vs_phiusiil_phishing_exact_url_conflicts": 0,
+  "observed_vs_phiusiil_phishing_normalized_url_conflicts": 0,
+  "observed_vs_phiusiil_phishing_shared_domain_groups": 3,
+  "psl_policy": "Bundled tldextract snapshot; private suffixes excluded; normalized IP retained",
+  "psl_snapshot_sha256": "b69315c085d53972724b8f2df111ffc329b0c84fe0a47d62c8c91655cc774a38",
+  "limitations": [
+    "Observed label is assumed legitimate, not independently verified benign.",
+    "Collection failures are logged events, not unique failed domains.",
+    "PhiUSIIL is an available candidate, not a substitute approved by this audit for the requested ISCX archive.",
+    "Historical phishing and September 2026 observations are source/time confounded.",
+    "No precomputed PhiUSIIL features were used; only original URL and label columns read.",
+    "No final sampling, threshold adjustment, feature selection, model fitting, or test evaluation performed."
+  ]
+}

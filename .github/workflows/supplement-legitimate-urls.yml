@@ -1,0 +1,96 @@
+name: Supplement observed legitimate URLs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: assignment02-fixed-supplement
+  cancel-in-progress: false
+
+jobs:
+  supplement:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies and run offline tests
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pytest -q
+      - name: Retrieve the exact first-run evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p continuation/prior
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/10899969152/zip" > continuation/prior-evidence.zip
+          echo 'f17b134b71a4424b3af2195c152771d8caa1adbf35da1e149985a3d83017684e  continuation/prior-evidence.zip' | sha256sum --check
+          unzip -q continuation/prior-evidence.zip -d continuation/prior
+      - name: Retrieve the same frozen sampling frame
+        run: |
+          curl --fail --location --retry 3 --max-time 900 \
+            https://tranco-list.eu/download/L5PZ4/1000000 \
+            --output continuation/tranco.csv
+          echo '831476d0f554af0a5164d6977acc85c95b4cc176b47366be3caa3227f5e63f90  continuation/tranco.csv' | sha256sum --check
+      - name: Collect one fixed new batch and merge evidence
+        run: |
+          python -m phishing_url.supplement_collection \
+            --tranco continuation/tranco.csv \
+            --prior continuation/prior/data/collection/cloud_full_2026-09-26 \
+            --output continuation/batch2
+      - name: Audit combined observations without changing thresholds
+        run: |
+          set +e
+          python -m phishing_url.collection_audit \
+            --observations continuation/batch2/combined/observed_legitimate_urls.csv \
+            --failures continuation/batch2/combined/collection_failures.csv \
+            --output continuation/combined-audit
+          status=$?
+          set -e
+          if [[ "$status" != 0 && "$status" != 2 ]]; then exit "$status"; fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = json.loads(Path('continuation/combined-audit/suitability_gate.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+              out.write('## Combined collection audit\n\n')
+              out.write('Decision: **' + result['decision'] + '**\n\n')
+              out.write('```json\n' + json.dumps(result['counts'], indent=2) + '\n```\n\n')
+              out.write('No Dataset v2 or model training was performed. Full two-class audit and labeling review remain required.\n')
+          PY
+      - name: Preserve both batches and verification metadata
+        if: always()
+        run: |
+          mkdir -p continuation
+          git rev-parse HEAD > continuation/execution_commit.txt
+          python -m pip freeze > continuation/installed_dependencies.txt
+          cp .github/workflows/supplement-legitimate-urls.yml continuation/
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('continuation')
+          records = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                     for p in sorted(root.rglob('*')) if p.is_file()
+                     and p.name not in ('tranco.csv', 'CHECKSUMS.json')}
+          (root/'CHECKSUMS.json').write_text(json.dumps(records, indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment02-supplement-${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: error
+          path: |
+            continuation/
+            !continuation/tranco.csv

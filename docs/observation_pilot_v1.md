@@ -62,3 +62,14 @@ https://playwright.dev/python/docs/api/class-browsercontext . Browser image and 
 are pinned to 1.63.0. The vendored Playwright seccomp profile is pinned to that tag.
 The unmodified profile originates from microsoft/playwright, utils/docker/seccomp_profile.json;
 its Apache license is retained at resources/licenses/playwright_APACHE_LICENSE.
+
+The first cloud run (36289739946) failed before candidate capture: Chromium's
+namespace-local chroot was denied. Upstream's rule is conditional on Docker's
+CAP_SYS_CHROOT, which this workflow drops with all other capabilities. The derived
+effective profile appends only a chroot syscall allowance; it grants no capabilities
+and retains the upstream deny-by-default profile, non-root execution, no-new-privileges,
+internal network and Chromium sandbox. Kernel namespace capability checks still apply.
+Both upstream and effective profiles are preserved. This targeted runtime repair does
+not change candidates, seed, label policy or technical thresholds.
+Chromium implementation reference:
+https://chromium.googlesource.com/chromium/src/+/lkgr/sandbox/linux/services/credentials.cc

@@ -54,6 +54,7 @@ jobs:
           chmod -R a+rwX pilot
       - name: Build pinned browser and public destination gateway
         run: |
+          python scripts/pilot/prepare_seccomp.py config/playwright_seccomp_v1.63.0.json pilot/seccomp_effective.json
           docker build -f scripts/pilot/Dockerfile -t assignment02-pilot .
           docker image inspect assignment02-pilot --format '{{.Id}}' > pilot/container_image_id.txt
           docker network create --internal pilot-isolated
@@ -66,12 +67,12 @@ jobs:
         run: |
           docker run --rm --name pilot-browser --init --network pilot-isolated \
             --read-only --cap-drop ALL --security-opt no-new-privileges \
-            --security-opt seccomp=config/playwright_seccomp_v1.63.0.json \
+            --security-opt seccomp=pilot/seccomp_effective.json \
             --pids-limit 512 --memory 2g --cpus 2 --shm-size 1g \
             --tmpfs /tmp:rw,nosuid,nodev,size=768m \
             --tmpfs /home/pwuser:rw,nosuid,nodev,size=64m,uid=1000,gid=1000,mode=0700 \
             -v "${PWD}/pilot:/output:rw" \
-            assignment02-pilot python -m phishing_url.pilot_capture capture --root /output
+            assignment02-pilot python -m phishing_url.pilot_capture capture --root /output 2>&1 | tee pilot/capture.log
       - name: Audit actual evidence and report the gate
         if: always()
         run: |

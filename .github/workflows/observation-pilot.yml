@@ -2,17 +2,6 @@ name: Fixed observation pilot v1
 
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-      - '.github/workflows/observation-pilot.yml'
-      - 'src/phishing_url/pilot_capture.py'
-      - 'src/phishing_url/public_proxy.py'
-      - 'src/phishing_url/observation.py'
-      - 'config/observation_pilot_v1.json'
-      - 'schemas/observation_v1.schema.json'
-      - 'scripts/pilot/**'
-      - 'requirements-pilot.txt'
 
 permissions:
   contents: read
@@ -23,11 +12,7 @@ concurrency:
 
 jobs:
   pilot:
-    if: >-
-      github.event.repository.private == true &&
-      (github.event_name == 'workflow_dispatch' ||
-       (github.event.pull_request.head.repo.full_name == github.repository &&
-        github.head_ref == 'codex/observation-pilot-v1'))
+    if: github.event.repository.private == true
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:

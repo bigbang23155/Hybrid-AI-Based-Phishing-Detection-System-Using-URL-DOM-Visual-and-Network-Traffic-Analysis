@@ -1,0 +1,35 @@
+{
+  "protocol_version": "observation-pilot-v1",
+  "technical_pass": false,
+  "label_gate_pass": false,
+  "expansion_allowed": false,
+  "decision": "pilot_incomplete",
+  "planned": 16,
+  "recorded": 16,
+  "complete_by_candidate_class": {
+    "1": 3,
+    "0": 6
+  },
+  "schema_errors": [],
+  "status_counts": {
+    "complete": 9,
+    "partial": 1,
+    "skipped": 6
+  },
+  "failure_reasons": {
+    "non_html_or_http_403": 1,
+    "robots_http_403": 2,
+    "robots_http_307": 1,
+    "robots_http_302": 1,
+    "robots_ReadTimeout": 1,
+    "robots_policy": 1
+  },
+  "pending_label_reviews": 16,
+  "all_planned_rows_present": true,
+  "thresholds": {
+    "min_complete_per_stratum": 6,
+    "required_observations": 16
+  },
+  "model_training_performed": false,
+  "note": "Source assertions and HTTP/asset completeness do not adjudicate page labels. No expansion without review."
+}

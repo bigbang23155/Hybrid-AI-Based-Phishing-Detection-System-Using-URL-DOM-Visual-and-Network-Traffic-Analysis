@@ -73,3 +73,10 @@ Both upstream and effective profiles are preserved. This targeted runtime repair
 not change candidates, seed, label policy or technical thresholds.
 Chromium implementation reference:
 https://chromium.googlesource.com/chromium/src/+/lkgr/sandbox/linux/services/credentials.cc
+
+After this bounded PR pilot, collection is manual-dispatch only. Documentation or
+review commits must not silently recollect candidate pages. For a future authorized
+cloud run, first version a fresh source snapshot and freeze the next plan, then use
+GitHub Actions -> Fixed observation pilot v1 -> Run workflow on the reviewed branch.
+The pinned source age check deliberately fails after its 48-hour window. Refreshing
+a source creates a new prospective batch; it is not a retry of an old observation.

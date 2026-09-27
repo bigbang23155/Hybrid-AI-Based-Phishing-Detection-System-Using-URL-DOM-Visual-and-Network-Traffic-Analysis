@@ -1,0 +1,38 @@
+{
+  "run_id": 36291517717,
+  "run_url": "https://github.com/bigbang23155/Hybrid-AI-Based-Phishing-Detection-System-Using-URL-DOM-Visual-and-Network-Traffic-Analysis/actions/runs/36291517717",
+  "workflow_conclusion": "success",
+  "scientific_gate": "pilot_incomplete",
+  "artifact_id": 10922820850,
+  "artifact_sha256": "e664eaee030075987d06be4169d4c06cf6c16a5b7d285bea32d508801be2bf40",
+  "artifact_size_bytes": 3302393,
+  "verified_manifest_files": 153,
+  "schema_and_evidence_validated_records": 16,
+  "all_raw_labels_null": true,
+  "all_raw_training_ineligible": true,
+  "robots_decision_records": 16,
+  "readiness_records": 11,
+  "review_templates": 16,
+  "human_reviews_completed": 0,
+  "expansion_performed": false,
+  "automatic_retries_performed": false,
+  "local_tests_passed": 69,
+  "cloud_test_workflow_run_id": 36291517686,
+  "cloud_test_conclusion": "success",
+  "visual_spot_check": {
+    "reviewer_type": "automated",
+    "human_label_adjudication": false,
+    "observations": {
+      "cdd1ca2c592cf39fc07e1a28b2422aa58034cb4de175a0d8df1dbc648b133e48": "JSON page-not-found body; visual readiness failed.",
+      "1d3c91fdaf78d07869cd10859aa3a0e9a708028f24a2c6e3fcd12c54b4f1c9a4": "Visible branded arithmetic challenge; readiness passes but target page and phishing label remain unverified.",
+      "3c40f0eca54f5669bc904f354baac3886249397f4c7ccc908526311a44744681": "Visible bank-themed article and advertising links; source assertion requires human review.",
+      "1c673ae6fa90c96de4a0dd2b54e8955807cd3c277e2525b538e2f7abc5942b3a": "Visible university homepage with a missing hero image; readiness is not asset completeness."
+    }
+  },
+  "remaining_requirements": [
+    "Human evidence-linked adjudication of all 16 observations, including uncertain/exclude decisions.",
+    "Technical completeness threshold remains 6 per stratum; actual source-reported phishing candidates completed 4 of 8.",
+    "Visual readiness measures rendered content, not target-page authenticity or complete asset loading.",
+    "Disagreements remain excluded; reviewer authentication and explicit conflict-resolution workflow are future work."
+  ]
+}

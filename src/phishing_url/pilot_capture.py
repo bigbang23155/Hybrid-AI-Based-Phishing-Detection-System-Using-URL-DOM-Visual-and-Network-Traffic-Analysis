@@ -141,7 +141,7 @@ async def preflight(browser,proxy,root):
 async def capture_one(browser,candidate,config,root,proxy):
     started=now();tick=time.monotonic();oid=digest((candidate['candidate_id']+'\n'+started).encode())
     folder=root/'observations'/oid;folder.mkdir(parents=True)
-    record={'schema_version':'observation-v1','observation_id':oid, 'candidate_id':candidate['candidate_id'],
+    record={'schema_version':config.get('observation_schema_version','observation-v1'),'observation_id':oid, 'candidate_id':candidate['candidate_id'],
         'candidate_class':candidate['candidate_class'],'source':candidate['source'],
         'url_raw':candidate['url_raw'],'url_clean':candidate['url_clean'],'domain_group':candidate['domain_group'],
         'label':label_assertion(candidate['candidate_class'],candidate['evidence']),
@@ -149,11 +149,18 @@ async def capture_one(browser,candidate,config,root,proxy):
         'http_status':None,'navigation_chain':[],'modalities':{},'capture_duration_ms':0,
         'session':{'browser_version':browser.version,'viewport':config['viewport'],'locale':config['locale'],
                    'timezone_id':config['timezone_id'],'sandbox_enabled':True,'fresh_context':True}}
+    v2=record['schema_version']=='observation-v2'
+    if v2:record.update(capture_evidence={},readiness_pass=False)
     events=[];context=None;page=None;request_count=0
     async def work():
         nonlocal context,page,request_count
-        allowed,reason=await asyncio.to_thread(robots_allowed,candidate['url_clean'],proxy,config['user_agent'])
-        write_json(folder/'robots_decision.json',{'allowed':allowed,'reason':reason,'checked_at':now()})
+        if v2:
+            from .capture_policy_v2 import check_robots
+            allowed,reason=await asyncio.to_thread(check_robots,candidate['url_clean'],proxy,config['user_agent'],root,folder)
+            record['capture_evidence']['robots']=artifact(root,folder/'robots_decision.json',now())
+        else:
+            allowed,reason=await asyncio.to_thread(robots_allowed,candidate['url_clean'],proxy,config['user_agent'])
+            write_json(folder/'robots_decision.json',{'allowed':allowed,'reason':reason,'checked_at':now()})
         if not allowed:record.update(status='skipped',reason=reason);return
         context=await browser.new_context(viewport=config['viewport'],locale=config['locale'],timezone_id=config['timezone_id'],
             user_agent=config['user_agent'],accept_downloads=False,service_workers='block',ignore_https_errors=False)
@@ -181,10 +188,19 @@ async def capture_one(browser,candidate,config,root,proxy):
         context.on('request',lambda req:events.append({'event':'request','url':req.url,'method':req.method,'resource_type':req.resource_type,'at':now()}))
         context.on('response',lambda res:events.append({'event':'response','url':res.url,'status':res.status,
             'content_type':res.headers.get('content-type'),'declared_content_length':res.headers.get('content-length'),'at':now()}))
+        if v2:
+            context.on('response',lambda res:events.append({'event':'navigation_response','url':res.url,
+                'status':res.status,'location':res.headers.get('location'),'at':now()})
+                if res.request.is_navigation_request() and res.request.frame==page.main_frame else None)
         context.on('requestfailed',lambda req:events.append({'event':'request_failed','url':req.url,'failure':req.failure,'at':now()}))
         response=await page.goto(candidate['url_clean'],timeout=config['max_navigation_ms'],wait_until='domcontentloaded')
         record['http_status']=response.status if response else None
-        await page.wait_for_timeout(config['settle_ms'])
+        if v2:
+            from .capture_policy_v2 import wait_visible
+            readiness=await wait_visible(page,config['visual_readiness'])
+            write_json(folder/'readiness.json',readiness);record['readiness_pass']=readiness['passed']
+            record['capture_evidence']['readiness']=artifact(root,folder/'readiness.json',now())
+        else:await page.wait_for_timeout(config['settle_ms'])
         record['final_url']=page.url
         ctype=response.headers.get('content-type','') if response else ''
         html=(await page.content()).encode()
@@ -194,6 +210,8 @@ async def capture_one(browser,candidate,config,root,proxy):
         await page.screenshot(path=str(folder/'screenshot.png'),full_page=False,timeout=5000)
         record['modalities']['screenshot']=artifact(root,folder/'screenshot.png',now())
         if page.url!=record['final_url']:record.update(status='partial',reason='navigation_during_capture')
+        elif v2 and not record['readiness_pass']:
+            record.update(status='partial',reason='visual_readiness_failed')
         elif response and 200<=response.status<300 and ('text/html' in ctype or 'application/xhtml+xml' in ctype):
             record.update(status='complete',reason=None)
         else:record.update(status='partial',reason=f'non_html_or_http_{record["http_status"]}')
@@ -208,7 +226,8 @@ async def capture_one(browser,candidate,config,root,proxy):
             try:await asyncio.wait_for(context.close(),timeout=5)
             except Exception:pass
         write_json(folder/'url.json',{'observation_id':oid,'url_raw':candidate['url_raw'],'url_clean':candidate['url_clean'],
-            'final_url':record['final_url'],'navigation_chain':record['navigation_chain'],'captured_at':now()})
+            'final_url':record['final_url'],'navigation_chain':record['navigation_chain'],
+            'navigation_responses':[e for e in events if e['event']=='navigation_response'],'captured_at':now()})
         record['modalities']['url']=artifact(root,folder/'url.json',now())
         write_json(folder/'network.json',{'observation_id':oid,'scope':'Browser HTTP events, not PCAP; missing byte counts stay unknown',
             'events':events,'request_count':sum(e['event']=='request' for e in events),

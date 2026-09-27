@@ -1,0 +1,118 @@
+{
+  "dataset_id": "assignment02_ebbu2017_historical_v2",
+  "raw_rows": 73575,
+  "valid_rows": 73339,
+  "invalid_rows": 236,
+  "invalid_reasons": {
+    "hostname contains an invalid DNS label": 24,
+    "only http and https schemes are accepted": 197,
+    "URL is empty or contains whitespace/control characters": 15
+  },
+  "exact_duplicate_rows": 18691,
+  "normalized_duplicate_rows": 18732,
+  "conflicting_normalized_urls": 0,
+  "conflicting_rows_removed": 0,
+  "mixed_label_domains": 20,
+  "profiles": {
+    "0": {
+      "rows": 29886,
+      "domains": 12703,
+      "largest_domain_share": 0.04487050793013451,
+      "top10_domain_share": 0.12233152646724219,
+      "domain_hhi": 0.0033219432442402235,
+      "https_rate": 0.36177474402730375,
+      "inner_page_rate": 0.950110419594459,
+      "query_rate": 0.043197483771665664,
+      "url_length": {
+        "0.0": 14.0,
+        "0.05": 30.0,
+        "0.25": 43.0,
+        "0.5": 55.0,
+        "0.75": 72.0,
+        "0.95": 104.0,
+        "0.99": 134.0,
+        "1.0": 341.0
+      },
+      "path_length": {
+        "0.0": 1.0,
+        "0.05": 2.0,
+        "0.25": 17.0,
+        "0.5": 28.0,
+        "0.75": 45.0,
+        "0.95": 77.0,
+        "0.99": 108.0,
+        "1.0": 319.0
+      },
+      "query_length": {
+        "0.0": 0.0,
+        "0.05": 0.0,
+        "0.25": 0.0,
+        "0.5": 0.0,
+        "0.75": 0.0,
+        "0.95": 0.0,
+        "0.99": 24.0,
+        "1.0": 288.0
+      }
+    },
+    "1": {
+      "rows": 24721,
+      "domains": 8846,
+      "largest_domain_share": 0.009182476437037337,
+      "top10_domain_share": 0.042514461389102386,
+      "domain_hhi": 0.0005599957603633377,
+      "https_rate": 0.020387524776505805,
+      "inner_page_rate": 0.9809069212410502,
+      "query_rate": 0.20872942033089276,
+      "url_length": {
+        "0.0": 16.0,
+        "0.05": 31.0,
+        "0.25": 43.0,
+        "0.5": 58.0,
+        "0.75": 82.0,
+        "0.95": 221.0,
+        "0.99": 290.0,
+        "1.0": 3992.0
+      },
+      "path_length": {
+        "0.0": 1.0,
+        "0.05": 6.0,
+        "0.25": 17.0,
+        "0.5": 27.0,
+        "0.75": 41.0,
+        "0.95": 78.0,
+        "0.99": 132.0,
+        "1.0": 305.0
+      },
+      "query_length": {
+        "0.0": 0.0,
+        "0.05": 0.0,
+        "0.25": 0.0,
+        "0.5": 0.0,
+        "0.75": 0.0,
+        "0.95": 159.0,
+        "0.99": 227.0,
+        "1.0": 3915.0
+      }
+    }
+  },
+  "checks": {
+    "original_url_text": true,
+    "explicit_published_binary_labels": true,
+    "enough_rows": true,
+    "domain_diversity_heuristic": true
+  },
+  "decision": "suitable_for_historical_source_label_baseline_only",
+  "suitable_for_2026_or_multimodal_claims": false,
+  "limitations": [
+    "Historical corpus associated with a 2019 paper; per-URL collection and verification timestamps unavailable.",
+    "Author-described benign selection used query words and high-ranked Yandex search results; source labels are not proof of safety.",
+    "Phishing URLs were mostly obtained from PhishTank according to the authors; per-row provider evidence is unavailable.",
+    "Source and label are confounded; HTTPS, page structure, language and concentration can produce shortcuts.",
+    "URLs lacking an explicit HTTP(S) scheme are rejected, never reconstructed.",
+    "No live requests to historical URLs, no precomputed features, no relabeling of spam/malware/defacement.",
+    "Offline PSL snapshot excludes private suffixes; domains are isolated but shared templates or campaigns may remain.",
+    "Balanced 2000-per-class benchmark does not estimate real-world prevalence or 2026 performance.",
+    "300-domain minimum is an unchanged project heuristic, not a professor requirement."
+  ],
+  "source_config_sha256": "65eba5935e7f7a4df40a3040ee268e2c79b86706187cc3554800ef52b8a9c6ff"
+}

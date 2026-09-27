@@ -1,0 +1,7 @@
+{
+  "domain_leakage": false,
+  "normalized_url_leakage": false,
+  "test_membership_stable_across_5_seeds": true,
+  "test_rows": 600,
+  "test_used_for_selection": false
+}

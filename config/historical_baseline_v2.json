@@ -1,0 +1,34 @@
+{
+  "dataset_id": "assignment02_ebbu2017_historical_v2",
+  "target_per_label": 2000,
+  "min_domains_per_class_heuristic": 300,
+  "label_semantics": "Published legitimate=0 and phishing=1. Reproduce historical source labels; not independent current-site adjudication.",
+  "source_repository": "https://github.com/ebubekirbbr/pdd",
+  "source_commit": "90b394d8f9fb5d5dc48400e8bf46b001ce42999f",
+  "paper": "https://doi.org/10.1016/j.eswa.2018.09.029",
+  "sources": [
+    {
+      "filename": "data_legitimate_36400.json",
+      "source": "ebbu2017_yandex_published_legitimate",
+      "label": 0,
+      "sha256": "5e8fbcc88d6ba25f46bd85ed48d8aed9f56e2afc9deb712d13496112b8158ab4"
+    },
+    {
+      "filename": "data_phishing_37175.json",
+      "source": "ebbu2017_published_phishing",
+      "label": 1,
+      "sha256": "c513d1f11b0ce159d43a23b465af2a65f752c6f65a816c2a8084f2a2adf2ebf6"
+    }
+  ],
+  "limitations": [
+    "Historical corpus associated with a 2019 paper; per-URL collection and verification timestamps unavailable.",
+    "Author-described benign selection used query words and high-ranked Yandex search results; source labels are not proof of safety.",
+    "Phishing URLs were mostly obtained from PhishTank according to the authors; per-row provider evidence is unavailable.",
+    "Source and label are confounded; HTTPS, page structure, language and concentration can produce shortcuts.",
+    "URLs lacking an explicit HTTP(S) scheme are rejected, never reconstructed.",
+    "No live requests to historical URLs, no precomputed features, no relabeling of spam/malware/defacement.",
+    "Offline PSL snapshot excludes private suffixes; domains are isolated but shared templates or campaigns may remain.",
+    "Balanced 2000-per-class benchmark does not estimate real-world prevalence or 2026 performance.",
+    "300-domain minimum is an unchanged project heuristic, not a professor requirement."
+  ]
+}

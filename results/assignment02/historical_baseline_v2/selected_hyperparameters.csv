@@ -1,0 +1,15 @@
+feature_set,model,parameters,selection_metric
+baseline,logistic_regression,"{""C"": 10.0}",mean_validation_f1
+baseline,decision_tree,"{""max_depth"": null, ""min_samples_leaf"": 10}",mean_validation_f1
+no_https,logistic_regression,"{""C"": 10.0}",mean_validation_f1
+no_https,decision_tree,"{""max_depth"": null, ""min_samples_leaf"": 10}",mean_validation_f1
+compact16,logistic_regression,"{""C"": 1.0}",mean_validation_f1
+compact16,decision_tree,"{""max_depth"": 8, ""min_samples_leaf"": 2}",mean_validation_f1
+expanded21,logistic_regression,"{""C"": 0.1}",mean_validation_f1
+expanded21,decision_tree,"{""max_depth"": null, ""min_samples_leaf"": 10}",mean_validation_f1
+hostname_only,logistic_regression,"{""C"": 0.1}",mean_validation_f1
+hostname_only,decision_tree,"{""max_depth"": null, ""min_samples_leaf"": 10}",mean_validation_f1
+https_only,logistic_regression,"{""C"": 10.0}",mean_validation_f1
+https_only,decision_tree,"{""max_depth"": null, ""min_samples_leaf"": 2}",mean_validation_f1
+structure_only,logistic_regression,"{""C"": 0.1}",mean_validation_f1
+structure_only,decision_tree,"{""max_depth"": 3, ""min_samples_leaf"": 2}",mean_validation_f1

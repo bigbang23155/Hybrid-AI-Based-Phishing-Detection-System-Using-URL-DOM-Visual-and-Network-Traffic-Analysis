@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "master_seed": 431186710,
+  "origin": "system_entropy",
+  "sampling_seed": 155023747,
+  "test_seed": 3475406451,
+  "development_seeds": [
+    1278796162,
+    966526719,
+    1287234460,
+    4067879670,
+    805077198
+  ],
+  "model_seed": 208867450,
+  "policy": "Generate before outcomes; never regenerate to improve model scores."
+}

@@ -1,0 +1,16 @@
+{
+  "dataset_v2_scope": "historical published-source-label URL-only benchmark",
+  "rows": 4000,
+  "narrative_report_generated": false,
+  "training_complete": true,
+  "test_evaluated": true,
+  "prospective_hybrid_dataset_approved": false,
+  "source_originals_preserved": true,
+  "baseline_execution_commit": "35e441d",
+  "previous_inputs": {
+    "All.csv": "feature-only; no original URLs or domain grouping possible",
+    "ISCX-URL2016": "official download form requires registration; no original archive acquired",
+    "PhiUSIIL_plus_2026_assumed_legitimate": "not used; retained as context evidence because of labeling/time/source limitations"
+  },
+  "prospective_pilot_v2": "configured; actual cloud execution pending"
+}

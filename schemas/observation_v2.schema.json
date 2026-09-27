@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:assignment02:observation:v2",
+  "title": "Immutable browser observation v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observation_id",
+    "candidate_id",
+    "candidate_class",
+    "source",
+    "url_raw",
+    "url_clean",
+    "domain_group",
+    "label",
+    "started_at",
+    "ended_at",
+    "status",
+    "reason",
+    "final_url",
+    "http_status",
+    "navigation_chain",
+    "modalities",
+    "session",
+    "capture_duration_ms",
+    "capture_evidence",
+    "readiness_pass"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "observation-v2"
+    },
+    "observation_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "candidate_class": {
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url_raw": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url_clean": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain_group": {
+      "type": "string",
+      "minLength": 1
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "project_label",
+        "status",
+        "training_eligible",
+        "review_status",
+        "source_verification_time",
+        "evidence"
+      ],
+      "properties": {
+        "policy_version": {
+          "const": "label-policy-v1"
+        },
+        "project_label": {
+          "type": "null"
+        },
+        "status": {
+          "enum": [
+            "assumed_benign",
+            "source_reported_phishing",
+            "uncertain",
+            "conflicting"
+          ]
+        },
+        "training_eligible": {
+          "const": false
+        },
+        "review_status": {
+          "const": "pending"
+        },
+        "source_verification_time": {
+          "type": "null"
+        },
+        "evidence": {
+          "type": "object"
+        }
+      }
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial",
+        "failed",
+        "skipped"
+      ]
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "final_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "http_status": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 100,
+      "maximum": 599
+    },
+    "navigation_chain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "modalities": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size_bytes",
+            "captured_at"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "dom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size_bytes",
+            "captured_at"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "screenshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size_bytes",
+            "captured_at"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size_bytes",
+            "captured_at"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "required": [
+        "browser_version",
+        "viewport",
+        "locale",
+        "timezone_id",
+        "sandbox_enabled",
+        "fresh_context"
+      ],
+      "properties": {
+        "browser_version": {
+          "type": "string"
+        },
+        "viewport": {
+          "type": "object"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "timezone_id": {
+          "type": "string"
+        },
+        "sandbox_enabled": {
+          "const": true
+        },
+        "fresh_context": {
+          "const": true
+        }
+      }
+    },
+    "capture_duration_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "readiness_pass": {
+      "type": "boolean"
+    },
+    "capture_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "robots": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size_bytes",
+            "captured_at"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "readiness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size_bytes",
+            "captured_at"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    }
+  }
+}

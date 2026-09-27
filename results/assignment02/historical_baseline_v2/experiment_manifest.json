@@ -1,0 +1,65 @@
+{
+  "created_utc": "2026-09-27T03:17:25Z",
+  "input": "/workspace/scratch/a68e4cd943cd/baseline_work/frozen/urls.csv",
+  "dataset_sha256": "a45a5609dec304be42616b4f100b731c8d7fe315d93e5d758afb6aae1e8df549",
+  "test_seed": 3475406451,
+  "development_seeds": [
+    1278796162,
+    966526719,
+    1287234460,
+    4067879670,
+    805077198
+  ],
+  "positive_class": "1=phishing",
+  "threshold": 0.5,
+  "versions": {
+    "python": "3.12.14",
+    "scikit_learn": "1.7.2",
+    "tldextract": "5.3.0"
+  },
+  "domain_parser": {
+    "library": "tldextract",
+    "bundled_snapshot": true,
+    "snapshot_filename": ".tld_set_snapshot",
+    "snapshot_sha256": "b69315c085d53972724b8f2df111ffc329b0c84fe0a47d62c8c91655cc774a38",
+    "suffix_list_urls": [],
+    "private_suffix_policy": "excluded"
+  },
+  "hardware": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "cpu_count": 9
+  },
+  "latency": {
+    "warmup_batches": 3,
+    "measured_batches": 30,
+    "scope": "single-request and batch local URL-only; model timing includes preprocessing; not hybrid-system latency"
+  },
+  "git_provenance_at_start": {
+    "revision": "35e441d1ef324a58c9388a56cbe4f34cfe4b9a09",
+    "working_tree_dirty_before_run": false,
+    "status_before_run": [],
+    "tracked_patch_sha256_before_run": null
+  },
+  "selection_metric": "mean validation F1; deterministic tie-break",
+  "notes": "Feature changes and parameter selection use development data only.",
+  "model_seed": 208867450,
+  "seed_plan": {
+    "version": 1,
+    "master_seed": 431186710,
+    "origin": "system_entropy",
+    "sampling_seed": 155023747,
+    "test_seed": 3475406451,
+    "development_seeds": [
+      1278796162,
+      966526719,
+      1287234460,
+      4067879670,
+      805077198
+    ],
+    "model_seed": 208867450,
+    "policy": "Generate before outcomes; never regenerate to improve model scores."
+  },
+  "test_evaluated": true,
+  "status": "planned_test_comparisons_complete"
+}

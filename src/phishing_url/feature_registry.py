@@ -22,6 +22,8 @@ FEATURE_SETS: dict[str, tuple[str, ...]] = {
     "compact16": tuple(name for name in FEATURE_NAMES if name not in {"uses_https", "suspicious_keyword_count"}),
     "expanded21": REGISTERED_FEATURE_NAMES,
     "hostname_only": ("hostname_length", "subdomain_count", "is_ip_hostname", "hostname_digit_ratio"),
+    "https_only": ("uses_https",),
+    "structure_only": ("uses_https", "path_length", "query_length"),
 }
 
 

@@ -136,6 +136,18 @@ PYTHONPATH=src python -m phishing_url.experiment predict \
   'https://example.com/'
 ```
 
+## Prospective observation pilot checkpoint — September 27, 2026
+
+The new [label policy](docs/label_policy_v1.md),
+[observation protocol](docs/observation_pilot_v1.md) and
+[schema](schemas/observation_v1.schema.json) were exercised in GitHub Actions.
+The repaired run recorded all 16 candidates and passed schema/integrity checks;
+complete captures were 6/8 official controls and 3/8 source-reported phishing candidates.
+The fixed completeness gate failed, so no expansion, Dataset v2 or model training occurred.
+Read the [actual run report](docs/observation_pilot_results_en.md) before using the data.
+Source assertions remain separate from adjudicated labels. Future live pilots require
+explicit workflow dispatch; report commits do not initiate collection.
+
 ## Observed legitimate URL acquisition
 
 The bounded collector accepts a **frozen local** Tranco CSV, samples candidate

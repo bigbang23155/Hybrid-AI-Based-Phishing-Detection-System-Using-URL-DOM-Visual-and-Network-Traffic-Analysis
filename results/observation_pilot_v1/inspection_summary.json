@@ -1,0 +1,68 @@
+{
+  "run_id": 36289927306,
+  "verified_manifest_entries": 106,
+  "schema_valid_records": 16,
+  "start": "2026-09-27T02:57:12.299743+00:00",
+  "end": "2026-09-27T02:57:49.925332+00:00",
+  "profiles": {
+    "0": {
+      "planned": 8,
+      "domains": 8,
+      "statuses": {
+        "complete": 6,
+        "skipped": 2
+      },
+      "https_count": 8,
+      "inner_page_count": 3,
+      "query_count": 0,
+      "url_length": {
+        "min": 20,
+        "median": 23.5,
+        "max": 51
+      },
+      "path_length": {
+        "min": 1,
+        "median": 1.0,
+        "max": 28
+      },
+      "query_length": {
+        "min": 0,
+        "median": 0.0,
+        "max": 0
+      }
+    },
+    "1": {
+      "planned": 8,
+      "domains": 8,
+      "statuses": {
+        "complete": 3,
+        "partial": 1,
+        "skipped": 4
+      },
+      "https_count": 8,
+      "inner_page_count": 6,
+      "query_count": 1,
+      "url_length": {
+        "min": 29,
+        "median": 50.0,
+        "max": 158
+      },
+      "path_length": {
+        "min": 1,
+        "median": 20.0,
+        "max": 30
+      },
+      "query_length": {
+        "min": 0,
+        "median": 0.0,
+        "max": 104
+      }
+    }
+  },
+  "unique_normalized_urls": 16,
+  "unique_original_urls": 16,
+  "source_feed_sha256": "88a444823b729be7a441c837db487c3f3dc6b37c477dd0fc72b3bb36284b2cfa",
+  "human_adjudicated_labels": 0,
+  "expansion_performed": false,
+  "model_training_performed": false
+}

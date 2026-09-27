@@ -110,6 +110,18 @@ URL-only timing is not complete Hybrid latency. Importance is associational; lab
 noise, source/period differences, collection success and cross-domain templates remain
 risks. Final effectiveness must be established with the planned data/evaluation design.
 
+## Observation pilot checkpoint — September 27, 2026
+
+The next milestone described above has now been attempted in cloud. Label-policy-v1,
+the observation schema, isolated browser collection and evidence packaging are implemented.
+After a documented sandbox compatibility repair, run 36289927306 recorded all 16
+fixed candidates; 106 file hashes and all record validations passed. Complete captures
+were 6/8 official controls and 3/8 source-reported phishing candidates, so the declared
+gate failed. All labels remain unadjudicated. No expansion or model training occurred.
+The existing URL model/feature/randomness foundation remains unchanged. See
+[the actual pilot report](observation_pilot_results_en.md) for content problems,
+retained failures, network-modality limits and the next acquisition-design work.
+
 ## References
 
 - UCI, PhiUSIIL Phishing URL (Website): https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset . Original label mapping and March 3, 2024 donation; donation is not per-URL collection time.

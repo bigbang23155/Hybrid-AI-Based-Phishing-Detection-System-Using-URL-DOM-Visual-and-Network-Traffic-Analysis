@@ -1,0 +1,113 @@
+name: Fixed observation pilot v1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.github/workflows/observation-pilot.yml'
+      - 'src/phishing_url/pilot_capture.py'
+      - 'src/phishing_url/public_proxy.py'
+      - 'src/phishing_url/observation.py'
+      - 'config/observation_pilot_v1.json'
+      - 'schemas/observation_v1.schema.json'
+      - 'scripts/pilot/**'
+      - 'requirements-pilot.txt'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: observation-pilot-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  pilot:
+    if: >-
+      github.event.repository.private == true &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.pull_request.head.repo.full_name == github.repository &&
+        github.head_ref == 'codex/observation-pilot-v1'))
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Verify code before any candidate acquisition
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pytest -q
+      - name: Freeze exact source snapshot and candidate plan
+        run: |
+          python -m phishing_url.pilot_capture prepare --root pilot
+          git rev-parse HEAD > pilot/execution_commit.txt
+          cp schemas/observation_v1.schema.json pilot/
+          cp docs/label_policy_v1.md docs/observation_pilot_v1.md pilot/
+          python -m pip freeze > pilot/host_dependencies.txt
+          chmod -R a+rwX pilot
+      - name: Build pinned browser and public destination gateway
+        run: |
+          docker build -f scripts/pilot/Dockerfile -t assignment02-pilot .
+          docker image inspect assignment02-pilot --format '{{.Id}}' > pilot/container_image_id.txt
+          docker network create --internal pilot-isolated
+          docker run -d --name pilot-guard --read-only --cap-drop ALL \
+            --security-opt no-new-privileges --pids-limit 100 --memory 256m \
+            --tmpfs /tmp:rw,nosuid,nodev,size=64m \
+            assignment02-pilot python -m phishing_url.public_proxy
+          docker network connect --alias guard pilot-isolated pilot-guard
+      - name: Capture the fixed batch in an isolated non-root sandbox
+        run: |
+          docker run --rm --name pilot-browser --init --network pilot-isolated \
+            --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --security-opt seccomp=config/playwright_seccomp_v1.63.0.json \
+            --pids-limit 512 --memory 2g --cpus 2 --shm-size 1g \
+            --tmpfs /tmp:rw,nosuid,nodev,size=768m \
+            --tmpfs /home/pwuser:rw,nosuid,nodev,size=64m,uid=1000,gid=1000,mode=0700 \
+            -v "${PWD}/pilot:/output:rw" \
+            assignment02-pilot python -m phishing_url.pilot_capture capture --root /output
+      - name: Audit actual evidence and report the gate
+        if: always()
+        run: |
+          if test -f pilot/plan.json; then
+            set +e
+            python -m phishing_url.pilot_capture audit --root pilot
+            status=$?
+            set -e
+            if [[ "$status" != 0 && "$status" != 2 ]]; then exit "$status"; fi
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = Path('pilot/pilot_audit.json')
+          summary = json.loads(report.read_text()) if report.exists() else {'decision':'preparation_or_runtime_blocked'}
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
+              stream.write('## Observation pilot v1\n\n```json\n'+json.dumps(summary,indent=2)+'\n```\n')
+              stream.write('\nNo model training or automatic expansion. Raw evidence remains private.\n')
+          PY
+      - name: Preserve failures, source, configuration and checksums
+        if: always()
+        run: |
+          mkdir -p pilot
+          docker logs pilot-guard > pilot/proxy.log 2>&1 || true
+          docker rm -f pilot-browser pilot-guard >/dev/null 2>&1 || true
+          docker network rm pilot-isolated >/dev/null 2>&1 || true
+          git rev-parse HEAD > pilot/execution_commit.txt
+          cp config/observation_pilot_v1.json pilot/declared_config.json
+          cp .github/workflows/observation-pilot.yml pilot/workflow.yml
+          cp requirements-pilot.txt pilot/
+          git archive --format=zip HEAD > pilot/executed_source.zip
+          python -m phishing_url.pilot_capture seal --root pilot
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assignment02-observation-pilot-${{ github.run_id }}-${{ github.run_attempt }}
+          path: pilot/
+          retention-days: 7
+          if-no-files-found: error

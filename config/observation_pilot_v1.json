@@ -1,0 +1,74 @@
+{
+  "protocol_version": "observation-pilot-v1",
+  "label_policy_version": "label-policy-v1",
+  "seed": 2026092701,
+  "per_stratum": 8,
+  "max_feed_age_hours": 48,
+  "max_navigation_ms": 15000,
+  "settle_ms": 2000,
+  "max_requests_per_observation": 60,
+  "max_dom_bytes": 2097152,
+  "max_observation_seconds": 30,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "locale": "en-US",
+  "timezone_id": "UTC",
+  "user_agent": "Assignment02ResearchPilot/1.0 (academic; no forms)",
+  "technical_gate": {
+    "min_complete_per_stratum": 6,
+    "required_observations": 16
+  },
+  "expansion_gate": {
+    "require_technical_pass": true,
+    "require_all_label_reviews": true,
+    "require_two_adjudicated_classes": true
+  },
+  "expansion": {
+    "enabled": false,
+    "next_target_per_stratum": 50,
+    "reason": "Only after pilot evidence and label gate pass; a prospective source frame must be frozen first."
+  },
+  "feed": {
+    "repository": "openphish/public_feed",
+    "path": "feed.txt",
+    "documentation": "https://openphish.com/phishing_feeds.html",
+    "terms": "https://openphish.com/terms.html",
+    "snapshot_commit": "085ed226813bf76ff73df5b0f908a932805ce332"
+  },
+  "benign_controls": [
+    {
+      "url": "https://www.nasa.gov/",
+      "organization": "NASA"
+    },
+    {
+      "url": "https://www.noaa.gov/",
+      "organization": "NOAA"
+    },
+    {
+      "url": "https://www.nist.gov/cybersecurity-and-privacy",
+      "organization": "NIST"
+    },
+    {
+      "url": "https://www.cisa.gov/",
+      "organization": "CISA"
+    },
+    {
+      "url": "https://docs.python.org/3/library/urllib.parse.html",
+      "organization": "Python documentation"
+    },
+    {
+      "url": "https://www.sqlite.org/docs.html",
+      "organization": "SQLite documentation"
+    },
+    {
+      "url": "https://illinoisstate.edu/",
+      "organization": "Illinois State University"
+    },
+    {
+      "url": "https://www.mit.edu/",
+      "organization": "MIT"
+    }
+  ]
+}

@@ -79,7 +79,7 @@ class Gateway:
                     await asyncio.gather(*tasks,return_exceptions=True)
         except Exception as exc:
             print(json.dumps({'event':'blocked_or_failed','reason':type(exc).__name__+': '+str(exc)[:150]}),flush=True)
-            try:writer.write(b'HTTP/1.1 403 Forbidden\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');await writer.drain()
+            try:writer.write(('HTTP/1.1 403 Forbidden\r\nConnection: close\r\nContent-Length: 0\r\nX-Research-Gateway-Error-Type: '+type(exc).__name__+'\r\n\r\n').encode());await writer.drain()
             except Exception:pass
         finally:
             if remote:remote.close()

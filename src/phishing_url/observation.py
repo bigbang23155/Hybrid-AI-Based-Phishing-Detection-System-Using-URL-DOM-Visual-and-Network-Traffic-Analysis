@@ -54,7 +54,24 @@ def validate_record(record: dict, root: Path, schema: dict) -> None:
         raise ValueError("complete observation lacks a modality")
     if record['status']=='complete' and not (record['http_status'] is not None and 200 <= record['http_status'] < 300):
         raise ValueError('complete observation requires successful HTTP status')
-    for info in record["modalities"].values():
+    if record['schema_version']=='observation-v2' and record['status']=='complete' and not record['readiness_pass']:
+        raise ValueError('complete v2 observation requires visual readiness')
+    evidence=list(record["modalities"].values())+list(record.get('capture_evidence',{}).values())
+    robots=record.get('capture_evidence',{}).get('robots')
+    if robots:
+        robots_path=(root/robots['path']).resolve()
+        if not robots_path.is_relative_to(root.resolve()):raise ValueError('robots path escapes root')
+        payload=json.loads(robots_path.read_text())
+        if record['status']=='complete' and payload.get('allowed') is not True:raise ValueError('complete capture without robots allowance')
+        evidence += [hop['body'] for hop in payload.get('hops',[]) if 'body' in hop]
+    if record['schema_version']=='observation-v2' and record['status']=='complete':
+        if set(record['capture_evidence'])!={'robots','readiness'}:raise ValueError('complete v2 capture lacks policy evidence')
+    readiness=record.get('capture_evidence',{}).get('readiness')
+    if readiness:
+        ready_path=(root/readiness['path']).resolve()
+        if not ready_path.is_relative_to(root.resolve()):raise ValueError('readiness path escapes root')
+        if json.loads(ready_path.read_text())['passed']!=record['readiness_pass']:raise ValueError('readiness evidence mismatch')
+    for info in evidence:
         path = (root / info["path"]).resolve()
         if not path.is_relative_to(root.resolve()): raise ValueError("artifact path escapes root")
         data=path.read_bytes()
@@ -91,15 +108,18 @@ def audit(root: Path, config: dict, schema: dict) -> dict:
     complete_plan=set(ids)==planned_ids and len(ids)==len(planned_ids)==config['technical_gate']['required_observations']
     technical=not errors and complete_plan and preflight.get('passed') is True and all(
         complete[str(c)] >= config['technical_gate']['min_complete_per_stratum'] for c in (0,1))
-    # Raw observations are immutable; this pilot has no completed adjudication table.
+    from .label_review import derive_labels
+    labels=derive_labels(root)
+    label_pass=labels['all_reviewed'] and labels['two_adjudicated_classes']
     decision={'protocol_version':config['protocol_version'], 'technical_pass':technical,
-              'label_gate_pass':False, 'expansion_allowed':False,
-              'decision':'technical_pass_review_required' if technical else 'pilot_incomplete',
+              'label_gate_pass':label_pass, 'expansion_allowed':bool(technical and label_pass),
+              'decision':('pilot_pass' if label_pass else 'technical_pass_review_required') if technical else 'pilot_incomplete',
               'planned':len(plan['candidates']), 'recorded':len(records),
               'complete_by_candidate_class':dict(complete), 'schema_errors':errors,
               'status_counts':dict(Counter(r['status'] for r in records)),
               'failure_reasons':dict(Counter(r['reason'] for r in records if r['reason'])),
-              'pending_label_reviews':len(records), 'all_planned_rows_present':complete_plan,
+              'pending_label_reviews':labels['pending'],'adjudicated_label_counts':labels['label_counts'],
+              'all_planned_rows_present':complete_plan,
               'thresholds':config['technical_gate'], 'model_training_performed':False,
               'note':'Source assertions and HTTP/asset completeness do not adjudicate page labels. No expansion without review.'}
     write_json(root/'pilot_audit.json',decision)
@@ -108,4 +128,10 @@ def audit(root: Path, config: dict, schema: dict) -> dict:
             'review_status':'pending', 'reviewer_id':None, 'reviewer_type':None,
             'decision':None, 'reason':None, 'evidence':r['modalities']} for r in records]
     write_json(root/'label_review_queue.json',queue)
+    for r in records:
+        template=root/'review_templates'/(r['observation_id']+'.json')
+        if not template.exists():
+            write_json(template,{'observation_id':r['observation_id'],'policy_version':'label-policy-v1',
+                'reviewer_id':None,'reviewer_type':'human','reviewed_at':None,'source_assertion':r['label']['status'],
+                'decision':None,'reason':None,'evidence':[{'path':v['path'],'sha256':v['sha256']} for v in r['modalities'].values()]})
     return decision

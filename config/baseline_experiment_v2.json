@@ -1,0 +1,29 @@
+{
+  "experiment_id": "assignment02_historical_url_v2",
+  "dataset_sha256": "a45a5609dec304be42616b4f100b731c8d7fe315d93e5d758afb6aae1e8df549",
+  "feature_sets": [
+    "baseline",
+    "no_https",
+    "compact16",
+    "expanded21",
+    "hostname_only",
+    "https_only",
+    "structure_only"
+  ],
+  "models": [
+    "logistic_regression",
+    "decision_tree"
+  ],
+  "primary_comparison": "baseline18, with predeclared no-HTTPS and feature-count sensitivity",
+  "selection": "mean validation F1 across five development seeds; deterministic tie break",
+  "test_policy": "fixed domain-disjoint test; evaluate all 14 declared comparisons once after frozen development replay",
+  "diagnostics": [
+    "development model-seed sensitivity",
+    "held-out prediction and error artifacts",
+    "validation permutation importance",
+    "train-derived coefficients or impurity importance",
+    "URL-only latency"
+  ],
+  "scope": "Historical source-label benchmark; not validation of 2026 Hybrid detection",
+  "narrative_report_requested": false
+}

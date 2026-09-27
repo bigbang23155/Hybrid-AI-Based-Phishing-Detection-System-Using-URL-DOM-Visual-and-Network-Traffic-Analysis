@@ -1,0 +1,104 @@
+{
+  "planned_comparisons_verified": [
+    {
+      "feature_set": "baseline",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "baseline",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "compact16",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "compact16",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "expanded21",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "expanded21",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "hostname_only",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "hostname_only",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "https_only",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "https_only",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "no_https",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "no_https",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "structure_only",
+      "model": "decision_tree",
+      "rows": 600,
+      "metrics_recomputed": true
+    },
+    {
+      "feature_set": "structure_only",
+      "model": "logistic_regression",
+      "rows": 600,
+      "metrics_recomputed": true
+    }
+  ],
+  "all_metrics_recomputed": true,
+  "model_seed_sensitivity_uses_test": false,
+  "model_reselection_performed": false,
+  "fixed_model_seeds": [
+    2637921992,
+    3494003559,
+    2309373356,
+    2333683829,
+    4177874314
+  ],
+  "limitations": [
+    "LR default lbfgs is deterministic; changing random_state need not change results.",
+    "Five seed runs characterize this split procedure, not independent population samples.",
+    "Feature importance is associational and sensitive to correlated features.",
+    "Test error strata are descriptive and will not be used to retune this frozen experiment."
+  ]
+}

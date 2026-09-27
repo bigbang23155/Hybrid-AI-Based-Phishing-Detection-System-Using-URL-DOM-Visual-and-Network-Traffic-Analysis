@@ -121,7 +121,8 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
     conflict_urls = {item.url_clean for item in conflicts}
     conflict_counts = Counter(row.source for row, record in valid if record.url_clean in conflict_urls)
     summary = []
-    for source in (*SOURCES, "total"):
+    source_names = tuple(dict.fromkeys((*SOURCES, *sorted({row.source for row in input_rows}))))
+    for source in (*source_names, "total"):
         source_rows = input_rows if source == "total" else [row for row in input_rows if row.source == source]
         source_records = selected if source == "total" else [record for record in selected if record.source == source]
         summary.append({
@@ -139,12 +140,12 @@ def prepare_dataset(rows: Iterable[ParsedRow], target_per_label: int = 2_000, se
         })
     source_summary = [{
         "source": source,
-        "label": 0 if source == "tranco" else 1,
-        "raw_records": sum(row.source == source for row in input_rows),
-        "accepted_before_sampling": accepted_counts[source],
-        "selected_records": selected_counts[source],
-        "unique_registered_domains": len({record.registered_domain for record in selected if record.source == source}),
-    } for source in SOURCES]
+        "label": label,
+        "raw_records": sum(row.source == source and row.label == label for row in input_rows),
+        "accepted_before_sampling": sum(r.source == source and r.label == label for r in candidates),
+        "selected_records": sum(r.source == source and r.label == label for r in selected),
+        "unique_registered_domains": len({record.registered_domain for record in selected if record.source == source and record.label == label}),
+    } for source in source_names for label in sorted({row.label for row in input_rows if row.source == source} or ({0} if source == 'tranco' else {1}))]
     pool_bytes = json.dumps([r.as_dict() for r in sorted(candidates, key=lambda r:r.url_clean)], sort_keys=True).encode()
     manifest = {"sampling_version": 2, "sampling_seed": seed,
                 "duplicate_representative": "fixed source priority phishtank/openphish/tranco, then source/raw URL; all rejected rows retained",

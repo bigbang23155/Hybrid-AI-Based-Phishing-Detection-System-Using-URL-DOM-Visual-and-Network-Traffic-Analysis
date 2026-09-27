@@ -1,0 +1,136 @@
+{
+  "dataset_id": "assignment02_ebbu2017_historical_v2",
+  "scope": "historical URL-only source-label baseline; not the final prospective Hybrid dataset",
+  "label_semantics": "Published legitimate=0 and phishing=1. Reproduce historical source labels; not independent current-site adjudication.",
+  "dataset_sha256": "a45a5609dec304be42616b4f100b731c8d7fe315d93e5d758afb6aae1e8df549",
+  "audit_sha256": "073a5fb6741063977dc207a8af13e484b38c60f79e8ed9da2c40f91a091d4fd1",
+  "source_config_sha256": "65eba5935e7f7a4df40a3040ee268e2c79b86706187cc3554800ef52b8a9c6ff",
+  "seed_plan_sha256": "2a91a5e8de207ef0aa807ab8b513a163815f2d5285e7c83af6772e79ac14df71",
+  "sampling": {
+    "sampling_version": 2,
+    "sampling_seed": 155023747,
+    "duplicate_representative": "fixed source priority phishtank/openphish/tranco, then source/raw URL; all rejected rows retained",
+    "class_seeds": {
+      "0": 4131789092,
+      "1": 2070012765
+    },
+    "method": "uniform URL sampling without replacement within each class after conflicts/deduplication",
+    "candidate_pool_sha256": "86cff66e5a1d34ca0d9639c9116eda2b856c589108bb442fa1dc4910f9d6d72a",
+    "target_per_label": 2000,
+    "actual_per_label": 2000,
+    "shortfall": false,
+    "candidate_counts": {
+      "0": 29886,
+      "1": 24721
+    },
+    "note": "Uniform URL sampling is not uniform domain sampling; no distribution matching or score-based retries."
+  },
+  "order_invariance_verified": true,
+  "profiles": {
+    "0": {
+      "rows": 2000,
+      "domains": 1397,
+      "largest_domain_share": 0.0455,
+      "top10_domain_share": 0.1305,
+      "domain_hhi": 0.003941,
+      "https_rate": 0.3745,
+      "inner_page_rate": 0.948,
+      "query_rate": 0.0375,
+      "url_length": {
+        "0.0": 16.0,
+        "0.05": 30.0,
+        "0.25": 43.0,
+        "0.5": 54.5,
+        "0.75": 71.25,
+        "0.95": 107.04999999999995,
+        "0.99": 140.01999999999998,
+        "1.0": 232.0
+      },
+      "path_length": {
+        "0.0": 1.0,
+        "0.05": 1.0,
+        "0.25": 17.0,
+        "0.5": 29.0,
+        "0.75": 46.0,
+        "0.95": 81.0,
+        "0.99": 111.05999999999995,
+        "1.0": 210.0
+      },
+      "query_length": {
+        "0.0": 0.0,
+        "0.05": 0.0,
+        "0.25": 0.0,
+        "0.5": 0.0,
+        "0.75": 0.0,
+        "0.95": 0.0,
+        "0.99": 22.0,
+        "1.0": 71.0
+      }
+    },
+    "1": {
+      "rows": 2000,
+      "domains": 1537,
+      "largest_domain_share": 0.009,
+      "top10_domain_share": 0.05,
+      "domain_hhi": 0.0010315000000000003,
+      "https_rate": 0.018,
+      "inner_page_rate": 0.986,
+      "query_rate": 0.2235,
+      "url_length": {
+        "0.0": 20.0,
+        "0.05": 30.0,
+        "0.25": 44.0,
+        "0.5": 60.0,
+        "0.75": 83.0,
+        "0.95": 235.0999999999999,
+        "0.99": 285.01,
+        "1.0": 565.0
+      },
+      "path_length": {
+        "0.0": 1.0,
+        "0.05": 7.0,
+        "0.25": 17.0,
+        "0.5": 27.0,
+        "0.75": 41.0,
+        "0.95": 76.0,
+        "0.99": 121.0,
+        "1.0": 216.0
+      },
+      "query_length": {
+        "0.0": 0.0,
+        "0.05": 0.0,
+        "0.25": 0.0,
+        "0.5": 0.0,
+        "0.75": 0.0,
+        "0.95": 165.0,
+        "0.99": 225.03999999999996,
+        "1.0": 488.0
+      }
+    }
+  },
+  "source_files": [
+    {
+      "filename": "data_legitimate_36400.json",
+      "source": "ebbu2017_yandex_published_legitimate",
+      "label": 0,
+      "sha256": "5e8fbcc88d6ba25f46bd85ed48d8aed9f56e2afc9deb712d13496112b8158ab4"
+    },
+    {
+      "filename": "data_phishing_37175.json",
+      "source": "ebbu2017_published_phishing",
+      "label": 1,
+      "sha256": "c513d1f11b0ce159d43a23b465af2a65f752c6f65a816c2a8084f2a2adf2ebf6"
+    }
+  ],
+  "limitations": [
+    "Historical corpus associated with a 2019 paper; per-URL collection and verification timestamps unavailable.",
+    "Author-described benign selection used query words and high-ranked Yandex search results; source labels are not proof of safety.",
+    "Phishing URLs were mostly obtained from PhishTank according to the authors; per-row provider evidence is unavailable.",
+    "Source and label are confounded; HTTPS, page structure, language and concentration can produce shortcuts.",
+    "URLs lacking an explicit HTTP(S) scheme are rejected, never reconstructed.",
+    "No live requests to historical URLs, no precomputed features, no relabeling of spam/malware/defacement.",
+    "Offline PSL snapshot excludes private suffixes; domains are isolated but shared templates or campaigns may remain.",
+    "Balanced 2000-per-class benchmark does not estimate real-world prevalence or 2026 performance.",
+    "300-domain minimum is an unchanged project heuristic, not a professor requirement."
+  ]
+}

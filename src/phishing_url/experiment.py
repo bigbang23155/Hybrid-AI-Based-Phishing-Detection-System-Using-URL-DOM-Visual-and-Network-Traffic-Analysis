@@ -325,7 +325,7 @@ def run(input_path: Path, output: Path, overwrite: bool = False, *,
     for filename in ("development_split_manifest.csv", "selected_hyperparameters.csv", "validation_seed_metrics.csv"):
         if _sha256(output / filename) != _sha256(development_run / filename):
             raise ValueError(f"frozen development replay mismatch: {filename}; test remains unevaluated")
-    final_rows=[]; importance_rows=[]; error_frames=[]; latency_rows=[]
+    final_rows=[]; importance_rows=[]; error_frames=[]; latency_rows=[]; prediction_frames=[]
     development = canonical != "test"; test = canonical == "test"
     for feature_set in feature_sets:
         names=resolve_feature_set(feature_set); X=all_features.loc[:, names]
@@ -356,13 +356,19 @@ def run(input_path: Path, output: Path, overwrite: bool = False, *,
             timings=(("feature_extraction","batch_throughput",len(test_X),extraction),("model_inference_including_preprocessing","batch_throughput",len(test_X),inference),("feature_extraction","single_request",1,single_extraction),("model_inference_including_preprocessing","single_request",1,single_inference))
             for stage,mode,batch_size,values in timings:
                 latency_rows.append({"feature_set":feature_set,"model":model,"stage":stage,"mode":mode,"batch_size":batch_size,"repetitions":30,"median_ms_per_url":float(np.median(values)),"p95_ms_per_url":float(np.percentile(values,95)),"timer":"time.perf_counter_ns"})
-            pred=(score>=.5).astype(int); errors=frame.loc[test].copy(); errors["prediction_probability"]=score; errors["prediction"]=pred; errors=errors[errors.label!=errors.prediction]
+            pred=(score>=.5).astype(int)
+            predictions=frame.loc[test,["sample_id","domain_group","label","source"]].copy()
+            predictions["prediction_probability"]=score; predictions["prediction"]=pred
+            predictions["feature_set"]=feature_set; predictions["model"]=model
+            prediction_frames.append(predictions)
+            errors=frame.loc[test].copy(); errors["prediction_probability"]=score; errors["prediction"]=pred; errors=errors[errors.label!=errors.prediction]
             errors["error_type"]=np.where(errors.label==0,"false_positive","false_negative")
             errors["url_defanged_host"] = errors["url_clean"].map(lambda url: url.split(":", 1)[0].replace("http", "hxxp") + "://" + registered_domain(url).replace(".", "[.]"))
             errors["path_length"] = all_features.loc[errors.index, "path_length"]; errors["query_length"] = all_features.loc[errors.index, "query_length"]
-            errors["feature_set"]=feature_set; errors["model"]=model; error_frames.append(errors[["feature_set","model","error_type","source","domain_group","prediction_probability","path_length","query_length","url_defanged_host"]])
+            errors["feature_set"]=feature_set; errors["model"]=model; error_frames.append(errors[["sample_id","label","prediction","feature_set","model","error_type","source","domain_group","prediction_probability","path_length","query_length","url_defanged_host"]])
     final=pd.DataFrame(final_rows); final.to_csv(output/"final_test_metrics.csv",index=False); final.to_csv(output/"model_comparison.csv",index=False)
     pd.DataFrame(importance_rows).to_csv(output/"feature_importance.csv",index=False); pd.concat(error_frames).to_csv(output/"error_analysis.csv",index=False)
+    pd.concat(prediction_frames).to_csv(output/"test_predictions.csv",index=False)
     pd.DataFrame(latency_rows).to_csv(output/"latency.csv",index=False)
     schema={name:list(resolve_feature_set(name)) for name in feature_sets}; (output/"feature_schema.json").write_text(json.dumps(schema,indent=2)+"\n")
     metadata={"created_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),"input":str(input_path),"dataset_sha256":dataset_checksum,"test_seed":TEST_SEED,"development_seeds":DEV_SEEDS,"positive_class":"1=phishing","threshold":.5,"versions":{"python":platform.python_version(),"scikit_learn":sklearn.__version__,"tldextract":tldextract.__version__},"domain_parser":{"library":"tldextract",**_psl_snapshot()},"hardware":{"platform":platform.platform(),"processor":platform.processor(),"cpu_count":os.cpu_count()},"latency":{"warmup_batches":3,"measured_batches":30,"scope":"single-request and batch local URL-only; model timing includes preprocessing; not hybrid-system latency"},"git_provenance_at_start":provenance,"selection_metric":"mean validation F1; deterministic tie-break","notes":"Feature changes and parameter selection use development data only."}

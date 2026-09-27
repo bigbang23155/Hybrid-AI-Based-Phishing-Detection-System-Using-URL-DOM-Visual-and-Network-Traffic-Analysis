@@ -1,0 +1,4 @@
+split,sample_count,phishing_count,domain_count,legitimate_count,fraction
+test,600,300,461,300,0.15
+train,2800,1400,2035,1400,0.7
+validation,600,300,435,300,0.15

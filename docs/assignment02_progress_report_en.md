@@ -112,7 +112,7 @@ risks. Final effectiveness must be established with the planned data/evaluation 
 
 ## Observation pilot checkpoint — September 27, 2026
 
-The next milestone described above has now been attempted in cloud. Label-policy-v1,
+The next milestone described above has now been attempted. Label-policy-v1,
 the observation schema, isolated browser collection and evidence packaging are implemented.
 After a documented sandbox compatibility repair, run 36289927306 recorded all 16
 fixed candidates; 106 file hashes and all record validations passed. Complete captures

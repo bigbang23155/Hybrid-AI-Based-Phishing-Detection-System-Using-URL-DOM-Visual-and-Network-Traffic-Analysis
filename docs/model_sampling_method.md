@@ -53,7 +53,7 @@ is identical across seeds. All assignments, sample IDs, domain groups and seeds 
 LR uses training-only median imputation and scaling; tree-based models use
 imputation without scaling. Convergence warnings stop fitting. Selection remains mean validation
 F1 with deterministic tie-breaking. Save every seed, mean/SD, selected rows and paired
-tree-minus-LR F1 differences. Threshold remains 0.5; phishing is 1. Record accuracy,
+model-minus-LR F1 differences. Threshold remains 0.5; phishing is 1. Record accuracy,
 precision, recall, F1, FPR, ROC-AUC, average precision and confusion counts.
 
 The loader now rejects fractional labels, inconsistent raw/clean URLs and stored PSL
@@ -70,7 +70,7 @@ controls; one-time test use still depends on the research protocol.
 Tests cover existing behavior, random replay, input-order invariance, group isolation,
 16/18/21 schemas, missing data, train-only preprocessing and saved-model inference.
 Reserved example domains are software fixtures only. Their scores are not research
-performance evidence and do not establish that either model is better.
+performance evidence and do not establish that any model is better.
 
 ## Primary references
 

@@ -139,8 +139,8 @@ PYTHONPATH=src python -m phishing_url.experiment predict \
 ## Assignment 03 Phase 1: complete and freeze the URL baseline
 
 Assignment 03 starts by completing the URL-only baseline before DOM work. The
-development protocol now compares Logistic Regression, Decision Tree, and Random
-Forest on the same domain-grouped splits. Model/feature decisions remain
+development protocol now compares Logistic Regression, Decision Tree, Random
+Forest, and scikit-learn Gradient Boosting (GBDT) on the same domain-grouped splits. Model/feature decisions remain
 validation-only; the held-out test set is not used for Phase 1 development.
 
 Run a fresh development experiment with the updated protocol:

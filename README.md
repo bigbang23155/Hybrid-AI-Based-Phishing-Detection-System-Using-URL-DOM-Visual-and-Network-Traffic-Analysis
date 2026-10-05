@@ -136,6 +136,43 @@ PYTHONPATH=src python -m phishing_url.experiment predict \
   'https://example.com/'
 ```
 
+## Assignment 03 Phase 1: complete and freeze the URL baseline
+
+Assignment 03 starts by completing the URL-only baseline before DOM work. The
+development protocol now compares Logistic Regression, Decision Tree, and Random
+Forest on the same domain-grouped splits. Model/feature decisions remain
+validation-only; the held-out test set is not used for Phase 1 development.
+
+Run a fresh development experiment with the updated protocol:
+
+```bash
+PYTHONPATH=src python -m phishing_url.experiment run \
+  --input data/processed/urls.csv \
+  --output results/assignment03/phase1_development \
+  --seed-plan config/study_seeds.json \
+  --feature-sets baseline no_https
+```
+
+After that development run is frozen, run the Assignment 03 diagnostics:
+
+```bash
+PYTHONPATH=src python -m phishing_url.phase1_diagnostics \
+  --dataset data/processed/urls.csv \
+  --development results/assignment03/phase1_development \
+  --output results/assignment03/phase1_diagnostics
+```
+
+The diagnostic produces a domain-aware training-size stability comparison at
+25/50/75/100% of the available training data and an optional conventional random
+URL split comparison. Both use only the development pool. Hyperparameters are
+held fixed from the domain-grouped development run, random-split domain overlap
+is reported explicitly, and the frozen test membership is never scored.
+
+Do not run `--evaluate-test` for Assignment 03 development. A real experiment
+also requires the approved dataset to be available in the execution environment;
+the repository's pull-request workflow can validate software behavior without
+claiming research metrics.
+
 ## Prospective observation pilot checkpoint — September 27, 2026
 
 The new [label policy](docs/label_policy_v1.md),

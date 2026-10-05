@@ -20,7 +20,7 @@ import pandas as pd
 import sklearn
 import tldextract
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
@@ -48,6 +48,10 @@ SEARCH_GRIDS = {
     "random_forest": tuple(
         {"n_estimators": 100, "max_depth": depth, "min_samples_leaf": 1, "max_features": "sqrt"}
         for depth in (12, None)
+    ),
+    "gradient_boosting": (
+        {"n_estimators": 100, "learning_rate": .05, "max_depth": 3, "min_samples_leaf": 1},
+        {"n_estimators": 100, "learning_rate": .10, "max_depth": 3, "min_samples_leaf": 1},
     ),
 }
 
@@ -171,7 +175,7 @@ def _pipeline(model: str, params: dict[str, object], names: tuple[str, ...], see
             min_samples_leaf=int(params["min_samples_leaf"]),
             random_state=seed,
         )
-    else:
+    elif model == "random_forest":
         classifier = RandomForestClassifier(
             n_estimators=int(params["n_estimators"]),
             max_depth=params["max_depth"],
@@ -179,6 +183,14 @@ def _pipeline(model: str, params: dict[str, object], names: tuple[str, ...], see
             max_features=str(params["max_features"]),
             random_state=seed,
             n_jobs=1,
+        )
+    else:
+        classifier = GradientBoostingClassifier(
+            n_estimators=int(params["n_estimators"]),
+            learning_rate=float(params["learning_rate"]),
+            max_depth=int(params["max_depth"]),
+            min_samples_leaf=int(params["min_samples_leaf"]),
+            random_state=seed,
         )
     return Pipeline([("preprocess", preprocess), ("classifier", classifier)])
 

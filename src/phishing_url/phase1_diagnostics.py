@@ -12,6 +12,7 @@ limited questions requested for Assignment 03:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Iterable
@@ -71,6 +72,17 @@ def _validate_fractions(fractions: Iterable[float]) -> tuple[float, ...]:
     return values
 
 
+def _metric_summary(frame: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
+    summary = frame.groupby(keys)[list(METRIC_COLUMNS)].agg(["mean", "std"]).reset_index()
+    summary.columns = [
+        "_".join(str(part) for part in column if part).rstrip("_")
+        if isinstance(column, tuple)
+        else str(column)
+        for column in summary.columns
+    ]
+    return summary
+
+
 def run(
     dataset: Path,
     development: Path,
@@ -90,7 +102,7 @@ def run(
         raise ValueError("Phase 1 diagnostics require a completed development-only experiment")
 
     frame = _load(dataset)
-    if config["dataset_sha256"] != __import__("hashlib").sha256(dataset.read_bytes()).hexdigest():
+    if config["dataset_sha256"] != hashlib.sha256(dataset.read_bytes()).hexdigest():
         raise ValueError("dataset checksum differs from the frozen development run")
 
     split_manifest = pd.read_csv(development / "development_split_manifest.csv")
@@ -233,20 +245,12 @@ def run(
     output.mkdir(parents=True)
     size = pd.DataFrame(size_rows)
     size.to_csv(output / "training_size_stability.csv", index=False)
-    size_summary = (
-        size.groupby(["feature_set", "model", "training_fraction"])[list(METRIC_COLUMNS)]
-        .agg(["mean", "std"])
-        .reset_index()
-    )
+    size_summary = _metric_summary(size, ["feature_set", "model", "training_fraction"])
     size_summary.to_csv(output / "training_size_summary.csv", index=False)
 
     split = pd.DataFrame(split_rows)
     split.to_csv(output / "split_strategy_comparison.csv", index=False)
-    split_summary = (
-        split.groupby(["feature_set", "model", "split_strategy"])[list(METRIC_COLUMNS)]
-        .agg(["mean", "std"])
-        .reset_index()
-    )
+    split_summary = _metric_summary(split, ["feature_set", "model", "split_strategy"])
     split_summary.to_csv(output / "split_strategy_summary.csv", index=False)
 
     metadata = {

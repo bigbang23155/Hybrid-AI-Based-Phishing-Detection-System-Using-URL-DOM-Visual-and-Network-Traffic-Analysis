@@ -29,9 +29,10 @@ do not eliminate randomness or source bias.
 Legacy test seed 2025 and development seeds 11/23/37/53/71 remain defaults. Model
 seed is held fixed across splits to isolate split variation. LR's default lbfgs
 solver is deterministic for fixed inputs; random_state does not make it stochastic.
-The tree uses its model seed for randomized feature ordering/ties. Five-seed SD
-describes overlapping development splits, not independent confidence intervals or
-a complete estimator-seed study.
+The tree and Random Forest use the recorded model seed; Random Forest also fixes
+single-process fitting for reproducible baseline execution. Five-seed SD describes
+overlapping development splits, not independent confidence intervals or a complete
+estimator-seed study.
 
 The existing split search considers 500 random group permutations and selects on
 size/class balance only. It is constrained group randomization, not uniform sampling
@@ -46,6 +47,7 @@ is identical across seeds. All assignments, sample IDs, domain groups and seeds 
 |---|---|---|---|
 | Logistic Regression | C 0.1/1/10, max_iter 2000 | Compact linear baseline; inspectable coefficients | Misses direct nonlinear interactions; correlated features complicate interpretation |
 | Decision Tree | depth 3/5/8/unrestricted, leaf size 2/10 | Nonlinear interactions; shallow rules are readable | Overfitting/sample instability; impurity importance bias |
+| Random Forest | 100 trees; depth 12/unrestricted; sqrt features | Additional nonlinear ensemble baseline; less sensitive than one tree to a single split | Less interpretable; impurity importance can still be biased and training is slower |
 
 LR uses training-only median imputation and scaling; the tree uses imputation
 without scaling. Convergence warnings stop fitting. Selection remains mean validation
@@ -75,3 +77,13 @@ performance evidence and do not establish that either model is better.
 - [LogisticRegression](https://scikit-learn.org/1.7/modules/generated/sklearn.linear_model.LogisticRegression.html).
 - [Decision Trees](https://scikit-learn.org/1.7/modules/tree.html).
 - [Feature hypotheses and research references](feature_rationale.md).
+
+## Assignment 03 Phase 1 extension
+
+The URL baseline now includes Random Forest as the required additional baseline
+family before DOM work begins. The primary protocol remains domain-grouped and
+development-only. A separate Phase 1 diagnostic reuses the selected development
+hyperparameters to examine training-size stability and, optionally, a conventional
+random URL split. These diagnostics never score the held-out test rows and do not
+replace the domain-grouped protocol. Random URL results report train/validation
+domain overlap explicitly so any optimistic effect is visible rather than hidden.

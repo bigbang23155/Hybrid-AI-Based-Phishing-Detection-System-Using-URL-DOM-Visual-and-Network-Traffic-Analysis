@@ -20,6 +20,7 @@ import pandas as pd
 import sklearn
 import tldextract
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
@@ -44,6 +45,10 @@ SEARCH_GRIDS = {
     "logistic_regression": ({"C": .1}, {"C": 1.0}, {"C": 10.0}),
     "decision_tree": tuple({"max_depth": depth, "min_samples_leaf": leaf}
                            for depth in (3, 5, 8, None) for leaf in (2, 10)),
+    "random_forest": tuple(
+        {"n_estimators": 300, "max_depth": depth, "min_samples_leaf": leaf, "max_features": "sqrt"}
+        for depth in (12, None) for leaf in (1, 2)
+    ),
 }
 
 
@@ -158,9 +163,23 @@ def _pipeline(model: str, params: dict[str, object], names: tuple[str, ...], see
         ("imputer", SimpleImputer(strategy="median", add_indicator=True, keep_empty_features=True)),
         ("scale", StandardScaler() if model == "logistic_regression" else "passthrough"),
     ]), list(names))], remainder="drop", verbose_feature_names_out=False)
-    classifier = (LogisticRegression(C=float(params["C"]), max_iter=2000, random_state=seed)
-                  if model == "logistic_regression" else
-                  DecisionTreeClassifier(max_depth=params["max_depth"], min_samples_leaf=int(params["min_samples_leaf"]), random_state=seed))
+    if model == "logistic_regression":
+        classifier = LogisticRegression(C=float(params["C"]), max_iter=2000, random_state=seed)
+    elif model == "decision_tree":
+        classifier = DecisionTreeClassifier(
+            max_depth=params["max_depth"],
+            min_samples_leaf=int(params["min_samples_leaf"]),
+            random_state=seed,
+        )
+    else:
+        classifier = RandomForestClassifier(
+            n_estimators=int(params["n_estimators"]),
+            max_depth=params["max_depth"],
+            min_samples_leaf=int(params["min_samples_leaf"]),
+            max_features=str(params["max_features"]),
+            random_state=seed,
+            n_jobs=1,
+        )
     return Pipeline([("preprocess", preprocess), ("classifier", classifier)])
 
 
@@ -243,7 +262,7 @@ def run(input_path: Path, output: Path, overwrite: bool = False, *,
         raise FileExistsError("use a new output directory to avoid mixing experiment evidence")
     provenance = _git_provenance()
     dataset_checksum = _sha256(input_path)
-    protocol = {"protocol_version": 2, "input": str(input_path), "dataset_sha256": dataset_checksum, "test_seed": test_seed,
+    protocol = {"protocol_version": 3, "input": str(input_path), "dataset_sha256": dataset_checksum, "test_seed": test_seed,
                 "development_seeds": list(dev_seeds), "model_seed": model_seed, "seed_plan": seeds,
                 "evaluate_test": evaluate_test, "target_split_proportions": TARGET_SPLITS,
                 "domain_grouping": {"key": "PSL-aware eTLD+1 or normalized IP", "library": "tldextract", **_psl_snapshot()},
@@ -312,7 +331,12 @@ def run(input_path: Path, output: Path, overwrite: bool = False, *,
         (validation.parameters == json.dumps(params, sort_keys=True))] for (fs, model), params in best.items()])
     selected_rows.to_csv(output / "selected_validation_seed_metrics.csv", index=False)
     paired = selected_rows.pivot(index=["feature_set", "seed"], columns="model", values="f1").reset_index()
-    paired["decision_tree_minus_logistic_regression_f1"] = paired.decision_tree - paired.logistic_regression
+    reference_model = "logistic_regression"
+    if reference_model not in paired:
+        raise ValueError("paired validation comparison requires logistic_regression as the reference model")
+    for model in grids:
+        if model != reference_model:
+            paired[f"{model}_minus_{reference_model}_f1"] = paired[model] - paired[reference_model]
     paired.to_csv(output / "paired_validation_comparison.csv", index=False)
     metadata = {"created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "dataset_sha256": dataset_checksum, "git_provenance_at_start": provenance,

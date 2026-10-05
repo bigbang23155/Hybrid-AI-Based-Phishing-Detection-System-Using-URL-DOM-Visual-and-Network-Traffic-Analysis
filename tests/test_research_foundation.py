@@ -10,6 +10,7 @@ import pytest
 from phishing_url.experiment import _choose_groups, _load, _pipeline, run, validate_split
 from phishing_url.feature_registry import FeatureExtractor, resolve_feature_set
 from phishing_url.ingestion import ParsedRow
+from phishing_url.phase1_diagnostics import run as run_phase1_diagnostics
 from phishing_url.prepare import prepare_dataset
 from phishing_url.randomness import load_seed_plan, main as seed_main, make_seed_plan
 from phishing_url.url_cleaning import clean_url, registered_domain
@@ -98,7 +99,11 @@ def test_16_18_21_and_actual_hostname_only():
     with pytest.raises(ValueError,match='unknown'):small.transform_mapping({'new_unregistered':1})
 
 
-@pytest.mark.parametrize('model,params',[('logistic_regression',{'C':1}),('decision_tree',{'max_depth':3,'min_samples_leaf':2})])
+@pytest.mark.parametrize('model,params',[
+    ('logistic_regression',{'C':1}),
+    ('decision_tree',{'max_depth':3,'min_samples_leaf':2}),
+    ('random_forest',{'n_estimators':10,'max_depth':3,'min_samples_leaf':1,'max_features':'sqrt'}),
+])
 def test_missing_columns_preserved_and_preprocessing_training_only(model,params):
     X=pd.DataFrame({'url_length':[10.,20.,np.nan,30.], 'query_length':[np.nan]*4})
     pipe=_pipeline(model,params,tuple(X),5).fit(X,pd.Series([0,1,0,1]))
@@ -128,10 +133,23 @@ def test_end_to_end_development_then_explicit_fixture_test(tmp_path):
         run(path,tmp_path/'mismatch',feature_sets=('compact16',),evaluate_test=True,development_run=dev)
     expanded=tmp_path/'expanded_development';run(path,expanded,feature_sets=('compact16','expanded21'))
     final=tmp_path/'explicit_fixture_test';run(path,final,feature_sets=('compact16','expanded21'),evaluate_test=True,development_run=expanded)
-    assert len(pd.read_csv(final/'final_test_metrics.csv'))==4
+    assert len(pd.read_csv(final/'final_test_metrics.csv'))==6
     for feature_set,width in [('compact16',16),('expanded21',21)]:
         artifact=joblib.load(final/'models'/f'{feature_set}_logistic_regression.joblib')
         assert len(artifact['feature_names'])==width
         X=pd.DataFrame([FeatureExtractor(tuple(artifact['feature_names'])).transform_one('https://demo.example/')],columns=artifact['feature_names'])
         assert artifact['pipeline'].predict_proba(X).shape==(1,2)
+    phase1=tmp_path/'phase1_diagnostics'
+    run_phase1_diagnostics(path,dev,phase1,fractions=(.5,1.0))
+    size=pd.read_csv(phase1/'training_size_stability.csv')
+    assert set(size.model)=={'logistic_regression','decision_tree','random_forest'}
+    assert set(size.training_fraction)=={.5,1.0}
+    split=pd.read_csv(phase1/'split_strategy_comparison.csv')
+    assert set(split.split_strategy)=={'domain_grouped','random_url'}
+    assert split[split.split_strategy=='domain_grouped'].domain_overlap_count.eq(0).all()
+    config=json.loads((phase1/'diagnostic_config.json').read_text())
+    assert config['test_sample_count_locked']>0
+    assert config['scope'].startswith('development only')
+    with pytest.raises(FileExistsError):run_phase1_diagnostics(path,dev,phase1)
+
     with pytest.raises(FileExistsError):run(path,final,overwrite=True)

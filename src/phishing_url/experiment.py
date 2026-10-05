@@ -46,8 +46,8 @@ SEARCH_GRIDS = {
     "decision_tree": tuple({"max_depth": depth, "min_samples_leaf": leaf}
                            for depth in (3, 5, 8, None) for leaf in (2, 10)),
     "random_forest": tuple(
-        {"n_estimators": 300, "max_depth": depth, "min_samples_leaf": leaf, "max_features": "sqrt"}
-        for depth in (12, None) for leaf in (1, 2)
+        {"n_estimators": 100, "max_depth": depth, "min_samples_leaf": 1, "max_features": "sqrt"}
+        for depth in (12, None)
     ),
 }
 

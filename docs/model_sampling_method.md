@@ -29,9 +29,10 @@ do not eliminate randomness or source bias.
 Legacy test seed 2025 and development seeds 11/23/37/53/71 remain defaults. Model
 seed is held fixed across splits to isolate split variation. LR's default lbfgs
 solver is deterministic for fixed inputs; random_state does not make it stochastic.
-The tree uses its model seed for randomized feature ordering/ties. Five-seed SD
-describes overlapping development splits, not independent confidence intervals or
-a complete estimator-seed study.
+The Decision Tree, Random Forest, and Gradient Boosting models use the recorded
+model seed; Random Forest also fixes single-process fitting for reproducible baseline execution. Five-seed SD describes
+overlapping development splits, not independent confidence intervals or a complete
+estimator-seed study.
 
 The existing split search considers 500 random group permutations and selects on
 size/class balance only. It is constrained group randomization, not uniform sampling
@@ -46,11 +47,13 @@ is identical across seeds. All assignments, sample IDs, domain groups and seeds 
 |---|---|---|---|
 | Logistic Regression | C 0.1/1/10, max_iter 2000 | Compact linear baseline; inspectable coefficients | Misses direct nonlinear interactions; correlated features complicate interpretation |
 | Decision Tree | depth 3/5/8/unrestricted, leaf size 2/10 | Nonlinear interactions; shallow rules are readable | Overfitting/sample instability; impurity importance bias |
+| Random Forest | 100 trees; depth 12/unrestricted; sqrt features | Bagged nonlinear ensemble; reduces single-tree variance | Less interpretable; impurity importance can still be biased and training is slower |
+| Gradient Boosting (GBDT) | 100 stages; learning rate 0.05/0.10; depth 3 | Sequential boosting contrast to RF; can capture nonlinear interactions with additive weak learners | More sensitive to tuning; sequential fitting is less parallel and can overfit if boosting is too aggressive |
 
-LR uses training-only median imputation and scaling; the tree uses imputation
-without scaling. Convergence warnings stop fitting. Selection remains mean validation
+LR uses training-only median imputation and scaling; tree-based models use
+imputation without scaling. Convergence warnings stop fitting. Selection remains mean validation
 F1 with deterministic tie-breaking. Save every seed, mean/SD, selected rows and paired
-tree-minus-LR F1 differences. Threshold remains 0.5; phishing is 1. Record accuracy,
+model-minus-LR F1 differences. Threshold remains 0.5; phishing is 1. Record accuracy,
 precision, recall, F1, FPR, ROC-AUC, average precision and confusion counts.
 
 The loader now rejects fractional labels, inconsistent raw/clean URLs and stored PSL
@@ -67,11 +70,22 @@ controls; one-time test use still depends on the research protocol.
 Tests cover existing behavior, random replay, input-order invariance, group isolation,
 16/18/21 schemas, missing data, train-only preprocessing and saved-model inference.
 Reserved example domains are software fixtures only. Their scores are not research
-performance evidence and do not establish that either model is better.
+performance evidence and do not establish that any model is better.
 
 ## Primary references
 
 - [scikit-learn 1.7: leakage and randomness](https://scikit-learn.org/1.7/common_pitfalls.html).
 - [LogisticRegression](https://scikit-learn.org/1.7/modules/generated/sklearn.linear_model.LogisticRegression.html).
 - [Decision Trees](https://scikit-learn.org/1.7/modules/tree.html).
+- [GradientBoostingClassifier](https://scikit-learn.org/1.7/modules/generated/sklearn.ensemble.GradientBoostingClassifier.html).
 - [Feature hypotheses and research references](feature_rationale.md).
+
+## Assignment 03 Phase 1 extension
+
+The URL baseline now includes Random Forest and Gradient Boosting as additional
+ensemble baselines before DOM work begins. The primary protocol remains domain-grouped and
+development-only. A separate Phase 1 diagnostic reuses the selected development
+hyperparameters to examine training-size stability and, optionally, a conventional
+random URL split. These diagnostics never score the held-out test rows and do not
+replace the domain-grouped protocol. Random URL results report train/validation
+domain overlap explicitly so any optimistic effect is visible rather than hidden.

@@ -1,8 +1,9 @@
 # Assignment 03 selected-HTML results
 
-This records the earlier materialization checkpoint. The subsequent local research
+This records the earlier materialization checkpoint. The subsequent research
 decision, pilot overlap and holdout freeze are in `assignment03_holdout_results.md`;
-their cloud replay remains pending. Counts and content findings below are preserved.
+their cloud replay passed in Actions 37703227484. Counts and content findings
+below describe this earlier checkpoint and are preserved.
 
 ## Outcome
 

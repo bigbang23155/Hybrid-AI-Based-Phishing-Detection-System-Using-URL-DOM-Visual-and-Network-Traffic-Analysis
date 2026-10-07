@@ -2,12 +2,19 @@
 
 ## Execution and authority
 
-This checkpoint was executed **locally**, at preregistered code commit
-`e7f4ff1` (full SHA in `config/assignment03_holdout_freeze_v1.json`).
-The complete suite passed **112 tests**. GitHub push failed because no
-authenticated CLI write credential was available. Connected GitHub/Library tools
-were initially unavailable, then recovered. A new PR and exact cloud replay are
-being prepared; cloud success is recorded only after its verification finishes.
+The preregistered local execution at `e7f4ff1` passed **112 tests**. GitHub
+Actions run **37703227484**, execution commit
+`372b48003f4dff90c0a85503e9e8c7c0cea54a9a`, independently reconstructed the
+verified sources and pilot and passed **112 tests in 38.92 seconds**.
+The cloud's full 5,000-row partition manifest is byte-identical to the local
+freeze and the committed compressed manifest. Both policy and partition hashes
+passed the workflow gates. The summary differs only in Python patch version
+(local 3.12.14, cloud 3.12.15), not any counts, groups, exposure or provenance.
+
+Downloaded artifact **11518617781** was checked against GitHub's ZIP digest:
+`d42833184e34b451ea6a8ee16c6f241754337d0cdea48ece99c19e716dbecd3d`.
+The execution evidence is in `config/assignment03_holdout_freeze_v1.json`.
+Temporary connector access problems were resolved before publication.
 
 The research decisions were recorded before examining overlap or partitions.
 Source cross-checks, alternatives and the applicability limits of each source
@@ -90,12 +97,12 @@ exposure and partitions, not raw URLs/HTML or DOM feature vectors.
 
 ## State and next step
 
-Local eligible membership and partitions are frozen. Training approval remains
-false; no models were trained and no test metrics were evaluated. The new Actions
-workflow must reproduce the exact committed partition hash after authenticated
-GitHub access is restored; a mismatch stops rather than replacing this freeze.
+Eligible membership and partitions are frozen and cloud-verified. Training
+approval remains false; no models were trained and no test metrics were evaluated.
+Replays must reproduce the exact committed partition hash; a mismatch stops rather
+than replacing this freeze.
 
-After cloud agreement is recorded, implement/freeze the DOM registry and the
-same-sample URL-only/DOM-only/URL+DOM modeling protocol. Learn any imputation or
-preprocessing from training only, develop using validation, and leave test
-performance untouched until the final evaluation protocol is fixed.
+Next implement/freeze the DOM registry and the same-sample
+URL-only/DOM-only/URL+DOM modeling protocol. Learn any imputation or preprocessing
+from training only, develop using validation, and leave test performance untouched
+until the final evaluation protocol is fixed.

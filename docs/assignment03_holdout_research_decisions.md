@@ -115,3 +115,11 @@ It does not prescribe the numerical engineering thresholds used here.
 `assignment03_professor_verification.json` records the document hash and exact
 requirement mapping. The immutable policy/source ledger retain their original
 bytes; their temporary-access note is historical and superseded by this addendum.
+
+## Cloud verification addendum
+
+Actions 37703227484 at commit `372b48003f4dff90c0a85503e9e8c7c0cea54a9a`
+passed 112 tests and independently reproduced the full frozen 5,000-row partition
+manifest byte-for-byte. No eligibility, grouping, seed or membership decision was
+changed after observing overlap or partitions. Result counts and artifact evidence
+are recorded in `assignment03_holdout_results.md` and the freeze checkpoint.

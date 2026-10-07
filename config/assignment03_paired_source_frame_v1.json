@@ -29,7 +29,7 @@
       {"path": "data/train-051.parquet", "sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845", "size_bytes": 526031430},
       {"path": "data/train-054.parquet", "sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c", "size_bytes": 547814803}
     ],
-    "expected_total_source_bytes": 2909636775,
+    "expected_total_source_bytes": 2903636775,
     "sample_target_before_content_inspection": 2500,
     "per_label": true,
     "insufficient_class_rows": "report shortfall and stop, no alternate shard or replacement without a new protocol version",

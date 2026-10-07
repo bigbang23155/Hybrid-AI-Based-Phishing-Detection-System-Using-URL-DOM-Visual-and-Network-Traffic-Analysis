@@ -1,0 +1,105 @@
+{
+  "cross_partition_domain_overlap": 0,
+  "cross_partition_exact_html_overlap": 0,
+  "cross_partition_group_overlap": 0,
+  "cross_partition_structural_signature_overlap": 0,
+  "eligible_membership_frozen": true,
+  "eligible_pairs": 4945,
+  "excluded_pairs": 55,
+  "final_group_count": 3669,
+  "final_partition_created": true,
+  "group_size_histogram": {
+    "1": 3126,
+    "2": 264,
+    "3": 199,
+    "4": 29,
+    "5": 10,
+    "6": 9,
+    "7": 7,
+    "8": 6,
+    "9": 1,
+    "10": 3,
+    "11": 2,
+    "13": 3,
+    "14": 2,
+    "16": 2,
+    "17": 1,
+    "21": 1,
+    "26": 2,
+    "30": 1,
+    "97": 1
+  },
+  "holdout_scope": "internal same-cohort modality comparison; not a prospective or deployment benchmark",
+  "largest_group": 97,
+  "model_training_performed": false,
+  "numpy_version": "2.2.6",
+  "overlap": {
+    "exposed_formal_components": 96,
+    "formal_all_candidates_direct_matches": {
+      "domain": 192,
+      "html": 52,
+      "sample": 0,
+      "structure": 207,
+      "url": 0
+    },
+    "formal_usable_direct_matches": {
+      "domain": 192,
+      "html": 52,
+      "sample": 0,
+      "structure": 207,
+      "url": 0
+    },
+    "pilot_candidates": 256,
+    "pilot_exposed_test_rows": 0,
+    "pilot_exposed_validation_rows": 0,
+    "train_only_due_to_pilot_rows": 464,
+    "transitive_additional_train_only_rows": 76,
+    "usable_directly_matched_rows": 388
+  },
+  "partition_counts": {
+    "test": {
+      "benign": 369,
+      "fraction": 0.15005055611729018,
+      "groups": 588,
+      "phishing": 373,
+      "total": 742
+    },
+    "train": {
+      "benign": 1718,
+      "fraction": 0.6998988877654196,
+      "groups": 2525,
+      "phishing": 1743,
+      "total": 3461
+    },
+    "validation": {
+      "benign": 369,
+      "fraction": 0.15005055611729018,
+      "groups": 556,
+      "phishing": 373,
+      "total": 742
+    }
+  },
+  "partition_manifest_sha256": "49e9dc599fe11e243ac6ba18307900ddc854eeabb3cd700eb9f39fbf05f2deb0",
+  "policy_sha256": "b6720f55582922f99a5ac68ea5eef6a3311d330bf433007b407407ade44ba480",
+  "provenance": {
+    "candidate_replay_sha256": "4f4ab4fd6567e84f0de91e061d61cf905574643e771ebf59504861843188a955",
+    "formal_paired_manifest_sha256": "a89fc9a32e5b272122a916047a627c65f1f3b0fde8738d991a1d8cde915d2895",
+    "formal_sample_audit_sha256": "985411edef6cbb953154def02b8f49f68ae9804cb8ae30113a3c2b1c34a9bd07",
+    "implementation_sha256": "15cf15de66536441a01802b30b7696dfc55b0af32009f75ba7837931f07d59a8",
+    "paired_policy_sha256": "432b1797189404d81aa105643ea561674faed511368cdf81dc95bb8993e59424",
+    "pilot": {
+      "all_candidates_including_oversize_treated_as_exposed": true,
+      "candidate_count": 256,
+      "enriched_manifest_sha256": "d4285a2fe5c4725d45675f8c4175298e5a855e711df8593a3336714248abfddd",
+      "original_manifest_projection_sha256": "a01a4ce217651205d596aae03f22d0e0754c6c0ba1fe9777908cc626495dc415",
+      "original_replay_sha256": "0c08e9aadec1454b5a18dd1354e105836392e783d48fe6c04345754c27b7eda7",
+      "structural_signatures_available": 242
+    },
+    "source_frame_sha256": "2dc4eabe9498db672e26a44850a77c1198eec08f7724f13585497f44dde295b9",
+    "source_ledger_sha256": "afd127658d883eb74c6fe07ee51f97476c917e63830fdfa8b1923205ed7d71aa"
+  },
+  "python_version": "3.12.14",
+  "schema_version": "assignment03-frozen-holdout-v1",
+  "test_evaluated": false,
+  "training_approved": false
+}

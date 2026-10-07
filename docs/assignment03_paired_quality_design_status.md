@@ -7,12 +7,22 @@ YARA/content-forensics, visual/network, Evil Twin and identity/session work is n
 kept under `docs/extensions/` and does not block Assignment 03.
 
 The paired-data work has moved from an informal pilot to a preregistered quality
-and experiment protocol, but **the formal paired training dataset is not yet
-approved or frozen**.
+and experiment protocol, with **eligible membership and grouped partitions now frozen and cloud-verified**.
+Model-training approval remains false until the DOM registry and modeling protocol
+are fixed.
 
 ## Cloud validation
 
-Latest selected-HTML checkpoint (run **37698952013**, commit
+Latest holdout checkpoint: content/source decisions and cross-pilot checks are
+complete; 4,945 eligible rows are frozen into 3,461/742/742 train/validation/test
+rows using 3,669 components. All 464 pilot-exposed component members are training
+only. Actions **37703227484**, commit `372b48003f4dff90c0a85503e9e8c7c0cea54a9a`,
+passed **112 tests** and reproduced the full local partition manifest byte-for-byte.
+Domain, exact-HTML and qualifying structural overlap between partitions is zero.
+No models or test performance have been evaluated. See
+`assignment03_holdout_results.md` and `config/assignment03_holdout_freeze_v1.json`.
+
+Earlier selected-HTML checkpoint (run **37698952013**, commit
 `bf1674c5d14e3b2f9f30108596d46c71e442d58d`):
 
 - full cloud suite: **105 passed**;
@@ -163,7 +173,6 @@ directly as though it came from the same dataset.
 - `docs/assignment03_paired_dataset_protocol.md`
 - `docs/extensions/`
 
-The next checkpoint is the documented content/source-bias research decision,
-including coarse-template and prior-pilot domain/content equivalence review.
-Then freeze final eligibility and reserve grouped partitions before modeling.
+The next checkpoint is DOM registry/modeling protocol finalization on the frozen
+paired membership and partitions. Cloud replay has passed the exact hash gate.
 The existing 55 losses are not replaced; optional extensions remain separate.

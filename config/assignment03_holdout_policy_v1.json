@@ -1,0 +1,95 @@
+{
+  "approval": {
+    "model_training_performed": false,
+    "requires_DOM_registry_and_training_protocol_before_modeling": true,
+    "scope": "freeze eligible membership and grouped partitions only",
+    "test_evaluated": false,
+    "training_approved": false
+  },
+  "eligibility": {
+    "change_source_labels": false,
+    "english_marker_exclusion": false,
+    "expected_candidates": 5000,
+    "expected_usable": 4945,
+    "low_static_text_exclusion": false,
+    "replace_failures": false,
+    "retain_all_technically_usable_pairs": true
+  },
+  "grouping": {
+    "hard_keys": [
+      "registered_domain",
+      "exact_html_sha256",
+      "ordered_start_tag_sequence_sha256_if_at_least_20_tags"
+    ],
+    "maximum_component_fraction": 0.1,
+    "on_excessive_component": "stop_without_reselection",
+    "structural_guard_reason": "conservative blocking of identical structural templates; may overgroup unrelated pages; not a complete near-duplicate detector",
+    "structural_min_tags": 20
+  },
+  "limitations": [
+    "All-candidate quality diagnostics were observed before partitioning; this is a newly reserved internal holdout, not an externally blinded or prospective sample.",
+    "Source labels have not been independently adjudicated.",
+    "Domain/exact/structural blocking does not guarantee absence of near-template, campaign, hosting or temporal dependence.",
+    "Numerical component and balance tolerances are project engineering choices, not professor requirements or thresholds borrowed from literature.",
+    "The professor PDF could not be reopened in this turn; the archived repository requirements are used without claiming a fresh PDF verification."
+  ],
+  "partition": {
+    "chronological_test": false,
+    "development_seed": 4941303,
+    "maximum_fraction_error_overall_and_per_label": 0.02,
+    "permutation_candidates": 500,
+    "selection_objective": "minimize absolute per-label sample-count error relative to global 15% targets; no model or feature scores",
+    "single_execution_rule": "immutable output; no seed search or rerun for model outcomes",
+    "test_fraction": 0.15,
+    "test_seed": 4941302,
+    "train_fraction": 0.7,
+    "validation_fraction": 0.15
+  },
+  "pilot_exposure": {
+    "all_original_256_candidates_exposed": true,
+    "allow_exposure_in_test": false,
+    "allow_exposure_in_validation": false,
+    "disposition": "train_only",
+    "include_oversize_candidate_domain_and_content_hash": true,
+    "match_keys": [
+      "sample_id",
+      "normalized_url",
+      "registered_domain",
+      "exact_html_sha256",
+      "ordered_start_tag_sequence_sha256_if_at_least_20_tags"
+    ],
+    "propagate_to_entire_formal_component": true
+  },
+  "predictor_policy": {
+    "allowed_modality_families": [
+      "frozen_URL_lexical_registry",
+      "later_versioned_static_DOM_registry"
+    ],
+    "content_marker_sensitivity": "development only; no wholesale keyword-based relabeling or exclusion",
+    "forbidden_metadata": [
+      "source_label",
+      "source_sample_id",
+      "sample_id",
+      "registered_domain_identity",
+      "source_file",
+      "source_file_sha256",
+      "capture_date",
+      "lang",
+      "lang_score",
+      "target",
+      "parse_status",
+      "exclusion_reasons",
+      "leakage_group",
+      "pilot_exposure",
+      "partition",
+      "content_review_flags"
+    ],
+    "query_and_path_shortcut_sensitivity": "design and validate on development only, before final test evaluation; do not resample cohort",
+    "required_sensitivity": [
+      "no_https"
+    ]
+  },
+  "purpose": "internal same-cohort modality comparison; not a prospective or deployment benchmark",
+  "schema_version": "assignment03-holdout-policy-v1",
+  "status": "research_decisions_adopted_before_overlap_inspection"
+}

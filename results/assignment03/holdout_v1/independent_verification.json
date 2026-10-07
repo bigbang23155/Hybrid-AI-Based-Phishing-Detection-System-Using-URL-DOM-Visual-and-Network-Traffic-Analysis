@@ -1,0 +1,22 @@
+{
+  "all_domain_html_structure_keys_single_partition": true,
+  "direct_match_counts": {
+    "domain": 192,
+    "html": 52,
+    "sample": 0,
+    "structure": 207,
+    "url": 0
+  },
+  "direct_match_union": 388,
+  "eligible": 4945,
+  "excluded": 55,
+  "final_group_count": 3669,
+  "independent_graph_traversal_matches_all_groups": true,
+  "independent_pilot_tag_parser": true,
+  "independent_source_URL_domain_hash_check": true,
+  "partition_manifest_sha256": "49e9dc599fe11e243ac6ba18307900ddc854eeabb3cd700eb9f39fbf05f2deb0",
+  "pilot_exposed_test_rows": 0,
+  "pilot_exposed_validation_rows": 0,
+  "rows": 5000,
+  "verification_passed": true
+}

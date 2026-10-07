@@ -1,5 +1,10 @@
 # Assignment 03 selected-HTML results
 
+This records the earlier materialization checkpoint. The subsequent research
+decision, pilot overlap and holdout freeze are in `assignment03_holdout_results.md`;
+their cloud replay passed in Actions 37703227484. Counts and content findings
+below describe this earlier checkpoint and are preserved.
+
 ## Outcome
 
 All 5,000 frozen candidates were materialized or assigned a retained exclusion record. The candidate replay hash matched the previous lock before any HTML inspection. There were no replacements or source changes. The technical quality gate passed, with **4,945 technically usable pairs**. Research approval, final dataset freeze, final partitions, modeling and test evaluation remain pending.

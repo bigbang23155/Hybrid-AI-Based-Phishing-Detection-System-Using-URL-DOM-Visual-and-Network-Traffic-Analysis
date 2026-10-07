@@ -295,9 +295,10 @@ CI never jumps automatically from state 2 or 3 to state 4.
 
 ## 15. Current next action
 
-The source frame, 5,000-candidate membership and selected-HTML technical audit
-are complete; see `docs/assignment03_selected_html_results.md`. There are 4,945
-technically usable pairs and 55 retained oversize exclusions. The immediate next
-action is to document content/source-bias research decisions and review template
-and prior-pilot domain/content equivalence before freezing final eligibility and
-creating the new grouped holdout. Technical pass does not grant training approval.
+The source frame, selected-HTML audit, research decisions and cloud-verified holdout freeze
+are complete. The additive holdout policy includes an explicitly documented
+conservative structural guard and training-only pilot exposure. See
+`docs/assignment03_holdout_results.md`. Eligibility is unchanged: 4,945 pairs and
+55 retained oversize exclusions. Actions 37703227484 reproduced the exact frozen
+partition hash. The immediate next action is DOM registry and modeling protocol
+finalization. Training approval remains false; test has not been evaluated.

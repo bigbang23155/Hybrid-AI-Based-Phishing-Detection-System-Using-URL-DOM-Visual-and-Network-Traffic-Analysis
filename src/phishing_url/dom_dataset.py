@@ -101,7 +101,8 @@ def select_candidates(metadata: list[dict], config: dict) -> tuple[list[dict], d
             "url_raw": raw, "url_clean": url, "registered_domain": domain,
             "source_label": row["label"], "label": config["label_mapping"][row["label"]],
             "source": config["source"], "capture_date": str(date) if date is not None else None,
-            "source_sample_id": row.get("sha256"),
+            "source_sample_id": row.get("sha256"), "target": row.get("target"),
+            "lang": row.get("lang"), "lang_score": row.get("lang_score"),
         })
     unique = []
     for records in by_url.values():
@@ -270,10 +271,10 @@ def run(parquet: Path, output: Path, config_path: Path) -> dict:
         raise ValueError("source checksum mismatch; no source substitution allowed")
     import pyarrow.parquet as pq
     source = pq.ParquetFile(parquet)
-    required = {"url", "html", "label", "date", "sha256"}
+    required = {"url", "html", "label", "date", "sha256", "target", "lang", "lang_score"}
     if not required.issubset(source.schema_arrow.names):
         raise ValueError("published file does not have the required paired URL/HTML schema")
-    metadata = source.read(columns=["url", "label", "date", "sha256"]).to_pylist()
+    metadata = source.read(columns=["url", "label", "date", "sha256", "target", "lang", "lang_score"]).to_pylist()
     for index, row in enumerate(metadata):
         row["source_row"] = index
     chosen, inventory = select_candidates(metadata, config)

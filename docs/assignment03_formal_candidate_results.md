@@ -59,6 +59,10 @@ Keep the preregistered no-HTTPS sensitivity comparison. Review root-path, date, 
 
 ## State and next checkpoint
 
+This section records the metadata-only checkpoint. Selected HTML has subsequently
+been audited in run 37698952013; see `assignment03_selected_html_results.md` for
+the current state. The original candidate membership and hashes remain unchanged.
+
 - Historical URL development baseline: unchanged and frozen.
 - Candidate membership: frozen.
 - HTML inspected: false.

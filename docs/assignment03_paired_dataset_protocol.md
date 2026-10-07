@@ -295,7 +295,9 @@ CI never jumps automatically from state 2 or 3 to state 4.
 
 ## 15. Current next action
 
-The immediate next action is to freeze the exact allowed train-shard inventory at
-the pinned source revision, replay the pilot exclusion list, then execute formal
-metadata-only candidate selection. Only after selection is fixed should HTML be
-read and the quality gate applied.
+The source frame, 5,000-candidate membership and selected-HTML technical audit
+are complete; see `docs/assignment03_selected_html_results.md`. There are 4,945
+technically usable pairs and 55 retained oversize exclusions. The immediate next
+action is to document content/source-bias research decisions and review template
+and prior-pilot domain/content equivalence before freezing final eligibility and
+creating the new grouped holdout. Technical pass does not grant training approval.

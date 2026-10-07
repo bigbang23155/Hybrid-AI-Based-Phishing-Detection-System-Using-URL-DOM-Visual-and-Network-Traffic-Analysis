@@ -12,7 +12,26 @@ approved or frozen**.
 
 ## Cloud validation
 
-Latest verified checkpoint:
+Latest selected-HTML checkpoint (run **37698952013**, commit
+`bf1674c5d14e3b2f9f30108596d46c71e442d58d`):
+
+- full cloud suite: **105 passed**;
+- original candidate membership: **5,000**, verified byte-identically;
+- technically usable: **2,456 benign / 2,489 phishing**;
+- retained losses: **44 benign / 11 phishing**, all above the fixed 2 MiB cap;
+- parse failures and cross-label exact-HTML conflicts: **0**;
+- technical quality gate: **pass**;
+- descriptive content/bias audit: complete, research decision still pending;
+- hard domain/exact-HTML components: **4,079**;
+- final dataset freeze, partition, training approval and test evaluation: **false**.
+
+See `docs/assignment03_selected_html_results.md` for results and limitations,
+`docs/assignment03_selected_html_audit.md` for variable definitions, and
+`config/assignment03_selected_html_checkpoint_v1.json` for execution/hash evidence.
+Run 37698201811 is superseded for aggregate numeric missingness; the corrected
+run preserved candidate, per-sample audit and paired-manifest identities.
+
+Earlier source-design checkpoint:
 
 - full offline project tests: **93 passed**;
 - pinned source revision:
@@ -97,7 +116,7 @@ extra shard after observing the shortfall.
 
 ## Formal paired dataset sequence
 
-The remaining sequence is now fixed:
+The sequence is fixed; steps 1–8 are complete at the selected-HTML checkpoint:
 
 1. download and SHA-verify only the six frozen source shards;
 2. read URL/label/date/language/target metadata only;
@@ -144,6 +163,7 @@ directly as though it came from the same dataset.
 - `docs/assignment03_paired_dataset_protocol.md`
 - `docs/extensions/`
 
-The next implementation checkpoint is metadata-only formal candidate selection
-over the six fixed shards. No DOM model should be trained before that selection,
-HTML audit, quality review and new holdout are frozen.
+The next checkpoint is the documented content/source-bias research decision,
+including coarse-template and prior-pilot domain/content equivalence review.
+Then freeze final eligibility and reserve grouped partitions before modeling.
+The existing 55 losses are not replaced; optional extensions remain separate.

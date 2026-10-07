@@ -85,13 +85,64 @@ def freeze_inventory(repo: Path, revision: str, output: Path) -> dict:
     return body
 
 
+def verify_source_frame(inventory: dict, frame: dict) -> dict:
+    """Fail closed if a predeclared shard frame disagrees with the exact inventory."""
+    identity = frame["source_inventory"]
+    if frame["revision"] != inventory["revision"]:
+        raise ValueError("source frame revision differs from pinned inventory")
+    if identity["inventory_sha256"] != inventory["inventory_sha256"]:
+        raise ValueError("source inventory hash mismatch")
+    if identity["train_shard_count"] != inventory["train_shard_count"]:
+        raise ValueError("source inventory train-shard count mismatch")
+    if identity["train_total_bytes"] != inventory["train_total_bytes"]:
+        raise ValueError("source inventory train byte total mismatch")
+    if inventory["official_test_split_used"] is not False:
+        raise ValueError("official source test split cannot be part of source inventory")
+
+    sampling = frame["sampling_frame"]
+    excluded = sampling["exclude_pilot_shard"]
+    seed = int(sampling["selection_seed"])
+    candidates = [r for r in inventory["train_shards"] if r["path"] != excluded]
+    if not any(r["path"] == excluded for r in inventory["train_shards"]):
+        raise ValueError("excluded pilot shard is not in inventory")
+    ranked = sorted(
+        candidates,
+        key=lambda r: hashlib.sha256(
+            f"assignment03:source-shard:{seed}:{r['path']}".encode()
+        ).hexdigest(),
+    )
+    expected = ranked[:int(sampling["fixed_shard_count"])]
+    actual = sampling["fixed_shards"]
+    if actual != expected:
+        raise ValueError("selected bounded shard frame differs from deterministic frozen selection")
+    total = sum(r["size_bytes"] for r in expected)
+    if total != int(sampling["expected_total_source_bytes"]):
+        raise ValueError("bounded source-frame byte total mismatch")
+    if sampling["source_split"] != "train" or sampling["official_source_test_split_used"] is not False:
+        raise ValueError("only train source shards are allowed")
+    return {
+        "verified": True,
+        "revision": inventory["revision"],
+        "inventory_sha256": inventory["inventory_sha256"],
+        "selected_shards": len(actual),
+        "selected_source_bytes": total,
+        "pilot_shard_excluded": excluded,
+        "official_test_split_used": False,
+        "training_approved": False,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--frame", type=Path)
     args = parser.parse_args()
     result = freeze_inventory(args.repo, args.revision, args.output)
+    if args.frame:
+        frame = json.loads(args.frame.read_text(encoding="utf-8"))
+        print(json.dumps(verify_source_frame(result, frame)))
     print(json.dumps({
         "revision": result["revision"],
         "train_shard_count": result["train_shard_count"],

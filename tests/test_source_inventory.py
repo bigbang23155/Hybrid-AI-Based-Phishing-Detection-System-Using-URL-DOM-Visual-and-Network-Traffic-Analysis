@@ -4,7 +4,7 @@ import subprocess
 
 import pytest
 
-from phishing_url.source_inventory import freeze_inventory, parse_lfs_pointer
+from phishing_url.source_inventory import freeze_inventory, parse_lfs_pointer, verify_source_frame
 
 
 def pointer(sha: str, size: int) -> str:
@@ -65,3 +65,38 @@ def test_freeze_inventory_rejects_wrong_revision_and_nonpointer(tmp_path):
     bad.write_bytes(b"real payload bytes")
     with pytest.raises(ValueError, match="pointer"):
         parse_lfs_pointer(bad)
+
+
+def test_verify_source_frame_is_deterministic_and_fail_closed(tmp_path):
+    repo, revision = init_repo(tmp_path)
+    inventory = freeze_inventory(repo, revision, tmp_path / "inventory.json")
+    seed = 77
+    candidates = [row for row in inventory["train_shards"] if row["path"] != "data/train-000.parquet"]
+    ranked = sorted(
+        candidates,
+        key=lambda row: __import__("hashlib").sha256(
+            f"assignment03:source-shard:{seed}:{row['path']}".encode()
+        ).hexdigest(),
+    )
+    selected = ranked[:1]
+    frame = {
+        "revision": revision,
+        "source_inventory": {
+            "inventory_sha256": inventory["inventory_sha256"],
+            "train_shard_count": inventory["train_shard_count"],
+            "train_total_bytes": inventory["train_total_bytes"],
+        },
+        "sampling_frame": {
+            "source_split": "train",
+            "official_source_test_split_used": False,
+            "exclude_pilot_shard": "data/train-000.parquet",
+            "selection_seed": seed,
+            "fixed_shard_count": 1,
+            "fixed_shards": selected,
+            "expected_total_source_bytes": sum(x["size_bytes"] for x in selected),
+        },
+    }
+    assert verify_source_frame(inventory, frame)["verified"] is True
+    frame["sampling_frame"]["expected_total_source_bytes"] += 1
+    with pytest.raises(ValueError, match="byte total"):
+        verify_source_frame(inventory, frame)

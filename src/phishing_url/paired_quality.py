@@ -329,13 +329,18 @@ def audit_paired_dataset(
         "password_input_rate_gap": password_gap,
         "password_review_threshold": password_threshold,
         "month_distribution_total_variation": month_tv,
-        "language_metadata_present": bool(languages_by_label[0] or languages_by_label[1]),
+        "language_metadata_present_for_both_labels": bool(languages_by_label[0] and languages_by_label[1]),
+        "manual_distribution_review_required_by_policy": {
+            "date": bool(policy["bias_review"].get("date_distribution_review_required")),
+            "language": bool(policy["bias_review"].get("language_distribution_review_required")),
+            "html_size": bool(policy["bias_review"].get("html_size_distribution_review_required")),
+        },
     }
     bias_review_required = (
         root_gap is None or root_gap > root_threshold or
         password_gap is None or password_gap > password_threshold or
-        bool(policy["bias_review"].get("date_distribution_review_required")) or
-        bool(policy["bias_review"].get("language_distribution_review_required"))
+        month_tv is None or
+        not (languages_by_label[0] and languages_by_label[1])
     )
     findings.append(_finding(
         "bias_review", "high", not bias_review_required, bias_flags,

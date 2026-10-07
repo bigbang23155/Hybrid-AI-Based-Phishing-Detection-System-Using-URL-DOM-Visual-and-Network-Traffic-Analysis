@@ -39,14 +39,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/phresh-source" "$RUNNER_TEMP/inventory"
-          git -c filter.lfs.smudge= -c filter.lfs.required=false clone \
-            --filter=blob:none --no-checkout \
-            https://huggingface.co/datasets/phreshphish/phreshphish \
-            "$RUNNER_TEMP/phresh-source/repo"
-          git -C "$RUNNER_TEMP/phresh-source/repo" fetch --depth=1 origin "$SOURCE_REVISION"
+          git init -q "$RUNNER_TEMP/phresh-source/repo"
+          git -C "$RUNNER_TEMP/phresh-source/repo" remote add origin \
+            https://huggingface.co/datasets/phreshphish/phreshphish
           git -C "$RUNNER_TEMP/phresh-source/repo" \
             -c filter.lfs.smudge= -c filter.lfs.required=false \
-            checkout --detach "$SOURCE_REVISION"
+            fetch --depth=1 origin "$SOURCE_REVISION"
+          git -C "$RUNNER_TEMP/phresh-source/repo" \
+            -c filter.lfs.smudge= -c filter.lfs.required=false \
+            checkout --detach FETCH_HEAD
       - name: Freeze allowed train-shard inventory
         run: |
           PYTHONPATH=src python -m phishing_url.source_inventory \

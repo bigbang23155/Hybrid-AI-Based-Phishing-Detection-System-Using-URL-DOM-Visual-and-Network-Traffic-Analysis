@@ -1,0 +1,80 @@
+name: Assignment 03 freeze paired source inventory
+
+on:
+  pull_request:
+    paths:
+      - 'src/phishing_url/source_inventory.py'
+      - 'tests/test_source_inventory.py'
+      - 'config/assignment03_paired_release_policy_v1.json'
+      - 'config/assignment03_paired_source_frame_v1.json'
+      - '.github/workflows/assignment03-source-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freeze-source-inventory:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.ref == 'codex/assignment03-formal-paired-design')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SOURCE_REVISION: eabec4b7a66324b79cc8a0ad856d1731dc26fe1a
+      GIT_LFS_SKIP_SMUDGE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Verify project software
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pytest -q tests/test_source_inventory.py
+      - name: Fetch pinned dataset repository without LFS payloads
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phresh-source" "$RUNNER_TEMP/inventory"
+          git init -q "$RUNNER_TEMP/phresh-source/repo"
+          git -C "$RUNNER_TEMP/phresh-source/repo" remote add origin \
+            https://huggingface.co/datasets/phreshphish/phreshphish
+          git -C "$RUNNER_TEMP/phresh-source/repo" \
+            -c filter.lfs.smudge= -c filter.lfs.required=false \
+            fetch --depth=1 origin "$SOURCE_REVISION"
+          git -C "$RUNNER_TEMP/phresh-source/repo" \
+            -c filter.lfs.smudge= -c filter.lfs.required=false \
+            checkout --detach FETCH_HEAD
+      - name: Freeze allowed train-shard inventory
+        run: |
+          PYTHONPATH=src python -m phishing_url.source_inventory \
+            --repo "$RUNNER_TEMP/phresh-source/repo" \
+            --revision "$SOURCE_REVISION" \
+            --output "$RUNNER_TEMP/inventory/assignment03_phreshphish_train_inventory_v1.json" \
+            --frame config/assignment03_paired_source_frame_v1.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path(os.environ['RUNNER_TEMP']) / 'inventory/assignment03_phreshphish_train_inventory_v1.json'
+          result = json.loads(path.read_text())
+          assert result['official_test_split_used'] is False
+          assert result['train_shard_count'] > 0
+          print(json.dumps({
+              'revision': result['revision'],
+              'train_shard_count': result['train_shard_count'],
+              'train_total_bytes': result['train_total_bytes'],
+              'excluded_source_test_file_count': result['excluded_source_test_file_count'],
+              'inventory_sha256': result['inventory_sha256'],
+          }, indent=2))
+          PY
+      - name: Upload immutable source inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment03-paired-source-inventory-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ${{ runner.temp }}/inventory/

@@ -137,6 +137,11 @@ No URL, DOM or hybrid model is trained by the dataset-preparation command.
 
 ## Preserved expansion roadmap
 
+Detailed optional specifications now live separately under `docs/extensions/`.
+Those documents are deliberately non-blocking for the Assignment 03 core. The
+formal paired-data protocol is in `docs/assignment03_paired_dataset_protocol.md`.
+
+
 | Module | Current implementation status | Appropriate milestone |
 |---|---|---|
 | URL lexical features, LR/DT/RF/GBDT | Completed historical development baseline, now frozen | Keep as fixed reference; use the same pipeline on new paired training data for a fair hybrid comparison |

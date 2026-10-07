@@ -1,0 +1,26 @@
+{
+  "changes_required": false,
+  "file_sha256": "1b219a528e410022a4cae54ab35acdedf4c256f26a93563300a236765d4707e4",
+  "library_file_id": "libfile_426c2e20ef84819191d1013a26f47412",
+  "note": "The frozen policy records the earlier temporary inability to reopen the PDF. This addendum supersedes that access limitation without rewriting the original policy hash.",
+  "policy_consistent": true,
+  "professor_does_not_specify": [
+    "70/15/15 fractions",
+    "20-tag structural threshold",
+    "10% largest-component stop gate",
+    "2 MiB limit"
+  ],
+  "source": "Assignment 03.pdf",
+  "verification_date": "2026-10-07",
+  "verification_timing": "after local freeze, before GitHub publication; no policy/eligibility/group/seed/partition changes",
+  "verified_requirements": [
+    "paired URL and HTML/DOM available",
+    "document sources, unavailable pages, redirects and parsing issues",
+    "domain-grouped training, validation and test partitions",
+    "new test unused during development",
+    "consider source bias",
+    "URL-only, DOM-only and URL+DOM use identical samples and grouped splits",
+    "validation supports development; test reserved for later final evaluation",
+    "update source code, dataset documentation and GitHub"
+  ]
+}

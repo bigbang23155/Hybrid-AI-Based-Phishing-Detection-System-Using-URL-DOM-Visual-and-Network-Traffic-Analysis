@@ -1,0 +1,130 @@
+name: Assignment 03 final groups and internal holdout
+on:
+  pull_request:
+    paths:
+      - 'src/phishing_url/formal_holdout.py'
+      - 'tests/test_formal_holdout.py'
+      - '.github/workflows/assignment03-holdout.yml'
+      - 'config/assignment03_holdout_policy_v1.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  formal-holdout:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.ref == 'codex/assignment03-pilot-isolated-holdout')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: src
+      GIT_LFS_SKIP_SMUDGE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Verify software including frozen HTML adapter
+        run: |
+          python -m pip install -r requirements-dom.txt
+          python -m pytest -q
+      - name: Prepare evidence
+        run: |
+          mkdir -p "$RUNNER_TEMP/formal/meta" "$RUNNER_TEMP/formal/output"
+          git rev-parse HEAD > "$RUNNER_TEMP/formal/meta/project_commit.txt"
+          python -m pip freeze > "$RUNNER_TEMP/formal/meta/python_packages.txt"
+          cp docs/assignment03_holdout_research_decisions.md docs/assignment03_professor_verification.json "$RUNNER_TEMP/formal/meta/"
+      - name: Reverify frozen inventory and bounded frame
+        run: |
+          git init -q "$RUNNER_TEMP/formal/source-repo"
+          git -C "$RUNNER_TEMP/formal/source-repo" remote add origin https://huggingface.co/datasets/phreshphish/phreshphish
+          git -C "$RUNNER_TEMP/formal/source-repo" -c filter.lfs.smudge= -c filter.lfs.required=false fetch --depth=1 origin eabec4b7a66324b79cc8a0ad856d1731dc26fe1a
+          git -C "$RUNNER_TEMP/formal/source-repo" -c filter.lfs.smudge= -c filter.lfs.required=false checkout --detach FETCH_HEAD
+          python -m phishing_url.source_inventory --repo "$RUNNER_TEMP/formal/source-repo" --revision eabec4b7a66324b79cc8a0ad856d1731dc26fe1a --output "$RUNNER_TEMP/formal/meta/source_inventory.json" --frame config/assignment03_paired_source_frame_v1.json
+      - name: Download six fixed shards with exact byte and SHA gates
+        run: |
+          python -m phishing_url.formal_candidates --download --source-root "$RUNNER_TEMP/formal/input" --frame config/assignment03_paired_source_frame_v1.json --policy config/assignment03_paired_release_policy_v1.json
+      - name: Build passive metadata reader
+        run: |
+          docker build -f docker/Dockerfile.dom-data -t assignment03-formal .
+          docker image inspect assignment03-formal --format '{{.Id}}' > "$RUNNER_TEMP/formal/meta/container_image_id.txt"
+      - name: Recover locked formal per-sample evidence
+        uses: actions/download-artifact@v5
+        with:
+          name: assignment03-formal-html-37698952013
+          run-id: 37698952013
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/formal/prior-audit
+      - name: Acquire original pilot shard with SHA gate
+        run: |
+          python - <<'PYCODE'
+          import json, os, hashlib, requests
+          from pathlib import Path
+          c=json.loads(Path('config/assignment03_dom_pilot.json').read_text())
+          dest=Path(os.environ['RUNNER_TEMP'])/'formal/input/pilot.parquet'
+          h=hashlib.sha256(); count=0
+          with requests.get(c['download_url'],stream=True,timeout=(30,120)) as response:
+              response.raise_for_status()
+              with dest.open('xb') as stream:
+                  for block in response.iter_content(1<<20):
+                      count+=len(block)
+                      if count>c['max_download_bytes']: raise ValueError('pilot size cap exceeded')
+                      h.update(block); stream.write(block)
+          if h.hexdigest()!=c['source_file_sha256']: raise ValueError('pilot SHA mismatch')
+          PYCODE
+      - name: Reconstruct pilot and freeze holdout without network or modeling
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --pids-limit=128 --memory=4g --cpus=2 \
+            --user "$(id -u):$(id -g)" \
+            --tmpfs /tmp:rw,nosuid,nodev,noexec,size=128m \
+            -v "$RUNNER_TEMP/formal/input:/input:ro" \
+            -v "$RUNNER_TEMP/formal/output:/output:rw" \
+            -v "$RUNNER_TEMP/formal/prior-audit:/prior-audit:ro" \
+            -v "$GITHUB_WORKSPACE/config:/config:ro" \
+            -v "$GITHUB_WORKSPACE/results/assignment03/dom_data_pilot_v1/verification.json:/pilot-verification.json:ro" \
+            -v "$GITHUB_WORKSPACE/docs/assignment03_holdout_source_ledger.json:/source-ledger.json:ro" \
+            --entrypoint sh assignment03-formal -ec '
+              python -m phishing_url.dom_dataset --parquet /input/pilot.parquet --config /config/assignment03_dom_pilot.json --output /output/pilot
+              python -m phishing_url.formal_holdout \
+                --source-root /input --audit-public /prior-audit/output/materialization/public \
+                --pilot-root /output/pilot --pilot-verification /pilot-verification.json \
+                --frame /config/assignment03_paired_source_frame_v1.json \
+                --paired-policy /config/assignment03_paired_release_policy_v1.json \
+                --candidate-freeze /config/assignment03_formal_candidate_freeze_v1.json \
+                --html-checkpoint /config/assignment03_selected_html_checkpoint_v1.json \
+                --holdout-policy /config/assignment03_holdout_policy_v1.json \
+                --source-ledger /source-ledger.json --output /output/holdout
+            '
+      - name: Require exact agreement with the committed local freeze
+        run: |
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          expected=json.loads(Path('config/assignment03_holdout_freeze_v1.json').read_text())
+          root=Path(os.environ['RUNNER_TEMP'])/'formal/output/holdout'
+          actual=hashlib.sha256((root/'partition_manifest.jsonl').read_bytes()).hexdigest()
+          if actual!=expected['partition_manifest_sha256']:
+              raise ValueError('cloud replay differs from immutable local freeze; do not substitute')
+          report=json.loads((root/'holdout_summary.json').read_text())
+          if report['policy_sha256']!=expected['policy_sha256']:
+              raise ValueError('holdout policy hash mismatch')
+          print('Cloud partition manifest exactly matches the committed local freeze.')
+          PY
+      - name: Preserve holdout evidence without raw URLs or HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment03-holdout-${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/formal/meta/
+            ${{ runner.temp }}/formal/input/acquisition.json
+            ${{ runner.temp }}/formal/output/holdout/

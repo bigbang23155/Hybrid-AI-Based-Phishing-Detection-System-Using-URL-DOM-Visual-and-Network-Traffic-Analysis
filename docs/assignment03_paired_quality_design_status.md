@@ -12,6 +12,13 @@ approved or frozen**.
 
 ## Cloud validation
 
+Newer local checkpoint: content/source decisions and cross-pilot checks are
+complete; 4,945 eligible rows are frozen into 3,461/742/742 train/validation/test
+rows using 3,669 components. All 464 pilot-exposed component members are training
+only. Local tests: 112 passed. **Cloud replay and GitHub sync are pending due to
+unavailable authenticated connector access**; do not present this as a new cloud
+run. See `assignment03_holdout_results.md` and the committed local freeze record.
+
 Latest selected-HTML checkpoint (run **37698952013**, commit
 `bf1674c5d14e3b2f9f30108596d46c71e442d58d`):
 
@@ -163,7 +170,6 @@ directly as though it came from the same dataset.
 - `docs/assignment03_paired_dataset_protocol.md`
 - `docs/extensions/`
 
-The next checkpoint is the documented content/source-bias research decision,
-including coarse-template and prior-pilot domain/content equivalence review.
-Then freeze final eligibility and reserve grouped partitions before modeling.
+The next checkpoint is cloud replay of the locally frozen holdout with an exact
+partition-hash comparison, then DOM registry/modeling protocol finalization.
 The existing 55 losses are not replaced; optional extensions remain separate.

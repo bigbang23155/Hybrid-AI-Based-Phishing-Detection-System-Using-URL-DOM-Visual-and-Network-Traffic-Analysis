@@ -242,7 +242,7 @@ def numeric(values):
     a = np.asarray(present, dtype=float)
     if not np.isfinite(a).all():
         raise ValueError('nonfinite audit value')
-    return {'n': len(present), 'missing': len(values), 'zero_count': sum(v == 0 for v in present),
+    return {'n': len(present), 'missing': len(values) - len(present), 'zero_count': sum(v == 0 for v in present),
             'mean': float(a.mean()), 'std_population': float(a.std()),
             **dict(zip(('min', 'p25', 'median', 'p75', 'p90', 'p95', 'p99', 'max'),
                        map(float, np.quantile(a, [0, .25, .5, .75, .9, .95, .99, 1])), strict=True))}

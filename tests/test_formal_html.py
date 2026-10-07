@@ -4,9 +4,17 @@ from pathlib import Path
 import pytest
 
 from phishing_url.formal_candidates import file_sha, json_bytes, run as select_run
-from phishing_url.formal_html import inspect_html, materialize, diagnostics, run
+from phishing_url.formal_html import inspect_html, materialize, diagnostics, numeric, run
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_numeric_missingness_reconciles_with_cohort():
+    r = numeric([0, None, 2])
+    assert r['n'] == 2 and r['missing'] == 1 and r['zero_count'] == 1
+    assert r['median'] == r['mean'] == 1
+    assert numeric([None, None]) == {'n': 0, 'missing': 2}
+    assert numeric([1, 2])['missing'] == 0
 
 
 def test_static_semantics_base_nonhttp_and_missing_denominators():
@@ -101,6 +109,10 @@ def test_replay_adapter_exact_membership_and_audit(tmp_path):
     public = (out/'public/sample_audit.jsonl').read_text()
     assert 'url_clean' not in public and 'html_path' not in public
     assert json.loads((out/'public/quality_report.json').read_text())['bias_review_required']
+    diagnostics = json.loads((out/'public/content_diagnostics.json').read_text())
+    for cohort in diagnostics['cohorts'].values():
+        for profile in cohort.values():
+            assert all(metric['n'] + metric['missing'] == profile['n'] for metric in profile['numeric'].values())
 
 
 def test_membership_tampering_stops_before_html(tmp_path, monkeypatch):

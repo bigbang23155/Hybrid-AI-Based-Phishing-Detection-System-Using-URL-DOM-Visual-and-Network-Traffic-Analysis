@@ -1,0 +1,100 @@
+{
+  "schema_version": "paired-dataset-policy-v1",
+  "dataset_id": "assignment03_phreshphish_paired_v1",
+  "status": "preregistered_design_not_yet_approved",
+  "purpose": "Assignment 03 same-sample URL-only, DOM-only, and URL+DOM development comparison",
+  "source": {
+    "name": "phreshphish_publication",
+    "revision": "eabec4b7a66324b79cc8a0ad856d1731dc26fe1a",
+    "allowed_split": "train",
+    "official_source_test_split_used": false,
+    "required_fields": ["sha256", "url", "label", "date", "html"],
+    "license": "CC-BY-4.0; anti-phishing research only",
+    "inventory_status": "must_be_frozen_and_hashed_before_formal_sampling"
+  },
+  "label_policy": {
+    "basis": "published_source_labels_for_coursework_experiment",
+    "mapping": {"benign": 0, "phish": 1},
+    "independent_project_adjudication_claimed": false,
+    "strong_real_world_label_claim_allowed": false
+  },
+  "sampling": {
+    "seed": 4941301,
+    "planned_candidates_per_label": 2500,
+    "minimum_usable_pairs_per_label": 2000,
+    "per_domain_cap_per_label": 3,
+    "selection_before_html_inspection": true,
+    "replace_failed_candidates": false,
+    "exclude_pilot_selected_samples": true,
+    "pilot_replay_artifact_id": 11383471007,
+    "pilot_run_id": 37396371232
+  },
+  "content": {
+    "max_html_bytes": 2097152,
+    "representation": "publisher-provided HTML string encoded as UTF-8; no live refetch",
+    "missing_html_is_not_zero_features": true,
+    "javascript_execution": false,
+    "external_resource_loading": false
+  },
+  "quality_gates": {
+    "minimum_registered_domains_per_label": 500,
+    "maximum_candidate_loss_rate_per_label": 0.10,
+    "maximum_largest_domain_share_per_label": 0.02,
+    "maximum_missing_capture_date_rate_per_label": 0.01,
+    "allow_cross_label_normalized_url_conflicts": false,
+    "allow_cross_label_exact_html_conflicts": false,
+    "require_html_sha256_integrity": true,
+    "require_source_revision_and_file_hashes": true
+  },
+  "bias_review": {
+    "root_path_rate_gap_review_threshold": 0.20,
+    "password_input_rate_gap_review_threshold": 0.20,
+    "date_distribution_review_required": true,
+    "language_distribution_review_required": true,
+    "html_size_distribution_review_required": true,
+    "bias_flags_block_automatic_approval": true
+  },
+  "partition": {
+    "train_fraction": 0.70,
+    "validation_fraction": 0.15,
+    "test_fraction": 0.15,
+    "test_seed": 4941302,
+    "development_seed": 4941303,
+    "hard_grouping": ["registered_domain", "exact_html_sha256"],
+    "pilot_exposed_samples_allowed_in_final_test": false,
+    "near_template_similarity": "diagnostic_before_final_freeze; do not silently merge groups without a documented rule",
+    "test_policy": "reserve once after the final paired dataset is frozen; no feature selection, model selection, threshold tuning, or error-driven changes using test"
+  },
+  "experiment": {
+    "primary_model": "random_forest",
+    "primary_model_parameters": {
+      "n_estimators": 100,
+      "max_depth": null,
+      "min_samples_leaf": 1,
+      "max_features": "sqrt"
+    },
+    "secondary_model": "gradient_boosting",
+    "secondary_model_parameters": {
+      "n_estimators": 100,
+      "learning_rate": 0.1,
+      "max_depth": 3,
+      "min_samples_leaf": 1
+    },
+    "primary_comparison": ["url_only", "dom_only", "url_plus_dom"],
+    "same_samples_and_partitions_required": true,
+    "development_selection_metric": "validation_f1",
+    "reported_metrics": ["accuracy", "precision", "recall", "f1", "fpr", "roc_auc", "average_precision"],
+    "url_feature_sets": ["baseline", "no_https_sensitivity"],
+    "test_evaluation": "later_final_evaluation_only"
+  },
+  "approval": {
+    "automated_quality_gate_can_approve_training": false,
+    "research_review_required": true,
+    "professor_requirements_override_project_heuristics": true
+  },
+  "notes": [
+    "Numerical quality thresholds are project engineering heuristics, not professor requirements.",
+    "A quality-gate pass means technically suitable for research review, not proven representative or deployment-ready.",
+    "Pilot diagnostics were already observed and therefore the pilot partition is not reused as the final study holdout."
+  ]
+}

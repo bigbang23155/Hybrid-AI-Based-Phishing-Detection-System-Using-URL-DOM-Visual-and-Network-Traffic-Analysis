@@ -6,6 +6,7 @@ on:
       - 'src/phishing_url/source_inventory.py'
       - 'tests/test_source_inventory.py'
       - 'config/assignment03_paired_release_policy_v1.json'
+      - 'config/assignment03_paired_source_frame_v1.json'
       - '.github/workflows/assignment03-source-inventory.yml'
   workflow_dispatch:
 
@@ -53,7 +54,8 @@ jobs:
           PYTHONPATH=src python -m phishing_url.source_inventory \
             --repo "$RUNNER_TEMP/phresh-source/repo" \
             --revision "$SOURCE_REVISION" \
-            --output "$RUNNER_TEMP/inventory/assignment03_phreshphish_train_inventory_v1.json"
+            --output "$RUNNER_TEMP/inventory/assignment03_phreshphish_train_inventory_v1.json" \
+            --frame config/assignment03_paired_source_frame_v1.json
           python - <<'PY'
           import json, os
           from pathlib import Path

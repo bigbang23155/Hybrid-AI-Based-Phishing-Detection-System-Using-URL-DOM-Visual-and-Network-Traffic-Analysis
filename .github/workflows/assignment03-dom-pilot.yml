@@ -6,6 +6,9 @@ on:
       - 'src/phishing_url/dom_dataset.py'
       - 'tests/test_dom_dataset.py'
       - 'config/assignment03_dom_pilot.json'
+      - 'config/assignment03_paired_release_policy_v1.json'
+      - 'src/phishing_url/paired_quality.py'
+      - 'tests/test_paired_quality.py'
       - 'requirements-dom.txt'
       - 'docker/Dockerfile.dom-data'
       - '.github/workflows/assignment03-dom-pilot.yml'
@@ -85,6 +88,36 @@ jobs:
             -v "$RUNNER_TEMP/dom-pilot/output:/output:rw" \
             -v "$GITHUB_WORKSPACE/config/assignment03_dom_pilot.json:/config.json:ro" \
             assignment03-dom-data --parquet /input/source.parquet --config /config.json --output /output/pilot
+      - name: Run formal-quality preflight on pilot evidence
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --pids-limit=128 --memory=2g --cpus=2 \
+            --user "$(id -u):$(id -g)" \
+            --tmpfs /tmp:rw,nosuid,nodev,noexec,size=128m \
+            -v "$RUNNER_TEMP/dom-pilot/output:/output:rw" \
+            -v "$GITHUB_WORKSPACE/config/assignment03_paired_release_policy_v1.json:/release-policy.json:ro" \
+            --entrypoint python assignment03-dom-data \
+            -m phishing_url.paired_quality \
+            --manifest /output/pilot/paired_manifest.jsonl \
+            --html-root /output/pilot \
+            --policy /release-policy.json \
+            --output /output/quality
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'dom-pilot/output/quality/quality_report.json').read_text())
+          assert report['training_approved'] is False
+          assert report['model_training_performed'] is False
+          assert report['test_evaluated'] is False
+          assert report['formal_data_ready_for_research_review'] is False
+          print(json.dumps({
+              'technical_gate_pass': report['technical_gate_pass'],
+              'formal_partition_present': report['formal_partition_present'],
+              'bias_review_required': report['bias_review_required'],
+              'formal_data_ready_for_research_review': report['formal_data_ready_for_research_review'],
+              'training_approved': report['training_approved'],
+          }, indent=2))
+          PY
       - name: Surface aggregate pilot result without raw URLs or HTML
         run: |
           python - <<'PY'
@@ -107,3 +140,4 @@ jobs:
           path: |
             ${{ runner.temp }}/dom-pilot/meta/
             ${{ runner.temp }}/dom-pilot/output/pilot/public/
+            ${{ runner.temp }}/dom-pilot/output/quality/

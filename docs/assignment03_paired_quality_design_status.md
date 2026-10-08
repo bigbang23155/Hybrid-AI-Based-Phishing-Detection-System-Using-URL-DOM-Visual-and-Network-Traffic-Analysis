@@ -7,6 +7,8 @@ the 23-feature static registry and common URL/DOM/hybrid modeling contract.
 Extractor/join/schema tests use synthetic fixtures; no formal feature extraction,
 training or test evaluation is performed. The separate open-world robustness
 roadmap states future evidence gates without claiming current generalization.
+Actions 37706988097 passed 148 tests; the cloud contract report matches local
+verification and preserves the original partition digest.
 
 The historical URL development baseline remains frozen and unchanged. Optional
 YARA/content-forensics, visual/network, Evil Twin and identity/session work is now

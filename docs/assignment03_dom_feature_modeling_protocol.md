@@ -13,6 +13,12 @@ and `assignment03_feature_protocol_lock_v1.json` under `config/`. The latter loc
 the registry definitions/order, implementation and dependency inputs with SHA-256.
 The original URL baseline and earlier audits/policies are not rewritten.
 
+Cloud verification: Actions **37706988097**, execution commit
+`59b6bf648a23c5bf213263a6261db6d6adbe3554`, passed **148 tests**. The downloaded
+artifact digest was checked and its definition/schema/model-parameter/membership
+report equals the local report. See `config/assignment03_feature_protocol_checkpoint_v1.json`.
+This is software/specification validation, not model accuracy or robustness evidence.
+
 ## Feature dictionary and interpretation
 
 `src/phishing_url/dom_features.py::DEFINITIONS` and the lock contain every feature's

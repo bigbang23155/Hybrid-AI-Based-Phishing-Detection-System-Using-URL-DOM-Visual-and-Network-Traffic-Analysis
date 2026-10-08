@@ -26,3 +26,8 @@ Only after that core works should extensions be promoted into experiments.
 The design rule is: **no module is credited with evidence it cannot observe**.
 For example, an HTML signature does not prove an Evil Twin exists, and a URL
 score does not prove a session token was stolen.
+
+The staged [open-world and adversarial-robustness roadmap](open_world_robustness.md)
+adds temporal/source/campaign evaluation, dynamic capture, reviewed-label drift
+adaptation and constrained adversarial training. These are separate future
+experiments, not demonstrated capabilities of the current static registry.

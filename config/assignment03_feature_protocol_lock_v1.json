@@ -1,0 +1,131 @@
+{
+  "dom_registry_version": "static_dom_v1",
+  "feature_definitions": [
+    [
+      "tag_count",
+      "count",
+      "All start/start-end tags emitted by HTMLParser, once each."
+    ],
+    [
+      "form_count",
+      "count",
+      "form start tags, including forms without action."
+    ],
+    [
+      "input_count",
+      "count",
+      "input start tags of any type."
+    ],
+    [
+      "password_input_count",
+      "count",
+      "input with stripped case-insensitive type=password."
+    ],
+    [
+      "hidden_input_count",
+      "count",
+      "input with stripped case-insensitive type=hidden."
+    ],
+    [
+      "link_count",
+      "count",
+      "a tags with an href attribute; empty and non-HTTP values included."
+    ],
+    [
+      "http_link_count",
+      "count",
+      "Link references resolvable to a valid HTTP(S) URL."
+    ],
+    [
+      "external_link_count",
+      "count",
+      "HTTP(S) links with registered domain different from page URL."
+    ],
+    [
+      "external_link_ratio",
+      "ratio",
+      "external_link_count / http_link_count; zero if denominator zero."
+    ],
+    [
+      "resource_count",
+      "count",
+      "One reference per resource tag with its declared src/href attribute."
+    ],
+    [
+      "http_resource_count",
+      "count",
+      "Resource references resolvable to a valid HTTP(S) URL."
+    ],
+    [
+      "external_resource_count",
+      "count",
+      "HTTP(S) resources with different registered domain."
+    ],
+    [
+      "external_resource_ratio",
+      "ratio",
+      "external_resource_count / http_resource_count; zero if denominator zero."
+    ],
+    [
+      "script_count",
+      "count",
+      "All script tags; does not imply executable JavaScript."
+    ],
+    [
+      "script_src_count",
+      "count",
+      "script tags with src, including empty/invalid/non-HTTP values."
+    ],
+    [
+      "external_script_count",
+      "count",
+      "script src references resolving to an external HTTP(S) domain."
+    ],
+    [
+      "iframe_count",
+      "count",
+      "iframe tags; content/srcdoc is not recursively parsed."
+    ],
+    [
+      "hidden_element_count",
+      "count",
+      "Union per tag of hidden attribute, input type=hidden, or explicit inline display:none / visibility:hidden declaration."
+    ],
+    [
+      "meta_refresh_count",
+      "count",
+      "meta with stripped case-insensitive http-equiv=refresh, regardless of content validity."
+    ],
+    [
+      "form_action_count",
+      "count",
+      "form tags explicitly carrying action; includes empty values."
+    ],
+    [
+      "http_form_action_count",
+      "count",
+      "Explicit action references resolvable to HTTP(S)."
+    ],
+    [
+      "external_form_action_count",
+      "count",
+      "Explicit HTTP(S) form actions with different registered domain."
+    ],
+    [
+      "external_form_action_ratio",
+      "ratio",
+      "external_form_action_count / http_form_action_count; zero if denominator zero."
+    ]
+  ],
+  "file_sha256": {
+    "config/assignment03_modeling_protocol_v1.json": "87921b6ea26539fce6d2a31111aab0fe882205c2cac2e57fac3891d50eed7167",
+    "requirements-dom.txt": "dacb69a9086d47b3b38be0c5afa4b6b8474e7a98249fdd073cc974294eef4c3b",
+    "requirements.txt": "87297a88670f599c3d543e5d5850fe1dd8ad054fa9ab8caf54ce70c93836c6b3",
+    "src/phishing_url/dom_features.py": "f4ea33bc1a52bc6e7bdd91d1b58feb3350092d0cd062c43888cfce03d4b28585",
+    "src/phishing_url/feature_registry.py": "de96a29fcf498b25429963f4d71652c642585a5289f562988430e70054dae02b",
+    "src/phishing_url/features.py": "12cd98f70a38471d4cc72ce96bbe96b9a269fd493832162f9dd6e74c4f6ccf50",
+    "src/phishing_url/modality_contract.py": "8e4ce47e603ec06fa42e57736fe38fbf02c93e79fa8f4cca62cc27ee3e14ad2e",
+    "src/phishing_url/url_cleaning.py": "aec3826ab71e1fa9cb152d82450cd4d37b7274c8c05e9d7d721a32289f0ab262"
+  },
+  "schema_version": "assignment03-feature-protocol-lock-v1"
+}

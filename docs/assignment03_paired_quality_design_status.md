@@ -2,14 +2,20 @@
 
 ## Decision status
 
+New definition checkpoint: `assignment03_dom_feature_modeling_protocol.md` fixes
+the 23-feature static registry and common URL/DOM/hybrid modeling contract.
+Extractor/join/schema tests use synthetic fixtures; no formal feature extraction,
+training or test evaluation is performed. The separate open-world robustness
+roadmap states future evidence gates without claiming current generalization.
+
 The historical URL development baseline remains frozen and unchanged. Optional
 YARA/content-forensics, visual/network, Evil Twin and identity/session work is now
 kept under `docs/extensions/` and does not block Assignment 03.
 
 The paired-data work has moved from an informal pilot to a preregistered quality
 and experiment protocol, with **eligible membership and grouped partitions now frozen and cloud-verified**.
-Model-training approval remains false until the DOM registry and modeling protocol
-are fixed.
+Definitions are now fixed; automatic model training remains disabled pending the
+development feature-integrity/coverage run and the common experiment runner.
 
 ## Cloud validation
 
@@ -173,6 +179,7 @@ directly as though it came from the same dataset.
 - `docs/assignment03_paired_dataset_protocol.md`
 - `docs/extensions/`
 
-The next checkpoint is DOM registry/modeling protocol finalization on the frozen
-paired membership and partitions. Cloud replay has passed the exact hash gate.
+The next execution checkpoint is development-only feature materialization and the
+common modeling runner under the new frozen definitions. Cloud holdout replay has
+passed the exact hash gate.
 The existing 55 losses are not replaced; optional extensions remain separate.

@@ -295,10 +295,19 @@ CI never jumps automatically from state 2 or 3 to state 4.
 
 ## 15. Current next action
 
+The subsequent definition freeze is documented in
+`assignment03_dom_feature_modeling_protocol.md` and the two new feature/protocol
+configuration files. It fixes 23 static DOM features, 18/23/41-dimensional primary
+conditions and common RF/GBDT settings. No formal feature run or model fit has
+occurred. The next execution is development-only feature integrity/coverage and
+the common runner; test remains sealed. Sections above preserve the earlier design
+history; the new versioned document controls detailed extraction/modeling rules.
+
 The source frame, selected-HTML audit, research decisions and cloud-verified holdout freeze
 are complete. The additive holdout policy includes an explicitly documented
 conservative structural guard and training-only pilot exposure. See
 `docs/assignment03_holdout_results.md`. Eligibility is unchanged: 4,945 pairs and
 55 retained oversize exclusions. Actions 37703227484 reproduced the exact frozen
-partition hash. The immediate next action is DOM registry and modeling protocol
-finalization. Training approval remains false; test has not been evaluated.
+partition hash. DOM registry and modeling protocol definitions are now fixed in
+the additive version above. Automatic training approval remains false; test has
+not been evaluated.

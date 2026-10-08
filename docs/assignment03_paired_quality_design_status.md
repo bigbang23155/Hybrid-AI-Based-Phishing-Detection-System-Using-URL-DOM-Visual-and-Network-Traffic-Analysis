@@ -2,7 +2,16 @@
 
 ## Decision status
 
-New definition checkpoint: `assignment03_dom_feature_modeling_protocol.md` fixes
+Latest execution checkpoint: the user authorized development-only extraction and
+common modeling. Actions **37725422890**, execution commit
+`7153f06cd719d393686e7cc8ceff8591f64b3bf6`, passed **158 tests**, extracted all
+**4,203 development rows with zero failures**, and completed **70 fixed fits**.
+Independent validation metric and paired F1 interval recomputation passed locally
+and in the cloud. The 742 test rows remain sealed and the original 55 exclusions
+remain unchanged. See `assignment03_development_results.md` and
+`config/assignment03_development_checkpoint_v1.json`.
+
+Earlier definition checkpoint: `assignment03_dom_feature_modeling_protocol.md` fixes
 the 23-feature static registry and common URL/DOM/hybrid modeling contract.
 Extractor/join/schema tests use synthetic fixtures; no formal feature extraction,
 training or test evaluation is performed. The separate open-world robustness
@@ -16,8 +25,9 @@ kept under `docs/extensions/` and does not block Assignment 03.
 
 The paired-data work has moved from an informal pilot to a preregistered quality
 and experiment protocol, with **eligible membership and grouped partitions now frozen and cloud-verified**.
-Definitions are now fixed; automatic model training remains disabled pending the
-development feature-integrity/coverage run and the common experiment runner.
+Definitions remain fixed. The authorized development run is complete; test
+evaluation remains disabled. Historical definition-only authorization flags are
+preserved, with current scope recorded in the additive development execution file.
 
 ## Cloud validation
 
@@ -181,7 +191,9 @@ directly as though it came from the same dataset.
 - `docs/assignment03_paired_dataset_protocol.md`
 - `docs/extensions/`
 
-The next execution checkpoint is development-only feature materialization and the
-common modeling runner under the new frozen definitions. Cloud holdout replay has
-passed the exact hash gate.
+Development feature materialization and the common modeling runner are complete.
+The next research work is a versioned development error/bias review and separately
+designed temporal/source/campaign and semantic-preserving robustness experiments.
+Final test requires its separately authorized evaluation entry point and remains
+outside these development decisions. Cloud holdout replay passed the exact hash gate.
 The existing 55 losses are not replaced; optional extensions remain separate.

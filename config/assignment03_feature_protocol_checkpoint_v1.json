@@ -1,0 +1,19 @@
+{
+  "schema_version": "assignment03-feature-protocol-checkpoint-v1",
+  "status": "definitions_frozen_cloud_verified",
+  "execution_commit": "59b6bf648a23c5bf213263a6261db6d6adbe3554",
+  "github_actions_run_id": 37706988097,
+  "artifact_id": 11519459840,
+  "artifact_zip_sha256": "76d37b21f99b03f533739c3276bd967660ee4fe9cdce91b2e42f84dc042bef12",
+  "definition_lock_sha256": "332503c9473d6976dbea545f0b12fcd915f3af24283c8aa2f092d91e9c0fa039",
+  "partition_manifest_sha256": "49e9dc599fe11e243ac6ba18307900ddc854eeabb3cd700eb9f39fbf05f2deb0",
+  "local_tests": {"passed": 148, "seconds": 37.99},
+  "cloud_tests": {"passed": 148, "seconds": 37.74},
+  "local_cloud_verification_reports_equal": true,
+  "primary_feature_dimensions": {"url_only": 18, "dom_only": 23, "url_dom": 41},
+  "formal_feature_materialization_performed": false,
+  "model_training_performed": false,
+  "test_evaluated": false,
+  "open_world_or_adversarial_improvement_demonstrated": false,
+  "next_execution": "development-only feature integrity/coverage and common modeling runner; separate authorization before test"
+}

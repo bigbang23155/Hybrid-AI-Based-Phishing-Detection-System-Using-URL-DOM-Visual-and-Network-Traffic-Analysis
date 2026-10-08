@@ -1,0 +1,3 @@
+# Optional DOM data-adapter dependencies. Frozen URL requirements are unchanged.
+-r requirements.txt
+pyarrow==21.0.0

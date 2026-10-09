@@ -2,7 +2,9 @@
 
 ## Decision status
 
-Current checkpoint: the development error/bias review is complete, all six fitted
+Current checkpoint: Actions **37899396181** passed **167 tests**, verified the
+75-file final freeze in both host and pinned container, and executed all four
+notebook code cells. The development error/bias review is complete, all six fitted
 model hashes and validation probabilities match the earlier experiment, and the
 final evaluation specification is frozen. See
 `assignment03_development_error_bias_review.md` and
@@ -200,8 +202,9 @@ directly as though it came from the same dataset.
 - `docs/extensions/`
 
 Development feature materialization and the common modeling runner are complete.
-The next research work is a versioned development error/bias review and separately
-designed temporal/source/campaign and semantic-preserving robustness experiments.
+The development error/bias review and final evaluation specification freeze are
+complete. Next implement the separately authorized one-time test executor and
+prepare the submission report. External robustness experiments remain separate.
 Final test requires its separately authorized evaluation entry point and remains
 outside these development decisions. Cloud holdout replay passed the exact hash gate.
 The existing 55 losses are not replaced; optional extensions remain separate.

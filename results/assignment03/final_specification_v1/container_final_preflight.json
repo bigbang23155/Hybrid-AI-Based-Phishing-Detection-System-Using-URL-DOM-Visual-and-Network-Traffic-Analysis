@@ -1,0 +1,12 @@
+{
+  "status": "final_specification_verified_test_sealed",
+  "freeze_sha256": "be19ad2c728704d75afd2eb605e023b9edfb8544d7700735e6fe071e906763e0",
+  "locked_files": 75,
+  "evaluation_cells": 6,
+  "fit_rows": 3461,
+  "future_test_rows": 742,
+  "test_features_read": 0,
+  "test_predictions": 0,
+  "test_execution_authorized": false,
+  "performance_or_deployment_approval": false
+}

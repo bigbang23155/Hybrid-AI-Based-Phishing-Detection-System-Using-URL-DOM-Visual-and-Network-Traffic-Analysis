@@ -48,9 +48,11 @@ jobs:
           python -m phishing_url.formal_candidates --download --source-root "$RUNNER_TEMP/development/input" --frame config/assignment03_paired_source_frame_v1.json --policy config/assignment03_paired_release_policy_v1.json
       - name: Build passive offline execution image
         run: |
+          docker pull python:3.12-slim
           docker build -f docker/Dockerfile.dom-data -t assignment03-development .
           docker image inspect python:3.12-slim --format '{{json .RepoDigests}}' > "$RUNNER_TEMP/development/meta/base_image_digests.json"
           docker image inspect assignment03-development --format '{{.Id}}' > "$RUNNER_TEMP/development/meta/image_id.txt"
+          docker run --rm --network=none --read-only --entrypoint python assignment03-development -m pip freeze > "$RUNNER_TEMP/development/meta/container_packages.txt"
       - name: Reproduce development features and six models, then diagnose errors
         run: |
           docker run --rm --network=none --read-only --cap-drop=ALL \
@@ -62,6 +64,9 @@ jobs:
             -v "$GITHUB_WORKSPACE:/repo:ro" \
             --entrypoint python assignment03-development -m phishing_url.development_review \
             --root /repo --source-root /input --output /output/run
+      - name: Independently verify review evidence
+        run: |
+          python scripts/verify_development_review.py --root . --public "$RUNNER_TEMP/development/output/run/public" --output "$RUNNER_TEMP/development/output/run/public/independent_verification.json"
       - name: Preserve sanitized execution evidence
         if: always()
         uses: actions/upload-artifact@v4

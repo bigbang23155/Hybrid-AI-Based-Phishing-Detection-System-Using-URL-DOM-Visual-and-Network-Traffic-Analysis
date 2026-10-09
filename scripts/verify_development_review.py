@@ -7,6 +7,10 @@ import numpy as np
 from sklearn.metrics import confusion_matrix,f1_score,roc_auc_score,brier_score_loss
 
 
+def jsonlines(path):
+    raw=path.read_bytes() if path.exists() else gzip.decompress(Path(str(path)+'.gz').read_bytes())
+    return list(map(json.loads,raw.splitlines()))
+
 def verify(public,root):
     cfg=json.loads((root/'config/assignment03_development_review_v1.json').read_text())
     raw=gzip.decompress((root/cfg['reference_predictions_path']).read_bytes())
@@ -15,7 +19,7 @@ def verify(public,root):
     manifest=list(map(json.loads,gzip.decompress((root/'results/assignment03/holdout_v1/partition_manifest.jsonl.gz').read_bytes()).splitlines()))
     val={r['sample_id']:r for r in manifest if r['partition']=='validation'}
     dev={r['sample_id'] for r in manifest if r['partition'] in ('train','validation')}
-    rows=list(map(json.loads,(public/'error_ledger.jsonl').read_text().splitlines()))
+    rows=jsonlines(public/'error_ledger.jsonl')
     assert len(rows)==len(ref)==4452
     lookup={};by=defaultdict(list)
     for r in rows:
@@ -47,7 +51,7 @@ def verify(public,root):
         if s['facet'] in ('language','month','password_present'):
             a=prior[s['condition'],s['facet'],s['value']]
             assert all(s[k]==a[k] for k in ('n','tn','fp','fn','tp'))
-    changes=list(map(json.loads,(public/'paired_changes.jsonl').read_text().splitlines()))
+    changes=jsonlines(public/'paired_changes.jsonl')
     for r in changes:
         sid=r['sample_id'];h=lookup[f"{r['model']}/url_dom/baseline",sid];b=lookup[f"{r['model']}/{r['comparator']}/baseline",sid]
         assert h['label']==b['label']==r['label']
@@ -63,7 +67,7 @@ def verify(public,root):
             kind=('both_correct' if hc else 'breaks') if bc else ('fixes' if hc else 'both_wrong')
             if kind==c['kind']:selected.append(r)
         assert c['n']==len(selected) and c['benign']==sum(r['label']==0 for r in selected) and c['phishing']==sum(r['label']==1 for r in selected)
-    repeats=list(map(json.loads,(public/'permutation_repeats.jsonl').read_text().splitlines()))
+    repeats=jsonlines(public/'permutation_repeats.jsonl')
     assert len(repeats)==960
     ps=json.loads((public/'permutation_summary.json').read_text())
     for s in ps:
@@ -101,7 +105,7 @@ def verify(public,root):
     saved=json.loads((public/'password_gap_intervals.json').read_text())['random_forest/url_dom/baseline']
     for k,v in values.items():
         assert abs(np.quantile(v,.025)-saved[k]['low'])<1e-12 and abs(np.quantile(v,.975)-saved[k]['high'])<1e-12
-    statuses=list(map(json.loads,(public/'features/extraction_status.jsonl').read_text().splitlines()))
+    statuses=jsonlines(public/'features/extraction_status.jsonl')
     assert len(statuses)==4203 and {r['sample_id'] for r in statuses}==dev and all(r['extraction_status']=='ok' for r in statuses)
     assert not list(public.rglob('*.joblib'))
     return dict(verification_passed=True,reference_probabilities_checked=4452,independent_slice_checks=checked,prior_language_month_password_counts_equal=True,paired_change_rows_verified=len(changes),permutation_repeats_aggregated=960,primary_password_gap_intervals_independently_verified=True,complexity_standardized_rates_independently_verified=True,development_statuses=4203,test_feature_rows=0,limitations=['Permutation predictions require private model/features; verified via runner tests and aggregates, not recomputed from public evidence.','Detailed feature profiles and bin assignments depend on the hash-matched extraction; source labels were not manually adjudicated.'])

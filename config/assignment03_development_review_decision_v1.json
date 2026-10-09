@@ -1,0 +1,45 @@
+{
+  "version": "assignment03-review-decision-v1",
+  "review_date": "2026-10-09",
+  "decision": "retain_frozen_six_cell_internal_benchmark_with_explicit_limitations",
+  "correctness_blockers": [],
+  "feature_changes": false,
+  "parameter_changes": false,
+  "threshold_changes": false,
+  "label_changes": false,
+  "partition_changes": false,
+  "test_execution_authorized": false,
+  "evidence": {
+    "feature_files_match_original": true,
+    "six_model_bytes_match_original": true,
+    "validation_probability_max_difference": 0.0,
+    "independent_verification_passed": true
+  },
+  "findings": [
+    {
+      "finding": "complexity_related_feature_reliance",
+      "severity_for_open_world_claim": "high",
+      "decision": "retain feature registry for internal paired comparison; restrict external claims; independently designed future holdout needed"
+    },
+    {
+      "finding": "password_gap_not_resolved_after_group_uncertainty_and_composition_review",
+      "severity": "medium",
+      "decision": "report observed gap, wide interval and standardization; do not attribute a causal password penalty"
+    },
+    {
+      "finding": "temporal_and_language_label_composition_imbalance",
+      "severity_for_temporal_generalization_claim": "high",
+      "decision": "do not call this a prospective or multi-source benchmark"
+    },
+    {
+      "finding": "hybrid_adds_some_false_positives_and_false_negatives",
+      "severity": "medium",
+      "decision": "report all fixes and breaks; do not hide inconvenient cases"
+    }
+  ],
+  "limits": [
+    "No independent human source-label adjudication; confidence cases are a reproducible inspection queue.",
+    "Feature permutations can create off-manifold samples and do not establish adversarial attack resistance.",
+    "Final same-cohort test will not resolve external, temporal, campaign or zero-day generalization."
+  ]
+}

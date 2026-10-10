@@ -87,7 +87,7 @@ PYTHONPATH=src:. python -m research.robustness_v1.intake audit --root . --output
 
 ```bash
 PYTHONPATH=src:. python -m research.robustness_v1.intake review --input packets.jsonl --output decisions.jsonl
-PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/intake/historical_exposure_denylist.jsonl --overlap-audit overlap_receipt.json --output /tmp/research-comparison
+PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v2/historical_exposure_registry.jsonl --overlap-audit overlap_receipt.json --output /tmp/research-comparison
 ```
 
 以上訓練命令目前不能對空白複核清單執行；必須有真實新樣本及證據。所有參數與 input hashes 隨結果保留。
@@ -98,3 +98,27 @@ PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_developmen
 第四階段 `adversarial_training_enabled` 與 `external_evaluation_enabled` 均為 false，且目前沒有啟動它們的工作流程。
 
 方法依據：[group-aware CV](https://scikit-learn.org/1.7/modules/cross_validation.html)、[nested CV](https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html)、[permutation importance 限制](https://scikit-learn.org/stable/modules/permutation_importance.html)。工程樣本數、效果門檻及預算是本研究規劃，並非文獻規定的 phishing 通用標準。
+
+## 第二輪：歷史曝光索引補強
+
+已從原 Actions artifact 11382518633 取回 DOM pilot replay index，ZIP 與 CSV
+分別通過原紀錄 SHA-256 核對。新增 256 個 pilot ID，合計 5,256 個曝光 ID；
+其中 15 筆 pilot HTML 與正式候選相同，因此 ID 不同不代表內容獨立。
+`evidence/history_v2/summary.json` 保留輸入雜湊、欄位覆蓋與缺口。
+新增索引不是新訓練資料，沒有解封或重跑 test。
+
+```bash
+PYTHONPATH=src:. python -m research.robustness_v1.history --root . --archive /path/to/dom_pilot.zip --output /tmp/history-v2
+```
+
+compare 已加入歷史 normalized URL／structural template／campaign 的直接排除，
+且來源列使用 revision + file + row 比對。缺少 source row 的紀錄仍可依其餘身分排除。
+未知 campaign 不提供「未見 campaign」證明。本次索引仍缺 URL baseline、其他 observation
+pilot 的完整身分，以及 normalized URL、template、campaign 歷史；不得宣稱查重已全部完成。
+新樣本訓練仍需真實複核紀錄及完整 overlap receipt。
+
+本輪另嘗試下載 observation pilot v2 artifact 10922820850，但 GitHub 回傳 404；
+無法據此判定刪除、過期或權限原因。Assignment 02 公開 export 已成功重建並驗證，
+但其中沒有完整逐筆身分資料，不能代替原始 dataset。詳見 continuation_receipt.json。
+目前需要恢復上述原始索引並取得實際人工複核；214 項本機測試通過只代表工程
+檢查通過，不代表四項改善已完成，也不代表模型效能提升。

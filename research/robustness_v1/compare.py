@@ -58,9 +58,12 @@ def validate_cohort(rows, packets, history):
     reviews = {r['sample_id']:r for r in packets}
     if set(reviews) != {r['sample_id'] for r in rows}:
         raise ValueError('review/cohort membership mismatch')
-    keys = ('sample_id','html_sha256','registered_domain_sha256','final_group')
+    keys = ('sample_id','html_sha256','registered_domain_sha256','final_group',
+            'normalized_url_sha256','structural_sha256','campaign_id')
     denied = {key:{r[key] for r in history if r.get(key)} for key in keys}
-    source_positions = {(r['source_file'],r['source_row']) for r in history}
+    source_positions = {(r.get('source_revision', 'eabec4b7a66324b79cc8a0ad856d1731dc26fe1a'),
+                         r['source_file'],r['source_row']) for r in history
+                        if r.get('source_file') is not None and r.get('source_row') is not None}
     owners = {key:{} for key in ('registered_domain_sha256','html_sha256','normalized_url_sha256','structural_sha256','campaign_id')}
     names = list(feature_names('url_dom'))
     for row in rows:
@@ -68,7 +71,7 @@ def validate_cohort(rows, packets, history):
             raise ValueError('only new_development allowed; historical/test/external rows rejected')
         if any(row.get(key) in denied[key] for key in keys):
             raise ValueError('historically exposed sample/domain/content/group')
-        if row.get('source_revision') == 'eabec4b7a66324b79cc8a0ad856d1731dc26fe1a' and (row.get('source_file'),row.get('source_row')) in source_positions:
+        if (row.get('source_revision'),row.get('source_file'),row.get('source_row')) in source_positions:
             raise ValueError('historically exposed source row')
         if row.get('overlap_audit_status') != 'complete_with_pilot_url_template_campaign':
             raise ValueError('full overlap audit needed; basic denylist alone is insufficient')

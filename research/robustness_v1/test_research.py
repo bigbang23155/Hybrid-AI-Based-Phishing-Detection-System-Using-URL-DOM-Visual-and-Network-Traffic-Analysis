@@ -133,6 +133,40 @@ def test_real_runner_rejects_exposed_and_unreviewed_rows():
     with pytest.raises(ValueError):validate_cohort(rows,packets,[])
 
 
+@pytest.mark.parametrize('key',['normalized_url_sha256','structural_sha256','campaign_id'])
+def test_historical_extended_identity_is_excluded_without_source_row(key):
+    rows,packets=cohort()
+    rows[0][key]='historical-identity'
+    with pytest.raises(ValueError, match='historically exposed'):
+        validate_cohort(rows,packets,[{key:'historical-identity'}])
+
+
+def test_historical_source_position_is_revision_scoped():
+    rows,packets=cohort()
+    rows[0].update(source_revision='new-revision', source_file='shard',source_row=7)
+    history=[dict(source_revision='old-revision',source_file='shard',source_row=7)]
+    validate_cohort(rows,packets,history)
+    history[0]['source_revision']='new-revision'
+    with pytest.raises(ValueError,match='source row'):
+        validate_cohort(rows,packets,history)
+
+
+def test_history_registry_evidence_and_archive_rejection(tmp_path):
+    from .history import build
+    from .intake import digest
+    folder=ROOT/'research/robustness_v1/evidence/history_v2'
+    summary=json.loads((folder/'summary.json').read_text())
+    rows=read_rows(folder/'historical_exposure_registry.jsonl')
+    assert summary['registry_sha256']==digest(folder/'historical_exposure_registry.jsonl')
+    assert len(rows)==5256 and summary['pilot_records']==256
+    assert summary['pilot_records_matching_formal_html']==15
+    assert summary['status']=='partial_history_not_novelty_certification'
+    archive=tmp_path/'bad.zip';archive.write_bytes(b'not the pinned archive')
+    with pytest.raises(ValueError,match='checksum'):
+        build(ROOT,archive,tmp_path/'output')
+    assert not (tmp_path/'output').exists()
+
+
 @pytest.mark.parametrize('key',['scope','html_sha256','registered_domain_sha256','normalized_url_sha256','structural_sha256','features','overlap_audit_status'])
 def test_leakage_schema_and_scope_rejected(key):
     rows,packets=cohort()

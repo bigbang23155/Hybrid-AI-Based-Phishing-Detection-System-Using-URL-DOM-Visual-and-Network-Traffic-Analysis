@@ -1,0 +1,64 @@
+{
+  "version": "assignment03-development-review-v1",
+  "scope": "post-development diagnostic; fixed before this review run; not original experiment preregistration",
+  "development_only": true,
+  "test_evaluation_authorized": false,
+  "original_execution_commit": "7153f06cd719d393686e7cc8ceff8591f64b3bf6",
+  "original_artifact_zip_sha256": "dbba6dc99b41e7ec417fc98600fc44dcf5385c6ccc38e6a57ceb1e064822f6ac",
+  "reference_predictions_path": "results/assignment03/development_v1/primary_validation_predictions.jsonl.gz",
+  "reference_predictions_raw_sha256": "39b962d4fb1e3341f7533c4d76fe2aa7886fa9e525df238b65a0e444f45ed204",
+  "reference_predictions_rows": 4452,
+  "reference_feature_hashes": {
+    "dom_rows.jsonl": "5a3a44df68f601fd6e118f154861442e68ac5027773d2f67674eba53e8aad5ec",
+    "url_rows.jsonl": "438c4ff0849c4b726e5703e7a70000d710d6106b02525fde3437964982aed341"
+  },
+  "model_replay_max_absolute_score_error": 1e-12,
+  "primary_seed": 4941401,
+  "permutation_seed": 4941601,
+  "permutation_repeats": 30,
+  "permutation_modes": [
+    "unconditional",
+    "within_password_language_shard"
+  ],
+  "complexity_features": [
+    "tag_count",
+    "resource_count",
+    "http_resource_count",
+    "external_resource_count",
+    "external_resource_ratio",
+    "script_count",
+    "script_src_count",
+    "external_script_count",
+    "iframe_count"
+  ],
+  "credential_features": [
+    "form_count",
+    "input_count",
+    "password_input_count",
+    "hidden_input_count",
+    "form_action_count",
+    "http_form_action_count",
+    "external_form_action_count",
+    "external_form_action_ratio"
+  ],
+  "complexity_bin_feature": "tag_count",
+  "complexity_train_quantiles": [
+    0.25,
+    0.5,
+    0.75
+  ],
+  "diagnostic_bootstrap_seed": 4941602,
+  "diagnostic_bootstrap_repeats": 2000,
+  "standardization_min_class_support_per_cell": 5,
+  "confidence_case_count_per_error": 10,
+  "decisions": "no new model/seed/feature/threshold selection; retain fixed benchmark unless a correctness blocker is found",
+  "permutation_limitation": "May create off-manifold feature combinations; repeated-shuffle variability is not a population confidence interval or adversarial attack result; conditioned permutation controls only observed password/language/shard strata.",
+  "reference_model_sha256": {
+    "random_forest/url_only/baseline": "b3226a16cd22003ece2ce3bed2f91a1c7fb2672432345ed9e2e45bd13eb7ad25",
+    "random_forest/dom_only/baseline": "97f70e93176dfe8a2b49c6dc690a8999e136659e9f975ef91c87d7318b0bec4d",
+    "random_forest/url_dom/baseline": "5433b30662666f1c53caffb1092ca9a0d7657a60b5fa38bb0c587b7e4c8815fc",
+    "gradient_boosting/url_only/baseline": "42da33e59bb4723609f7c5d6c637719478e259fe17091eb322c459c2103ec296",
+    "gradient_boosting/dom_only/baseline": "d8d1929ff4dee47490c7337c87047fcfb70a946282b3294b26d637173d84789b",
+    "gradient_boosting/url_dom/baseline": "83b29486bacbfb7f6fcb5d4e6d6615cbcdd300e3f519a3388d7f8eeebcf37478"
+  }
+}

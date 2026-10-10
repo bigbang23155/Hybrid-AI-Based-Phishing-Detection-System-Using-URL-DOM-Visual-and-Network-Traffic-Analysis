@@ -1,0 +1,25 @@
+{
+  "authorization": "User explicitly authorized implementation and one-time formal test evaluation on 2026-10-09 America/Chicago. Discuss strengthening directions in chat only; do not add them to the report.",
+  "diagnostics": "Reuse development-defined password, train-quartile complexity, language, month and source-shard facets; all descriptive. No new model selection, test permutations or adversarial claim.",
+  "evaluation_count": 1,
+  "executor_file_sha256": {
+    ".github/workflows/assignment03-final-test.yml": "e5d5937196c31c412eaa4c9ba630cea1668fea257cda395ad5951e75ee10c43e",
+    "scripts/claim_final_test.py": "deadb7236e3ff42d39ef459c9bb376bce229a5535e16fc3bf0ef15baf38a1b10",
+    "scripts/verify_final_test.py": "eb87829572107b6d3c608b2cb5b186ab39b14f37fb27e55321d3974cf72eea32",
+    "src/phishing_url/final_test.py": "7183159256dd34ec0501548f1b45ada5545df46fe605bc3fe2370c09d99b4db6",
+    "tests/test_final_test.py": "d4f1971b2783e39a90b23c15e7b93809e06114458ab59d62c65d57612f63167d"
+  },
+  "failure_policy": "Retain every failed/excluded sample, no backfill. Any post-access failure consumes the holdout and preserves partial exposure; stop rather than retry.",
+  "fit_partitions": [
+    "train"
+  ],
+  "freeze_sha256": "be19ad2c728704d75afd2eb605e023b9edfb8544d7700735e6fe071e906763e0",
+  "frozen_receipt_commit": "4647241749ad4702d2b26e9f6ddce7072fd66e39",
+  "no_automatic_retry_after_claim": true,
+  "persistent_claim_ref": "refs/tags/assignment03-final-test-v1-consumed",
+  "public_artifact": "Sanitized predictions, sample/group IDs, aggregate metrics, timing, model/input hashes; no raw URLs/HTML, feature vectors or model binaries.",
+  "test_driven_selection": false,
+  "test_evaluation_authorized": true,
+  "threshold_tuning": false,
+  "version": "assignment03-final-test-execution-v1"
+}

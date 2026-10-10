@@ -1,0 +1,11 @@
+{
+  "expected_rows": 742,
+  "failures": 0,
+  "feature_dimensions": {
+    "dom_only": 23,
+    "url_dom": 41,
+    "url_only": 18
+  },
+  "no_backfill": true,
+  "successes": 742
+}

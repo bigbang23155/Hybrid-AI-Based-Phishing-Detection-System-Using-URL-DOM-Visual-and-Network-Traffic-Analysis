@@ -1,0 +1,144 @@
+{
+  "authorization_sha256": "bc9429b9e27ccdfbd6c2ff014e5ba89b12739c1ae6c0b2899b21444fb2da1da8",
+  "complexity_cuts": [
+    106.0,
+    475.0,
+    1083.0
+  ],
+  "created_at": "2026-10-10T00:01:57.231790+00:00",
+  "development_integrity": {
+    "expected_rows": 4203,
+    "failures": 0,
+    "no_backfill": true,
+    "payloads_seen": 4203,
+    "per_partition": {
+      "train": 3461,
+      "validation": 742
+    },
+    "schema_dimensions": {
+      "dom_only": 23,
+      "url_dom": 41,
+      "url_only": 18
+    },
+    "successes": 4203,
+    "test_feature_rows": 0,
+    "test_payloads_converted_to_python": 0
+  },
+  "execution_commit": "5be2c41d484a207a2effece5828a6c0ccd145565",
+  "freeze_sha256": "be19ad2c728704d75afd2eb605e023b9edfb8544d7700735e6fe071e906763e0",
+  "models": [
+    {
+      "condition": "random_forest/url_only/baseline",
+      "maximum_score_difference": 0.0,
+      "model_sha256": "b3226a16cd22003ece2ce3bed2f91a1c7fb2672432345ed9e2e45bd13eb7ad25",
+      "train_n": 3461,
+      "validation_n": 742
+    },
+    {
+      "condition": "random_forest/dom_only/baseline",
+      "maximum_score_difference": 0.0,
+      "model_sha256": "97f70e93176dfe8a2b49c6dc690a8999e136659e9f975ef91c87d7318b0bec4d",
+      "train_n": 3461,
+      "validation_n": 742
+    },
+    {
+      "condition": "random_forest/url_dom/baseline",
+      "maximum_score_difference": 0.0,
+      "model_sha256": "5433b30662666f1c53caffb1092ca9a0d7657a60b5fa38bb0c587b7e4c8815fc",
+      "train_n": 3461,
+      "validation_n": 742
+    },
+    {
+      "condition": "gradient_boosting/url_only/baseline",
+      "maximum_score_difference": 0.0,
+      "model_sha256": "42da33e59bb4723609f7c5d6c637719478e259fe17091eb322c459c2103ec296",
+      "train_n": 3461,
+      "validation_n": 742
+    },
+    {
+      "condition": "gradient_boosting/dom_only/baseline",
+      "maximum_score_difference": 0.0,
+      "model_sha256": "d8d1929ff4dee47490c7337c87047fcfb70a946282b3294b26d637173d84789b",
+      "train_n": 3461,
+      "validation_n": 742
+    },
+    {
+      "condition": "gradient_boosting/url_dom/baseline",
+      "maximum_score_difference": 0.0,
+      "model_sha256": "83b29486bacbfb7f6fcb5d4e6d6615cbcdd300e3f519a3388d7f8eeebcf37478",
+      "train_n": 3461,
+      "validation_n": 742
+    }
+  ],
+  "run_id": "38006867242",
+  "runtime": {
+    "numpy": "2.2.6",
+    "python": "3.12.15",
+    "sklearn": "1.7.2"
+  },
+  "source_inventory": [
+    {
+      "path": "data/train-022.parquet",
+      "rows": 9388,
+      "sha256": "48bb12db73d2920adf6fab9065aef6458cef4c68a63bdf8d17cef31411ed9dbd",
+      "size_bytes": 519913293,
+      "source_labels": {
+        "benign": 5296,
+        "phish": 4092
+      }
+    },
+    {
+      "path": "data/train-007.parquet",
+      "rows": 8470,
+      "sha256": "6ea74e3fe2fb8e60aeb1e839b768c63f847a53a4b522eaeb039f646fef7e6d99",
+      "size_bytes": 470883056,
+      "source_labels": {
+        "benign": 4695,
+        "phish": 3775
+      }
+    },
+    {
+      "path": "data/train-032.parquet",
+      "rows": 9637,
+      "sha256": "5b066986fff36d56ef9fa9f0de918504db4b9bf4774c0feed07d4ec34ed48f2d",
+      "size_bytes": 516975992,
+      "source_labels": {
+        "benign": 5325,
+        "phish": 4312
+      }
+    },
+    {
+      "path": "data/train-001.parquet",
+      "rows": 5780,
+      "sha256": "260cb9c93299f6b244d48321fe115523159770f4e73446b382473628c6e81d74",
+      "size_bytes": 322018201,
+      "source_labels": {
+        "benign": 3184,
+        "phish": 2596
+      }
+    },
+    {
+      "path": "data/train-051.parquet",
+      "rows": 9641,
+      "sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845",
+      "size_bytes": 526031430,
+      "source_labels": {
+        "benign": 5394,
+        "phish": 4247
+      }
+    },
+    {
+      "path": "data/train-054.parquet",
+      "rows": 9483,
+      "sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c",
+      "size_bytes": 547814803,
+      "source_labels": {
+        "benign": 5233,
+        "phish": 4250
+      }
+    }
+  ],
+  "status": "six_models_verified_before_test",
+  "test_features_read": 0,
+  "test_predictions": 0
+}

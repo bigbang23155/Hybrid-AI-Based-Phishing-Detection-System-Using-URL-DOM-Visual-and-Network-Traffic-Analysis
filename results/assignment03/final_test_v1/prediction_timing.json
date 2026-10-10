@@ -1,0 +1,32 @@
+[
+  {
+    "batch_size": 742,
+    "condition": "random_forest/url_only/baseline",
+    "single_prediction_call_seconds": 0.011940797000022485
+  },
+  {
+    "batch_size": 742,
+    "condition": "random_forest/dom_only/baseline",
+    "single_prediction_call_seconds": 0.010424446000001808
+  },
+  {
+    "batch_size": 742,
+    "condition": "random_forest/url_dom/baseline",
+    "single_prediction_call_seconds": 0.009259692999989966
+  },
+  {
+    "batch_size": 742,
+    "condition": "gradient_boosting/url_only/baseline",
+    "single_prediction_call_seconds": 0.001616191999971761
+  },
+  {
+    "batch_size": 742,
+    "condition": "gradient_boosting/dom_only/baseline",
+    "single_prediction_call_seconds": 0.0015304030000038438
+  },
+  {
+    "batch_size": 742,
+    "condition": "gradient_boosting/url_dom/baseline",
+    "single_prediction_call_seconds": 0.001634620000004361
+  }
+]

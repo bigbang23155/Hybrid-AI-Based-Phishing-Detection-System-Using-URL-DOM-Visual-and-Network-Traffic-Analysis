@@ -163,6 +163,11 @@ def adjudicate(packet):
     snapshot = packet['html_sha256']
     if len(snapshot) != 64 or any(c not in '0123456789abcdef' for c in snapshot):
         raise ValueError('invalid snapshot SHA-256')
+    if len(rounds) < 2:
+        return dict(status='pending', label=None, reason='two independent reviews required')
+    if not packet.get('captured_at'):
+        return dict(status='quarantine', label=None,
+                    reason='capture time unresolved; publisher date is not a capture timestamp')
     capture_time = _timestamp(packet['captured_at'])
     ev = {r['id']:r for r in evidence}
     if len(ev) != len(evidence):
@@ -222,7 +227,8 @@ def adjudicate(packet):
     if conflicting and not (disputed and set(e['id'] for e in conflicting) <= set(rounds[2].get('resolved_conflict_ids', []))):
         return dict(status='quarantine', label=None, reason='conflicting evidence needs explicit adjudication')
     return dict(status='accepted_recorded_review', label=label, independently_verified_by_software=False,
-                original_label=packet.get('source_label'), changed=packet.get('source_label') != label,
+                original_label=packet.get('source_label'),
+                changed=packet['source_label'] != label if 'source_label' in packet else None,
                 note='Trusts recorded reviewer identity, source independence and rationale; no claim that software independently established truth.')
 
 

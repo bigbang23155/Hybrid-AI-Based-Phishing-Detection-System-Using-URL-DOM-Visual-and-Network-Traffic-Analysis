@@ -257,6 +257,70 @@ def test_passive_packet_check_is_not_label_review():
     with pytest.raises(ValueError):inspect_packet(q,source,html+'changed',2097152)
 
 
+def test_missing_capture_time_never_fabricated():
+    p=packet();del p['captured_at'];p['publisher_date']='2026-10-10'
+    assert adjudicate(p)['status']=='quarantine'
+    p['reviews']=[]
+    assert adjudicate(p)['status']=='pending'
+
+
+def test_global_history_components_bridge_provenance_rows():
+    from .extend_history import connect
+    rows=[dict(sample_id='a',normalized_url_sha256='url'),
+          dict(sample_id='a',html_sha256='html'),
+          dict(sample_id='b',html_sha256='html'),
+          dict(sample_id='c',normalized_url_sha256='url'),dict(sample_id='d')]
+    groups,matches=connect(rows)
+    assert groups['a']==groups['b']==groups['c'] and groups['d']!=groups['a']
+    assert connect(list(reversed(rows)))==connect(rows)
+    assert {r['match_type'] for r in matches}=={'html_sha256','normalized_url_sha256'}
+
+
+def test_campaign_proxy_overlap_is_denied():
+    rows,packets=cohort();rows[0]['suspected_campaign_component_id']='historical-proxy'
+    with pytest.raises(ValueError,match='historically exposed'):
+        validate_cohort(rows,packets,[{'suspected_campaign_component_id':'historical-proxy'}])
+
+
+def test_review_csv_import_blanks_and_same_human_rejected(tmp_path):
+    import csv
+    from .review_intake import import_forms
+    packets=tmp_path/'packets.jsonl'
+    p=packet();p.update(review_id='r1',snapshot_path='snapshots/r1.html.txt',evidence=[],reviews=[])
+    packets.write_text(json.dumps(p)+'\n')
+    fields=['review_id','snapshot_file','html_sha256','label','reviewer_id','reviewed_at_utc','review_rationale','blind_to_model_and_other_review']
+    def form(path,label='',identity=''):
+        with path.open('w',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerow(dict(review_id='r1',snapshot_file=p['snapshot_path'],
+                html_sha256=p['html_sha256'],label=label,reviewer_id=identity,reviewed_at_utc='2026-10-11T00:00:00Z',
+                review_rationale='synthetic only',blind_to_model_and_other_review='true'))
+    a=tmp_path/'a.csv';b=tmp_path/'b.csv';form(a);form(b)
+    summary=import_forms(packets,a,b,tmp_path/'blank')
+    assert summary['recorded_human_review_entries']==0 and summary['decision_counts']=={'pending':1}
+    form(a,'0','same');form(b,'0','same')
+    with pytest.raises(ValueError,match='distinct human'):import_forms(packets,a,b,tmp_path/'same')
+    form(b,'0','different')
+    summary=import_forms(packets,a,b,tmp_path/'unsupported')
+    assert summary['decision_counts']=={'quarantine':1}
+
+
+def test_new_history_checksums_and_coverage():
+    from .intake import digest
+    # Large generated registries are retained in the private delivery; a clean
+    # checkout must replay the documented acquisition before this integrity test.
+    if not (ROOT/'research/robustness_v1/evidence/history_v6/historical_exposure_registry.jsonl.gz').exists():
+        pytest.skip('requires checksum-pinned historical registry delivery or replay')
+    for version in ('history_v5','history_v6'):
+        folder=ROOT/'research/robustness_v1/evidence'/version
+        summary=json.loads((folder/'summary.json').read_text())
+        assert digest(folder/'historical_exposure_registry.jsonl.gz')==summary['registry_sha256']
+        assert summary['confirmed_campaigns']==summary['completed_human_reviews']==summary['real_model_fits']==0
+    coverage=json.loads((ROOT/'research/robustness_v1/evidence/history_v5/coverage.json').read_text())
+    assert coverage['dom_pilot']['present']['normalized_url_sha256']==256
+    assert coverage['dom_pilot']['present']['structural_sha256']==242
+    assert coverage['legitimate_collection_combined']['records']==2643
+
+
 def test_nested_runner_end_to_end_synthetic_only(tmp_path,monkeypatch):
     from . import compare as module
     from .intake import HERE

@@ -1,0 +1,132 @@
+{
+  "assignment02_historical_url_baseline": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 4000,
+      "registered_domain_sha256": 4000,
+      "structural_sha256": 0
+    },
+    "records": 4000
+  },
+  "dom_pilot": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 256,
+      "normalized_url_sha256": 256,
+      "registered_domain_sha256": 256,
+      "structural_sha256": 242
+    },
+    "records": 256
+  },
+  "formal_candidate_enriched": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 5000,
+      "normalized_url_sha256": 5000,
+      "registered_domain_sha256": 5000,
+      "structural_sha256": 4773
+    },
+    "records": 5000
+  },
+  "formal_candidates": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 5000,
+      "normalized_url_sha256": 0,
+      "registered_domain_sha256": 5000,
+      "structural_sha256": 0
+    },
+    "records": 5000
+  },
+  "legitimate_collection_attempted_domain": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 0,
+      "registered_domain_sha256": 1800,
+      "structural_sha256": 0
+    },
+    "records": 1800
+  },
+  "legitimate_collection_combined": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 2643,
+      "registered_domain_sha256": 2643,
+      "structural_sha256": 0
+    },
+    "records": 2643
+  },
+  "legitimate_collection_combined_evidence_url": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 2160,
+      "registered_domain_sha256": 2160,
+      "structural_sha256": 0
+    },
+    "records": 2160
+  },
+  "legitimate_collection_diagnostic": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 16,
+      "registered_domain_sha256": 16,
+      "structural_sha256": 0
+    },
+    "records": 16
+  },
+  "legitimate_collection_diagnostic_evidence_url": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 11,
+      "registered_domain_sha256": 11,
+      "structural_sha256": 0
+    },
+    "records": 11
+  },
+  "legitimate_diagnostic_attempted_domain": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 0,
+      "registered_domain_sha256": 5,
+      "structural_sha256": 0
+    },
+    "records": 5
+  },
+  "observation_pilot_v1": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 10,
+      "normalized_url_sha256": 16,
+      "registered_domain_sha256": 16,
+      "structural_sha256": 10
+    },
+    "records": 16
+  },
+  "observation_pilot_v2": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 11,
+      "normalized_url_sha256": 16,
+      "registered_domain_sha256": 16,
+      "structural_sha256": 10
+    },
+    "records": 16
+  },
+  "phiusiil_historical_inspected_candidate_pool": {
+    "present": {
+      "campaign_id": 0,
+      "html_sha256": 0,
+      "normalized_url_sha256": 235795,
+      "registered_domain_sha256": 235795,
+      "structural_sha256": 0
+    },
+    "records": 235795
+  }
+}

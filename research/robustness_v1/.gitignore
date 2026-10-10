@@ -1,0 +1,5 @@
+# Regenerable large hash-only evidence retained in history-recovery-v6.zip.
+/evidence/history_v5/historical_exposure_registry.jsonl.gz
+/evidence/history_v5/duplicate_groups.jsonl
+/evidence/history_v6/historical_exposure_registry.jsonl.gz
+/evidence/history_v6/duplicate_groups.jsonl

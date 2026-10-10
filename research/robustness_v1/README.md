@@ -87,7 +87,7 @@ PYTHONPATH=src:. python -m research.robustness_v1.intake audit --root . --output
 
 ```bash
 PYTHONPATH=src:. python -m research.robustness_v1.intake review --input packets.jsonl --output decisions.jsonl
-PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v4/historical_exposure_registry.jsonl.gz --overlap-audit overlap_receipt.json --output /tmp/research-comparison
+PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v6/historical_exposure_registry.jsonl.gz --overlap-audit overlap_receipt.json --output /tmp/research-comparison
 ```
 
 以上訓練命令目前不能對空白複核清單執行；必須有真實新樣本及證據。所有參數與 input hashes 隨結果保留。
@@ -160,3 +160,59 @@ Assignment 01 的 snapshot bytes 尚未找到，已保留為明確缺口。
 `review_materials.py` 產生 Reviewer A、Reviewer B 兩份空白盲審表與第三人裁決表。
 兩位 reviewer 必須是不同真人且在完成前看不到原標籤、模型結果與對方答案；本程式
 不會簽署或代填真人判定。分歧或 uncertain 保留 quarantine。
+
+
+## 第五／六輪：2026-10-10 歷史資料補齊及真人複核交付
+
+最新索引是 `evidence/history_v6/`，完整 generated registry 與 duplicate groups 另保存在
+`history-recovery-v6.zip`；PR 保留程式、coverage、summary 及其檔案雜湊。
+解壓交付包到本研究目錄，或依下列指令重建後，才可執行完整 registry integrity test。
+乾淨 checkout 的 CI 明確 skip 該檔案核验，不代表雲端已重建歷史索引。
+它有 **256,718 筆來源紀錄、248,857 個不同身分 ID**，
+包含 domain-only 嘗試紀錄與曾檢視的候選 pool；這不是新樣本數或訓練資料量。
+
+- 重新從 SHA-256 鎖定的 train-000.parquet 重建 DOM pilot；256 個身分及原始 manifest/replay 雜湊均匹配。
+  補回 256 個 URL/domain 指紋、242 個合格 structural fingerprints。其餘沒有 signature 不是「沒有 template」。
+- 取回 Actions artifact 10901830057，核對 ZIP 雜湊及 31 個 member hashes。
+  納入 2,643 個 combined observations、16 個 diagnostic observations、historical evidence URLs，
+  以及 1,800 個預先抽定的 candidate domains 和 diagnostic failure domains；保留來源紀錄的重複。
+- 找回原始 supplement audit delivery（SHA-256 與原報告一致），
+  其 PhiUSIIL ZIP 與 CSV 亦匹配既有雜湊。納入先前已檢視的全部 235,795 個 URL rows，
+  僅供曝光排除；142 個不同 normalized URL 身分已在 v5 中。
+  原標籤、預計算 features 及 raw URL 均未輸出到此索引。
+- 在整份歷史上做 URL、domain、exact HTML、合格 tag-sequence 的 transitive grouping。
+  19 / 8,219 / 84 / 237 是各 key **連到兩個以上不同 sample ID 的群組數**，
+  不是 duplicated row 數，也不是已确认釣魚 campaign 數。
+  相同 normalized URL 已用同一 hash ID 合併者仍保留其多筆來源紀錄。
+  `suspected_campaign_component_id` 是保守排除用 proxy，現有 confirmed campaign 仍為 0。
+  compare 現在也拒絕與歷史 proxy ID 相同的新資料，並檢查新資料不能拆散同一 proxy。
+
+仍未取得 Assignment01 原 4,000 個 URLs 與較早 local failed collection 原始身分。
+URL-only 來源沒有 HTML；近似 template、獨立 campaign/kit/operator 註記也未完成。
+因此 v4 的 recoverable-complete 表述不適用於整個研究歷史；v5/v6 明確保留 partial 狀態，
+不能簽發 complete novelty 或 unseen-campaign 證明。
+
+`review_intake prepare` 已對既有 656 筆盲審快照驗證所有 HTML hashes，
+建立不執行網頁的文字摘錄、兩份獨立 CSV 及必要 evidence 有效時間欄位。
+原始 URL/HTML 與填寫表格只在私有交付套件中；公用研究資料夾只保留 summary。
+blind attestation 不再預填 true，必須由真人自己確認。
+
+`review_intake import` 可接受部分填寫，拒絕未知/重複 ID、變更 snapshot、同一 reviewer、
+未聲明盲審與不完整證據。空白匯入結果是 656 pending、0 reviews，
+不會把 AI 文字摘錄當成真人答案。兩次同意但缺少 capture time 的紀錄仍 quarantine；
+現有 publisher_date 不是 captured_at，不會編造午夜時間戳。
+分歧裁決仍使用 intake.adjudicate 的第三位真人證據流程；本 CSV 匯入不自動解決分歧。
+
+重現指令（不訪問樣本 URL，不訓練、不讀 test predictions）：
+
+```bash
+PYTHONPATH=src:. python -m phishing_url.dom_dataset --parquet /private/train-000.parquet --config config/assignment03_dom_pilot.json --output /private/dom-pilot-replay
+PYTHONPATH=src:. python -m research.robustness_v1.extend_history --root . --pilot /private/dom-pilot-replay --supplement /private/historical-supplement.zip --output /tmp/history-v5
+PYTHONPATH=src:. python -m research.robustness_v1.recover_candidate_pool --root . --delivery /private/assignment02_supplement_audit_36227969493.zip --output /tmp/history-v6
+PYTHONPATH=src:. python -m research.robustness_v1.review_intake prepare --source /private/human-review-v1 --output /private/human-review-v2
+PYTHONPATH=src:. python -m research.robustness_v1.review_intake import --packets /private/human-review-v2/packets_blinded.jsonl --reviewer-a /private/human-review-v2/reviewer_a/review_form.csv --reviewer-b /private/human-review-v2/reviewer_b/review_form.csv --output /private/review-import
+```
+
+PhiUSIIL attribution: Prasad & Chandra (2024), UCI dataset 967, CC BY 4.0,
+https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset.
+Its inclusion records prior exposure, not source/label approval for training.

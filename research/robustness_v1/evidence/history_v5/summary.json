@@ -1,0 +1,39 @@
+{
+  "added_collection_records": 6635,
+  "completed_human_reviews": 0,
+  "component_interpretation": "Equality-based conservative leakage proxy; broad shared templates/domains may overgroup; no campaign attribution",
+  "components_with_multiple_ids": 2053,
+  "confirmed_campaigns": 0,
+  "dom_pilot_enriched": 256,
+  "dom_pilot_verification": {
+    "all_candidates_including_oversize_treated_as_exposed": true,
+    "candidate_count": 256,
+    "enriched_manifest_sha256": "d4285a2fe5c4725d45675f8c4175298e5a855e711df8593a3336714248abfddd",
+    "original_manifest_projection_sha256": "a01a4ce217651205d596aae03f22d0e0754c6c0ba1fe9777908cc626495dc415",
+    "original_replay_sha256": "0c08e9aadec1454b5a18dd1354e105836392e783d48fe6c04345754c27b7eda7",
+    "structural_signatures_available": 242
+  },
+  "duplicate_groups_by_key": {
+    "html_sha256": 84,
+    "normalized_url_sha256": 8,
+    "registered_domain_sha256": 1982,
+    "structural_sha256": 237
+  },
+  "historical_records": 20923,
+  "new_training_samples": 0,
+  "previous_registry_sha256": "8d68515e41290e3c1ded95980dbe4af8281aa8a8f48cdb4444946181ce2324ea",
+  "real_model_fits": 0,
+  "registry_sha256": "9f622597353a0e0530a216c78754cca7c78638779dad59666c8c8d5474faa291",
+  "remaining_gaps": [
+    "Assignment01 original 4000 URLs not recovered",
+    "Earlier local failed collection identities and inspected PhiUSIIL candidate pool not recovered in this registry",
+    "URL-only histories have no archived HTML; template absence is unknown, not negative",
+    "Near-template similarity and independent campaign/kit/operator attribution remain unverified"
+  ],
+  "status": "partial_history_unknown_campaign_not_novelty_certification",
+  "supplement_sha256": "7ae33290b473e233e11dd8b4184b23b1b4edffdee5edc864807e1f7b7b108ffd",
+  "suspected_components": 8431,
+  "test_predictions_read": false,
+  "unique_sample_ids": 14311,
+  "verified_supplement_members": 31
+}

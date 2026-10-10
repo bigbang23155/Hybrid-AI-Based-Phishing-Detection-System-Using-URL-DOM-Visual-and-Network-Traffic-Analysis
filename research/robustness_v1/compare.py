@@ -59,12 +59,12 @@ def validate_cohort(rows, packets, history):
     if set(reviews) != {r['sample_id'] for r in rows}:
         raise ValueError('review/cohort membership mismatch')
     keys = ('sample_id','html_sha256','registered_domain_sha256','final_group',
-            'normalized_url_sha256','structural_sha256','campaign_id')
+            'normalized_url_sha256','structural_sha256','campaign_id','suspected_campaign_component_id')
     denied = {key:{r[key] for r in history if r.get(key)} for key in keys}
     source_positions = {(r.get('source_revision', 'eabec4b7a66324b79cc8a0ad856d1731dc26fe1a'),
                          r['source_file'],r['source_row']) for r in history
                         if r.get('source_file') is not None and r.get('source_row') is not None}
-    owners = {key:{} for key in ('registered_domain_sha256','html_sha256','normalized_url_sha256','structural_sha256','campaign_id')}
+    owners = {key:{} for key in ('registered_domain_sha256','html_sha256','normalized_url_sha256','structural_sha256','campaign_id','suspected_campaign_component_id')}
     names = list(feature_names('url_dom'))
     for row in rows:
         if row['scope'] != 'new_development':
@@ -79,7 +79,7 @@ def validate_cohort(rows, packets, history):
             raise ValueError('missing provenance')
         for key in owners:
             value = row.get(key)
-            if key != 'campaign_id' and not value:raise ValueError('missing leakage key: '+key)
+            if key not in ('campaign_id','suspected_campaign_component_id') and not value:raise ValueError('missing leakage key: '+key)
             if value:
                 group = owners[key].setdefault(value, row['final_group'])
                 if group != row['final_group']:raise ValueError('leakage component incorrectly split')

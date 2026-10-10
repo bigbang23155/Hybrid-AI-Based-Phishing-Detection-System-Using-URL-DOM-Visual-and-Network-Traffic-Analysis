@@ -87,7 +87,7 @@ PYTHONPATH=src:. python -m research.robustness_v1.intake audit --root . --output
 
 ```bash
 PYTHONPATH=src:. python -m research.robustness_v1.intake review --input packets.jsonl --output decisions.jsonl
-PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v2/historical_exposure_registry.jsonl --overlap-audit overlap_receipt.json --output /tmp/research-comparison
+PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v3/historical_exposure_registry.jsonl.gz --overlap-audit overlap_receipt.json --output /tmp/research-comparison
 ```
 
 以上訓練命令目前不能對空白複核清單執行；必須有真實新樣本及證據。所有參數與 input hashes 隨結果保留。
@@ -122,3 +122,24 @@ pilot 的完整身分，以及 normalized URL、template、campaign 歷史；不
 但其中沒有完整逐筆身分資料，不能代替原始 dataset。詳見 continuation_receipt.json。
 目前需要恢復上述原始索引並取得實際人工複核；214 項本機測試通過只代表工程
 檢查通過，不代表四項改善已完成，也不代表模型效能提升。
+
+## 第三輪：恢復 A02 保存檔
+
+先前 GitHub artifact 404 的 observation v2 已從保存的完整 delivery 恢復。
+ZIP SHA-256 與 repository 原紀錄一致，153 個 manifest 檔案全部核對。
+另外取回 4,000 筆歷史 URL baseline；urls.csv 與凍結 dataset hash 一致。
+只讀 URL 身分、observation metadata 與舊 DOM，沒有開啟 test_predictions。
+
+`recover_history.py` 輸出合併的 hash-only registry（9,272 筆來源紀錄，不代表
+9,272 個獨立 domain 或新樣本）：4,016 筆 normalized URL、9,016 筆 domain、
+5,267 筆 HTML、10 筆符合最少 20 tags 的 structural signature。campaign 仍為 0。
+索引包含失敗／skipped observation，避免把擷取失敗的已知網址當作未曝光。
+來源紀錄可以重疊，不依此估計有效樣本數。
+
+```bash
+PYTHONPATH=src:. python -m research.robustness_v1.recover_history --root . --delivery /path/to/assignment02_baseline_and_pilot_v2_complete.zip --output /tmp/history-v3
+```
+
+輸出參見 `evidence/history_v3/summary.json`。原始 URL、DOM 與壓縮保存檔不進 Git。
+仍缺 Assignment01／其他 URL collection、observation v1，以及正式 cohort／DOM pilot
+完整 URL/template/campaign 歷史。未取得獨立人工判讀，因此新資料訓練與後兩階段未啟動。

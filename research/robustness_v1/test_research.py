@@ -167,6 +167,33 @@ def test_history_registry_evidence_and_archive_rejection(tmp_path):
     assert not (tmp_path/'output').exists()
 
 
+def test_recovered_registry_is_hash_only_and_bound():
+    from .intake import digest
+    folder=ROOT/'research/robustness_v1/evidence/history_v3'
+    summary=json.loads((folder/'summary.json').read_text())
+    path=folder/'historical_exposure_registry.jsonl.gz'
+    assert digest(path)==summary['registry_sha256']
+    rows=read_rows(path)
+    assert len(rows)==9272
+    assert sum(r['exposure_origin']=='assignment02_historical_url_baseline' for r in rows)==4000
+    assert sum(r['exposure_origin']=='observation_pilot_v2' for r in rows)==16
+    assert all(not ({'url_raw','url_clean','label','features','score'} & r.keys()) for r in rows)
+    assert summary['verified_observation_members']==153
+    assert summary['present_records']['campaign_id']==0
+    assert summary['test_predictions_read'] is False
+
+
+def test_recovery_rejects_changed_url_dataset_before_output(tmp_path):
+    import zipfile
+    from .recover_history import recover
+    archive=tmp_path/'bad.zip'
+    with zipfile.ZipFile(archive,'w') as z:
+        z.writestr('assignment02_baseline_and_pilot_v2/frozen/urls.csv','changed')
+    with pytest.raises(ValueError,match='dataset checksum'):
+        recover(ROOT,archive,tmp_path/'out')
+    assert not (tmp_path/'out').exists()
+
+
 @pytest.mark.parametrize('key',['scope','html_sha256','registered_domain_sha256','normalized_url_sha256','structural_sha256','features','overlap_audit_status'])
 def test_leakage_schema_and_scope_rejected(key):
     rows,packets=cohort()

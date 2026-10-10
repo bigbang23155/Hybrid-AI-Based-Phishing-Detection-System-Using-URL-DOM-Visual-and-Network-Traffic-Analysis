@@ -1,0 +1,64 @@
+{
+  "version": "post-assignment03-robustness-v1",
+  "baseline_commit": "ff45088e0ca5ff60c15923e15158553219898365",
+  "status": "intake_and_review_preparation",
+  "scope": "new research, not Assignment 03 submission",
+  "seed": 4941801,
+  "model_seeds": [4941802, 4941803, 4941804],
+  "stages": ["complexity", "benign_login", "fusion", "adversarial_and_external"],
+  "historical_test_policy": "diagnostic origin only; never refit, resplit, select, or claim new validation on it",
+  "new_holdout_policy": "exclude ALL old candidate and pilot exposure components; future time/source/campaign specification before collection; no outcome-driven replacement",
+  "review": {
+    "blind_independent_passes": 2,
+    "minimum_independent_evidence_families": 2,
+    "third_reviewer_on_disagreement": true,
+    "uncertain_policy": "quarantine, retain denominator, no automatic relabel",
+    "no_detection_is_not_benign_evidence": true,
+    "model_votes_are_not_ground_truth": true
+  },
+  "sample_design": {
+    "reference_stream": "representative new cohort; retain observed prevalence and collection failures",
+    "targeted_stream": "simple benign, complex phishing and benign login; report separately from reference stream",
+    "strata": ["label", "complexity", "login_context", "source_family", "capture_month", "language"],
+    "complexity_cutpoints": "fit training tag_count quartiles; retain historical thresholds only for old review",
+    "max_selected_per_registered_domain": 3,
+    "correct_control_cap_per_historical_cell": 3,
+    "learning_curve_train_group_fractions": [0.125, 0.25, 0.5, 0.75, 1.0],
+    "independent_subgroup_precision": {"confidence": 0.95, "half_width": 0.05},
+    "exploratory_min_class_groups_per_subgroup": 30,
+    "precision_target_is_not_a_power_calculation": true
+  },
+  "experiments": {
+    "core_models": ["logistic_regression", "random_forest", "extra_trees", "gradient_boosting", "hist_gradient_boosting", "rbf_svm"],
+    "optional_later_models": ["xgboost", "lightgbm"],
+    "modalities": ["url_only", "dom_only", "url_dom"],
+    "outer_group_folds": 5,
+    "inner_group_folds": 3,
+    "configurations_per_core_model": 2,
+    "data_treatments_in_order": ["reviewed_unweighted", "train_only_class_complexity_weights", "matched_source_time_login_sensitivity", "remove_complexity_group_ablation"],
+    "fusion_in_order": ["feature_concatenation", "calibrated_probability_average", "group_oof_stacking"],
+    "selection": "inner group CV only; primary mean F1, ties within 0.005 prefer lower benign FPR then lower complexity; report all outer results",
+    "threshold_reference": 0.5,
+    "calibration": "only group-disjoint training folds; SVC built-in probability CV disabled",
+    "metrics": ["f1", "fpr", "recall", "average_precision", "roc_auc", "brier_when_calibrated", "fp", "fn", "coverage", "abstention", "latency", "training_cost"],
+    "uncertainty": "paired whole-leakage-component bootstrap; repeated seed SD is not a confidence interval",
+    "operating_thresholds": "set on training calibration/inner validation only; operational FPR targets must be fixed before new external evaluation",
+    "no_smote_on_discrete_dom_counts": true,
+    "no_test_guided_model_choice": true
+  },
+  "promotion": {
+    "minimum_primary_f1_delta": 0.0,
+    "minimum_target_error_rate_improvement": 0.05,
+    "maximum_overall_fpr_increase": 0.01,
+    "maximum_overall_recall_decrease": 0.02,
+    "require_group_interval_support": true,
+    "note": "provisional research effect/guardrail targets, not deployment standards; lock with cohort before scores; failure/inconclusive keeps stage open"
+  },
+  "adversarial_training_enabled": false,
+  "external_evaluation_enabled": false,
+  "sources": [
+    "https://scikit-learn.org/1.7/modules/cross_validation.html",
+    "https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html",
+    "https://scikit-learn.org/stable/modules/permutation_importance.html"
+  ]
+}

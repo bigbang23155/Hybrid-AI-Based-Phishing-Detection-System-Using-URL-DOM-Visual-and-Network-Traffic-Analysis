@@ -194,6 +194,34 @@ def test_recovery_rejects_changed_url_dataset_before_output(tmp_path):
     assert not (tmp_path/'out').exists()
 
 
+def test_recoverable_history_v4_has_url_template_and_campaign_proxy():
+    from .intake import digest
+    folder=ROOT/'research/robustness_v1/evidence/history_v4'
+    summary=json.loads((folder/'summary.json').read_text())
+    path=folder/'historical_exposure_registry.jsonl.gz';rows=read_rows(path)
+    assert digest(path)==summary['registry_sha256'] and len(rows)==14288
+    assert summary['formal_candidates_enriched']==5000
+    assert summary['observation_v1_records']==16
+    assert summary['present_records']['structural_sha256']==4793
+    assert summary['present_records']['suspected_campaign_component_id']==5016
+    assert summary['present_records']['campaign_id']==0
+    assert summary['verified_observation_v1_members']==106
+    assert summary['test_predictions_read'] is False
+
+
+def test_human_review_materials_are_blank_and_independent(tmp_path):
+    from .review_materials import run
+    packets=tmp_path/'packets.jsonl'
+    packets.write_text(json.dumps(dict(review_id='r1',sample_id='s1',html_sha256='a'*64,
+        snapshot_path='snapshots/r1.html.txt',publisher_date='2026-01-01',language='en'))+'\n')
+    summary=run(packets,tmp_path/'out')
+    assert summary['completed_human_reviews']==0 and summary['reviewer_forms']==2
+    a=(tmp_path/'out/reviewer_a/review_form.csv').read_text()
+    b=(tmp_path/'out/reviewer_b/review_form.csv').read_text()
+    assert a==b and ',label,' in a and 'snapshots/r1.html.txt' in a
+    assert not any(x in a for x in ('source_label','model_score','selection_reason'))
+
+
 @pytest.mark.parametrize('key',['scope','html_sha256','registered_domain_sha256','normalized_url_sha256','structural_sha256','features','overlap_audit_status'])
 def test_leakage_schema_and_scope_rejected(key):
     rows,packets=cohort()

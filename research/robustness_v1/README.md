@@ -87,7 +87,7 @@ PYTHONPATH=src:. python -m research.robustness_v1.intake audit --root . --output
 
 ```bash
 PYTHONPATH=src:. python -m research.robustness_v1.intake review --input packets.jsonl --output decisions.jsonl
-PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v3/historical_exposure_registry.jsonl.gz --overlap-audit overlap_receipt.json --output /tmp/research-comparison
+PYTHONPATH=src:. python -m research.robustness_v1.compare --input new_development.jsonl --reviews packets.jsonl --history research/robustness_v1/evidence/history_v4/historical_exposure_registry.jsonl.gz --overlap-audit overlap_receipt.json --output /tmp/research-comparison
 ```
 
 以上訓練命令目前不能對空白複核清單執行；必須有真實新樣本及證據。所有參數與 input hashes 隨結果保留。
@@ -143,3 +143,20 @@ PYTHONPATH=src:. python -m research.robustness_v1.recover_history --root . --del
 輸出參見 `evidence/history_v3/summary.json`。原始 URL、DOM 與壓縮保存檔不進 Git。
 仍缺 Assignment01／其他 URL collection、observation v1，以及正式 cohort／DOM pilot
 完整 URL/template/campaign 歷史。未取得獨立人工判讀，因此新資料訓練與後兩階段未啟動。
+
+## 第四輪：URL／template／campaign 查重與真人盲審材料
+
+使用六個固定 shard 重建全部 5,000 筆正式候選的 normalized URL、domain、exact HTML
+與 structural signature。`evidence/history_v4` 合併 observation pilot v1，總計 14,288 筆
+來源紀錄（9,288 個 unique sample ID）；來源紀錄有意重疊，不代表獨立樣本數。
+可比對欄位包含 9,032 筆 normalized URL、10,277 筆 HTML、4,793 筆 structure。
+
+原 `final_group` 與 observation ID 被記錄為 `suspected_campaign_component_id`，供未來
+資料隔離。這是 domain/URL/HTML/structure 的保守連通 component；沒有 operator、kit、
+事件或獨立 feed 證據，因此 0 筆可標為 confirmed campaign，不能宣稱 unseen campaign。
+Assignment 01 的 snapshot bytes 尚未找到，已保留為明確缺口。
+
+656 筆既有 development 原因追查案例已重建為私人快照，技術檢查 656/656 通過。
+`review_materials.py` 產生 Reviewer A、Reviewer B 兩份空白盲審表與第三人裁決表。
+兩位 reviewer 必須是不同真人且在完成前看不到原標籤、模型結果與對方答案；本程式
+不會簽署或代填真人判定。分歧或 uncertain 保留 quarantine。

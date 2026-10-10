@@ -1,0 +1,34 @@
+{
+  "artifact_sha256": "c6c1237bb11f74308799203d6470f1e0f9abb3c84c49d0cfe50bc772b00c8be3",
+  "formal_records": 5000,
+  "human_reviews": 0,
+  "index_sha256": "0c08e9aadec1454b5a18dd1354e105836392e783d48fe6c04345754c27b7eda7",
+  "model_fits": 0,
+  "new_samples": 0,
+  "original_history_sha256": "ecbb57df38777d1adf83c266bc4b0bebc2a87b8b6bba1d80ea9d32b003906b4d",
+  "pilot_only_sample_ids": 256,
+  "pilot_records": 256,
+  "pilot_records_matching_formal_html": 15,
+  "present_records": {
+    "campaign_id": 0,
+    "html_sha256": 5256,
+    "normalized_url_sha256": 0,
+    "registered_domain_sha256": 5000,
+    "sample_id": 5256,
+    "structural_sha256": 0
+  },
+  "registry_records": 5256,
+  "registry_sha256": "978518b1531f4a776014f3d5ee3e9afa49c0310c2c97812bc477679ea4221eaa",
+  "remaining_gaps": [
+    "URL baseline and observation pilot identities",
+    "pilot-only registered domains",
+    "normalized URL history",
+    "structural template history",
+    "campaign evidence; unknown is not unseen"
+  ],
+  "shared_sample_ids": 0,
+  "status": "partial_history_not_novelty_certification",
+  "test_predictions_read": false,
+  "unique_sample_ids": 5256,
+  "verification_sha256": "8eded40d0cdfdfe64fe82d5934debf9531415f2a021f0091e56d08bbb82d1022"
+}

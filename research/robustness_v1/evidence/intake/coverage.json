@@ -1,0 +1,226 @@
+[
+  {
+    "complexity_bin": 0,
+    "error_rate": 0.42857142857142855,
+    "errors": 6,
+    "groups": 14,
+    "illustrative_independent_wilson_interval": [
+      0.21380798904474121,
+      0.6740935542034926
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 14,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 0,
+    "error_rate": 0.125,
+    "errors": 2,
+    "groups": 15,
+    "illustrative_independent_wilson_interval": [
+      0.03497748774324047,
+      0.36022827265758695
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 16,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 1,
+    "error_rate": 0.10638297872340426,
+    "errors": 5,
+    "groups": 45,
+    "illustrative_independent_wilson_interval": [
+      0.04630478218108157,
+      0.22594269343738355
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 47,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 1,
+    "error_rate": 0.18181818181818182,
+    "errors": 4,
+    "groups": 21,
+    "illustrative_independent_wilson_interval": [
+      0.07306884583422052,
+      0.38516607437126543
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 22,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 2,
+    "error_rate": 0.05042016806722689,
+    "errors": 6,
+    "groups": 118,
+    "illustrative_independent_wilson_interval": [
+      0.023310322236378966,
+      0.105648247392928
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 119,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 2,
+    "error_rate": 0.1111111111111111,
+    "errors": 1,
+    "groups": 9,
+    "illustrative_independent_wilson_interval": [
+      0.019890887638544907,
+      0.434999705576656
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 9,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 3,
+    "error_rate": 0.015503875968992248,
+    "errors": 2,
+    "groups": 109,
+    "illustrative_independent_wilson_interval": [
+      0.004262070389691612,
+      0.05476663111891134
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 129,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 3,
+    "error_rate": 0.0,
+    "errors": 0,
+    "groups": 13,
+    "illustrative_independent_wilson_interval": [
+      0.0,
+      0.22809537235419838
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 0,
+    "n": 13,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 0,
+    "error_rate": 0.014925373134328358,
+    "errors": 2,
+    "groups": 67,
+    "illustrative_independent_wilson_interval": [
+      0.0041026643692217285,
+      0.05278485617635224
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 134,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 0,
+    "error_rate": 0.0,
+    "errors": 0,
+    "groups": 19,
+    "illustrative_independent_wilson_interval": [
+      0.0,
+      0.16817922405261626
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 19,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 1,
+    "error_rate": 0.10526315789473684,
+    "errors": 8,
+    "groups": 57,
+    "illustrative_independent_wilson_interval": [
+      0.054311261828219104,
+      0.1941994632232051
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 76,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 1,
+    "error_rate": 0.08333333333333333,
+    "errors": 2,
+    "groups": 20,
+    "illustrative_independent_wilson_interval": [
+      0.023158815297043306,
+      0.25848802193210685
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 24,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 2,
+    "error_rate": 0.20689655172413793,
+    "errors": 12,
+    "groups": 44,
+    "illustrative_independent_wilson_interval": [
+      0.12251483969490558,
+      0.3276921792148341
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 58,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 2,
+    "error_rate": 0.2,
+    "errors": 6,
+    "groups": 11,
+    "illustrative_independent_wilson_interval": [
+      0.0950510717728987,
+      0.3730569641314825
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 30,
+    "password_present": true
+  },
+  {
+    "complexity_bin": 3,
+    "error_rate": 0.1,
+    "errors": 2,
+    "groups": 19,
+    "illustrative_independent_wilson_interval": [
+      0.027866481213768224,
+      0.3010336452284873
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 20,
+    "password_present": false
+  },
+  {
+    "complexity_bin": 3,
+    "error_rate": 0.5,
+    "errors": 6,
+    "groups": 8,
+    "illustrative_independent_wilson_interval": [
+      0.2537815976337061,
+      0.7462184023662939
+    ],
+    "interval_limitation": "not cluster-adjusted, descriptive only",
+    "label": 1,
+    "n": 12,
+    "password_present": true
+  }
+]

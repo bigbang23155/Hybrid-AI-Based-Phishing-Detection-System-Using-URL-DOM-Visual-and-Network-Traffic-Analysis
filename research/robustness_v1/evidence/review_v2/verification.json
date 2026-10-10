@@ -1,0 +1,11 @@
+{
+  "parent_commit": "2957fd1e0b652c4d9d736689185926e1dbcf127c",
+  "local_tests": {
+    "passed": 223,
+    "seconds": 23.72
+  },
+  "cloud_tests": "pending",
+  "real_model_fits": 0,
+  "test_predictions_read": false,
+  "human_reviews": 0
+}

@@ -1,0 +1,38 @@
+{
+  "adversarial_training_executed": false,
+  "blockers": [
+    "Original snapshots are not included in the repository; materialize for content review.",
+    "Two independent human reviews with time-aligned evidence are not available.",
+    "New development/reference samples and untouched external holdout are not acquired.",
+    "Historical denylist lacks pilot-only IDs and URL/template/campaign keys; expand it before certifying novel cohorts."
+  ],
+  "development_validation_rows": 742,
+  "frozen_files_verified": 75,
+  "historical_exposure_rows": 5000,
+  "historical_partitions": {
+    "excluded": 55,
+    "test": 742,
+    "train": 3461,
+    "validation": 742
+  },
+  "input_sha256": {
+    "config/assignment03_final_evaluation_v1.json": "be19ad2c728704d75afd2eb605e023b9edfb8544d7700735e6fe071e906763e0",
+    "results/assignment03/holdout_v1/partition_manifest.jsonl.gz": "2c69beb41c13aa70194904e993efe96ecebf5cf76a496c571af05e70597b8b54",
+    "results/assignment03/review_v1/error_ledger.jsonl.gz": "6343e8c1ccce32194f84d1a80e58c925d972f18ac393105b50f78ff843e33512",
+    "results/assignment03/review_v1/paired_changes.jsonl.gz": "bcb69d05565d29e1cc56da6fcac318670043ea9f0fe8a6b5a9e175f57b084775"
+  },
+  "model_fits": 0,
+  "new_samples_acquired": 0,
+  "review_queue_rows": 656,
+  "review_reason_counts": {
+    "benign_password_proxy": 60,
+    "complex_phishing": 32,
+    "fusion_introduced_error": 18,
+    "hybrid_error": 64,
+    "simple_benign": 30,
+    "stratified_correct_control": 591
+  },
+  "reviewed_labels": 0,
+  "status": "review_prepared_not_adjudicated",
+  "test_predictions_read": 0
+}

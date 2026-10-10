@@ -1,0 +1,30 @@
+{
+  "baseline_url_records": 4000,
+  "delivery_sha256": "f9a6865fbab90cb49640b871b842467bb0fb638c45c0bea75c8229eeff8c142b",
+  "historical_records": 9272,
+  "human_reviews": 0,
+  "inherited_registry_sha256": "978518b1531f4a776014f3d5ee3e9afa49c0310c2c97812bc477679ea4221eaa",
+  "new_samples": 0,
+  "observation_artifact_sha256": "e664eaee030075987d06be4169d4c06cf6c16a5b7d285bea32d508801be2bf40",
+  "observation_records": 16,
+  "present_records": {
+    "campaign_id": 0,
+    "html_sha256": 5267,
+    "normalized_url_sha256": 4016,
+    "registered_domain_sha256": 9016,
+    "sample_id": 9272,
+    "structural_sha256": 10
+  },
+  "real_model_fits": 0,
+  "registry_sha256": "31cd5c6fae9adc7f4371ca833cc6ee60f7db45e4f3424d9e5d53e172c185650a",
+  "remaining_gaps": [
+    "Assignment01 and other URL collections",
+    "observation pilot v1 identities",
+    "formal/DOM-pilot normalized URL and structural history",
+    "campaign evidence"
+  ],
+  "status": "partial_history_not_novelty_certification",
+  "test_predictions_read": false,
+  "url_dataset_sha256": "a45a5609dec304be42616b4f100b731c8d7fe315d93e5d758afb6aae1e8df549",
+  "verified_observation_members": 153
+}

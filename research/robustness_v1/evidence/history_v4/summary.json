@@ -1,0 +1,38 @@
+{
+  "campaign_interpretation": "suspected components prevent leakage but cannot establish operator, kit, family, or unseen campaign",
+  "formal_candidates_enriched": 5000,
+  "historical_records": 14288,
+  "human_reviews": 0,
+  "new_samples": 0,
+  "observation_v1_artifact_sha256": "62bf49d6f5b17d3536753f5f2ae605fc43ee259ebecfa1a7a97a2142deef79ad",
+  "observation_v1_records": 16,
+  "present_records": {
+    "campaign_id": 0,
+    "html_sha256": 10277,
+    "normalized_url_sha256": 9032,
+    "registered_domain_sha256": 14032,
+    "sample_id": 14288,
+    "structural_sha256": 4793,
+    "suspected_campaign_component_id": 5016
+  },
+  "previous_registry_sha256": "31cd5c6fae9adc7f4371ca833cc6ee60f7db45e4f3424d9e5d53e172c185650a",
+  "real_model_fits": 0,
+  "registry_sha256": "8d68515e41290e3c1ded95980dbe4af8281aa8a8f48cdb4444946181ce2324ea",
+  "remaining_gaps": [
+    "Assignment01 snapshot bytes unavailable; its 4,000 selected URL identities are described but not recoverable here",
+    "independent campaign/kit/operator annotations absent"
+  ],
+  "source_revision": "eabec4b7a66324b79cc8a0ad856d1731dc26fe1a",
+  "status": "recoverable_history_complete_campaign_truth_unavailable",
+  "test_predictions_read": false,
+  "unique_values": {
+    "campaign_id": 0,
+    "html_sha256": 5063,
+    "normalized_url_sha256": 9024,
+    "registered_domain_sha256": 7108,
+    "sample_id": 9288,
+    "structural_sha256": 4153,
+    "suspected_campaign_component_id": 3740
+  },
+  "verified_observation_v1_members": 106
+}

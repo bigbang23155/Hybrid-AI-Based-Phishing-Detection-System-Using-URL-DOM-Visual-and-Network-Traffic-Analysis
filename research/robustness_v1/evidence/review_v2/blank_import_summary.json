@@ -1,0 +1,13 @@
+{
+  "decision_counts": {
+    "pending": 656
+  },
+  "independence": "recorded identity only; software cannot verify actual person or source independence",
+  "input_sha256": {
+    "packets": "c01e1d56b93b54576be0e024f856945db6e9f1742eb5591f0847bebbbe82eddc",
+    "reviewer_a": "6d855817f842f3f8afdbb5c58e137f86c21d62f693bae30b3ad31a1f657c7762",
+    "reviewer_b": "6d855817f842f3f8afdbb5c58e137f86c21d62f693bae30b3ad31a1f657c7762"
+  },
+  "items": 656,
+  "recorded_human_review_entries": 0
+}

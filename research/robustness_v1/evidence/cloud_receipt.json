@@ -1,0 +1,146 @@
+{
+  "schema_version": "post-assignment03-research-cloud-receipt-v1",
+  "status": "intake_and_snapshot_checks_completed_not_model_improvement",
+  "execution_commit": "eb6d900263a341b2ed967b5ac398e2ff32d26757",
+  "github_actions_run_id": 38010729456,
+  "workflow_conclusion": "success",
+  "cloud_tests": {
+    "passed": 209,
+    "seconds": 39.77
+  },
+  "core_foundation_run_id": 38010729416,
+  "intake_replay_byte_identical": true,
+  "baseline_locked_files_unchanged": 75,
+  "review_priority_cases": 149,
+  "additional_correct_controls": 507,
+  "snapshot_preparation": {
+    "status": "snapshot_preparation_completed",
+    "queued": 656,
+    "materialized": 656,
+    "statuses": {
+      "technical_checks_passed": 656
+    },
+    "flags": {
+      "low_static_content_flag": 81,
+      "access_error_marker": 14,
+      "parking_marker": 2
+    },
+    "reviewed_labels": 0,
+    "new_samples": 0,
+    "model_fits": 0,
+    "test_html_selected": 0,
+    "queue_sha256": "c4bfd95598e221f613c7f822c082278db0d19375c49b7df1d1e2b9c6bebde4aa",
+    "source_revision": "eabec4b7a66324b79cc8a0ad856d1731dc26fe1a",
+    "crosscheck_limit": "Two count implementations share Python HTMLParser; this checks implementation consistency, not independent content truth.",
+    "marker_limit": "Markers and password inputs are review triggers, not labels; publisher date is not necessarily capture time."
+  },
+  "source_acquisition": [
+    {
+      "path": "data/train-022.parquet",
+      "sha256": "48bb12db73d2920adf6fab9065aef6458cef4c68a63bdf8d17cef31411ed9dbd",
+      "size_bytes": 519913293,
+      "actual_sha256": "48bb12db73d2920adf6fab9065aef6458cef4c68a63bdf8d17cef31411ed9dbd",
+      "actual_bytes": 519913293,
+      "verified": true
+    },
+    {
+      "path": "data/train-007.parquet",
+      "sha256": "6ea74e3fe2fb8e60aeb1e839b768c63f847a53a4b522eaeb039f646fef7e6d99",
+      "size_bytes": 470883056,
+      "actual_sha256": "6ea74e3fe2fb8e60aeb1e839b768c63f847a53a4b522eaeb039f646fef7e6d99",
+      "actual_bytes": 470883056,
+      "verified": true
+    },
+    {
+      "path": "data/train-032.parquet",
+      "sha256": "5b066986fff36d56ef9fa9f0de918504db4b9bf4774c0feed07d4ec34ed48f2d",
+      "size_bytes": 516975992,
+      "actual_sha256": "5b066986fff36d56ef9fa9f0de918504db4b9bf4774c0feed07d4ec34ed48f2d",
+      "actual_bytes": 516975992,
+      "verified": true
+    },
+    {
+      "path": "data/train-001.parquet",
+      "sha256": "260cb9c93299f6b244d48321fe115523159770f4e73446b382473628c6e81d74",
+      "size_bytes": 322018201,
+      "actual_sha256": "260cb9c93299f6b244d48321fe115523159770f4e73446b382473628c6e81d74",
+      "actual_bytes": 322018201,
+      "verified": true
+    },
+    {
+      "path": "data/train-051.parquet",
+      "sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845",
+      "size_bytes": 526031430,
+      "actual_sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845",
+      "actual_bytes": 526031430,
+      "verified": true
+    },
+    {
+      "path": "data/train-054.parquet",
+      "sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c",
+      "size_bytes": 547814803,
+      "actual_sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c",
+      "actual_bytes": 547814803,
+      "verified": true
+    }
+  ],
+  "cloud_installed_packages": [
+    "attrs-26.1.0",
+    "certifi-2026.7.22",
+    "charset_normalizer-3.5.2",
+    "filelock-4.1.0",
+    "idna-3.20",
+    "iniconfig-2.3.1",
+    "joblib-1.5.2",
+    "jsonschema-4.25.1",
+    "jsonschema-specifications-2025.9.1",
+    "numpy-2.2.6",
+    "packaging-26.3",
+    "pandas-2.3.2",
+    "pluggy-1.6.0",
+    "pyarrow-21.0.0",
+    "pygments-2.21.0",
+    "pytest-8.4.2",
+    "python-dateutil-2.9.0.post0",
+    "pytz-2026.5",
+    "referencing-0.37.0",
+    "requests-2.32.5",
+    "requests-file-3.0.1",
+    "rpds-py-2026.9.1",
+    "scikit-learn-1.7.2",
+    "scipy-1.18.1",
+    "six-1.17.0",
+    "threadpoolctl-3.7.0",
+    "tldextract-5.3.0",
+    "typing-extensions-4.16.0",
+    "tzdata-2026.5",
+    "urllib3-2.8.0"
+  ],
+  "artifacts": [
+    {
+      "id": 11652164502,
+      "name": "post-assignment03-intake-38010729456",
+      "size_in_bytes": 2480,
+      "reported_digest": "sha256:fd2ccc10a9d3c1fb4977ee8ed43dff5d4ca36820190b4fb4fa80e01e1831479b",
+      "expires_at": "2027-01-08T00:50:02Z"
+    },
+    {
+      "id": 11652054682,
+      "name": "post-assignment03-snapshot-checks-38010729456",
+      "size_in_bytes": 69040,
+      "reported_digest": "sha256:568f9afbc96a69a52daf2f7a8bdd817699985b90b47c20f3acdd6359a11c154b",
+      "expires_at": "2027-01-08T00:50:02Z"
+    }
+  ],
+  "evidence_retrieval": "Summary and acquisition records parsed from completed Actions logs; artifact metadata read via API. ZIP bytes were not downloaded or independently hashed.",
+  "pending": [
+    "new sample/source inventory and acquisition",
+    "complete historical pilot/URL/template/campaign overlap index",
+    "actual independent human review and evidence adjudication",
+    "real-data core comparison and later data treatments",
+    "login and fusion stages",
+    "adversarial training and external validation after stages 1-3"
+  ],
+  "assignment03_report_modified": false,
+  "test_inference_executed": false
+}

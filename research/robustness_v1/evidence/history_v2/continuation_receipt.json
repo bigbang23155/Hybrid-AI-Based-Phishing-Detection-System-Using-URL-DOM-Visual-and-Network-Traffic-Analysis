@@ -1,0 +1,28 @@
+{
+  "status": "history_extended_remaining_gaps_block_training",
+  "local_tests": {
+    "passed": 214,
+    "duration_seconds": 23.12
+  },
+  "immutable_files_verified": 75,
+  "dom_pilot_artifact": {
+    "id": 11382518633,
+    "download": "success",
+    "archive_and_index_sha256_verified": true
+  },
+  "observation_pilot_v2_artifact": {
+    "id": 10922820850,
+    "download": "GitHub API 404 NOT_FOUND",
+    "interpretation": "unavailable through this endpoint; cause not established"
+  },
+  "assignment02_export": {
+    "sha256": "faa6bedc50f28e8b7ffeb243ae64c0803f376ed0c18a1d7bf90ff20dc2003747",
+    "reconstructed_and_verified": true,
+    "identity_dataset_present": false
+  },
+  "new_samples": 0,
+  "real_model_fits": 0,
+  "human_reviews": 0,
+  "adversarial_training": false,
+  "external_evaluation": false
+}

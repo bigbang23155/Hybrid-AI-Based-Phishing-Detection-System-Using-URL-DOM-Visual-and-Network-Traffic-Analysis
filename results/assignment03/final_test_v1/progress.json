@@ -1,0 +1,12 @@
+{
+  "completed_cells": [
+    "random_forest/url_only/baseline",
+    "random_forest/dom_only/baseline",
+    "random_forest/url_dom/baseline",
+    "gradient_boosting/url_only/baseline",
+    "gradient_boosting/dom_only/baseline",
+    "gradient_boosting/url_dom/baseline"
+  ],
+  "status": "predictions_in_progress",
+  "test_predictions": 4452
+}

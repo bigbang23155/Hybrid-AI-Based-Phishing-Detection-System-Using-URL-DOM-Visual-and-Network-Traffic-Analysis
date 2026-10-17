@@ -13,6 +13,7 @@ from .adapters import from_checkpoint
 from .contract import MODALITIES, encoded, fusion_view, freshness, sha
 from .network_http import REGISTRY_SHA256, registry
 from .forensics import RULE_PATH
+from .quality import Coverage
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -51,6 +52,7 @@ def build(run, output, *, as_of, max_age_seconds, run_yara=True):
                     freshness_policy='explicit_provisional_cutoff_not_calibrated', complete=False)
     (output/'run.json').write_bytes(encoded(manifest)+b'\n')
     seen = set()
+    coverage = Coverage()
     with (private/'features.jsonl').open('xb') as stream, (private/'fusion_inputs.jsonl').open('xb') as fusion:
         for checkpoint in checkpoints:
             if checkpoint.parent.is_symlink() or not checkpoint.resolve().is_relative_to(run):
@@ -59,6 +61,9 @@ def build(run, output, *, as_of, max_age_seconds, run_yara=True):
             if row['item_id'] in seen:
                 raise ValueError('duplicate_item')
             seen.add(row['item_id'])
+            coverage.add(row)
+            if coverage.pairing['failed']:
+                raise ValueError('cross_modality_alignment_failed')
             stream.write(encoded(row)+b'\n')
             fusion.write(encoded({'item_id': row['item_id'], **fusion_view(row)})+b'\n')
             for name in MODALITIES:
@@ -74,7 +79,9 @@ def build(run, output, *, as_of, max_age_seconds, run_yara=True):
                'historical_equivalence_asserted': False}
     (public/'summary.json').write_bytes(encoded(summary)+b'\n')
     (public/'network_http_registry.json').write_bytes(encoded(registry())+b'\n')
+    (public/'feature_quality.json').write_bytes(encoded(coverage.report())+b'\n')
     manifest.update(complete=True, output_sha256={p.name:sha(p.read_bytes()) for p in sorted(private.iterdir())})
+    manifest['public_output_sha256'] = {p.name:sha(p.read_bytes()) for p in sorted(public.iterdir())}
     (output/'run.json').write_bytes(encoded(manifest)+b'\n')
     return summary
 

@@ -100,6 +100,10 @@ def from_checkpoint(checkpoint, *, as_of, max_age_seconds, run_yara=True):
 
     common = {'checkpoint_sha256': sha(record_raw), 'provider': record.get('provider'),
               'scan_uuid': record.get('scan_uuid'), 'retrieved_at': record.get('retrieved_at')}
+    if identity_ok:
+        final = result.get('page', {}).get('url') if isinstance(result.get('page'), dict) else None
+        common.update(submitted_url_sha256=sha(record['requested_url'].encode()),
+                      final_url_sha256=sha(final.encode()) if isinstance(final, str) else None)
     modalities, sidecars = {}, {}
     for name, kind in (('url', None), ('dom','dom'), ('visual','screenshot'), ('network_http','result')):
         version, names = SPEC[name]

@@ -48,15 +48,63 @@ Outputs:
   feature masks, modality masks and `all_missing`. This is an unfitted handoff,
   not a model-ready imputed matrix.
 - `public/summary.json`: acquisition, extraction, freshness and YARA status counts.
+- `public/feature_quality.json`: all 64 columns' observed/usable/zero counts,
+  nullable fractions, missing reasons, known support totals and same-scan alignment.
 - `public/network_http_registry.json`: definitions, units, source paths, limits
   and null policy. Source of truth is `network_http.py::DEFINITIONS`.
 - `run.json`: fixed time policy, runtime/dependency versions, implementation hashes,
   registry/rule hashes and output hashes. Feature order survives JSON sorting.
 
-Detailed outputs remain private even though raw payloads are omitted. If uploading
-to cloud storage, use the existing encrypted evidence store; this offline job has
-no upload operation. The new CI workflow uses synthetic data only, requires no
-Secrets, and does not change paused historical acquisition.
+Detailed outputs remain private even though raw payloads are omitted. The offline
+CLI has no upload operation. The CI offline job uses synthetic data and no Secrets;
+a separate bounded public-control job described below uses the existing encrypted
+evidence store. Historical acquisition remains paused.
+
+## Coverage and existing public-scan validation
+
+Coverage denominators include **every attempted record**, including absent artifacts.
+No complete-case filtering silently improves reported coverage. Observed zeros are
+counted separately from nulls; stale values remain observed but are not usable.
+Support totals include only records whose expected denominator is known. Missing
+reasons and quality flags in this report use fixed allowlists; unknown text becomes
+`other_reason` or `other_quality_flag` and cannot leak provider content.
+
+Before export, the pipeline recomputes and checks stored masks and exact registry
+versions/order. Acquired modalities must bind to the same checkpoint hash; DOM,
+Visual and HTTP must agree on scan UUID, capture time and submitted/final URL
+hashes. Artifact hashes and the HTTP representation/registry are required. A
+conflict aborts the batch with `complete=false`. Missing modalities are instead
+reported as `incomplete`, preserving the attempted record and explicit nulls.
+Pairing proves consistent evidence provenance, not authenticity of page content.
+
+The `public-evidence-smoke` CI job runs after offline tests on the existing research
+branch only. It uses the fixed `https://example.com/` positive control, searches
+existing public scans, and GETs verified JSON/DOM/screenshot evidence. It never
+submits scans or reads historical candidate Secrets. The client has a 15-request
+budget and 12-second request interval. No historical collection config is changed.
+
+```bash
+PYTHONPATH=src python -m research.multimodal_v1.smoke \
+  --work /absolute/path/to/new-private-smoke \
+  --publish /absolute/path/to/new-publish-directory
+```
+
+The job requires `URLSCAN_API_KEY` and validates the existing RSA recipient before
+any request. All raw evidence, feature rows and manifests are encrypted together
+with the existing authenticated evidence format. CI uploads only ciphertext,
+encryption receipt, execution identifiers and allowlisted quality/readiness JSON;
+artifacts expire after 30 days and plaintext is removed in an always-run cleanup.
+Failed or partial captures are retained encrypted for diagnosis and fail the job.
+
+Pass requires one aligned record, a usable feature in all four modalities, nonzero
+HTTP request counts, usable main HTTP status and successful YARA execution.
+`PASS_WITH_GAPS` explicitly lists optional unavailable columns (for example cookie
+ratios with zero cookies). The seven-day freshness cutoff is a provisional public
+control policy, **not a learned reliability threshold**. The exact reference time,
+implementation hashes, rules and dependencies are saved for reproducibility.
+The same scan may age out or become unavailable, so later live runs need not pass.
+This is one provider integration control, not dataset coverage, detection accuracy,
+proof of a benign label, or a substitute for independent human review.
 
 ## Missingness and reliability contract
 
@@ -172,8 +220,9 @@ provider-label leakage, timestamps/timezones, masks and serialization order,
 YARA positive/negative/error controls, resource caps, Collector end-to-end handoff,
 integrity/path checks, deterministic reruns and all 75 frozen file hashes.
 
-Real historical packet extraction and detection quality are not claimed by these
-tests. Historical collection remains paused and those packets lack matched recent
+The public-control job separately checks real provider evidence using the contract
+above. Real historical packet extraction and detection quality are not claimed by
+these tests. Historical collection remains paused and those packets lack matched recent
 evidence. Once authorized evidence is present, run this offline adapter, inspect
 coverage and temporal alignment, and complete independent human review before
 any training eligibility, threshold choice or model comparison. Existing Visual

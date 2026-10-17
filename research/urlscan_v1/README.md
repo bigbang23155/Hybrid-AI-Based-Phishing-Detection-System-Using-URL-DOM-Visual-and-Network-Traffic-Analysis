@@ -152,3 +152,23 @@ request_limit=70 包含重試，間隔至少 12 秒；遇限流或預算耗盡�
 
 搜尋欄位依官方文件：https://urlscan.io/docs/search/
 `task.url.keyword` 是原提交 URL；`page.url.keyword` 是跳轉後 URL；domain 搜尋不是頁面等價證明。
+
+## 搜尋範圍 preflight（暫停歷史批次）
+
+2026-10-17：本輪先完成帳號可見歷史與正向控制，`cloud_batch.json` 已設 `enabled=false`。
+歷史 workflow 在讀取候選 Secrets／建立 API client 前檢查開關；本輪不重查舊 10 筆，也不前進第 11–15 筆。
+`urlscan-readonly.yml` 的 live job 現改為 `search-preflight`，只使用固定公開 example.com，
+分別查 task URL、page URL、task hostname，再對原始 URL 查到的近期 public UUID 取得 Result 交叉驗證。
+成功通常 4 次 GET，含重試最多 12 次，間隔 12 秒；不下載 DOM/截圖或提交掃描。
+
+所有搜尋診斷保留 `search_date_limit_days`、`total`、`took` 及欄位狀態。
+三種查詢回報相同有效天數才確認 account-reported horizon；欄位缺失為 UNKNOWN，不能解讀為 unlimited。
+正向控制需三種查詢皆有最近 7 天內有效 public hit，且 reference Result 的 UUID/URL/time/visibility 通過。
+報表只保存固定公共控制目標、必要 UUID/time 與經白名單挑選的統計，不存原始 Search/Result body 或金鑰。
+
+更正：`has_more=false` 不是逐頁查完或搜尋全部歷史的證明；官方將此欄位連結到 total >10,000。
+先前 10 筆的確均為 results=[]，但未保存 `total` 或 `search_date_limit_days`，不能反推帳號歷史限制。
+搜尋日期限制也不等於 Result endpoint 的資料保留期限；知道舊 UUID 時是否可取回是另一個問題。
+
+官方依據：https://docs.urlscan.io/apis/urlscan-openapi/search
+變更日期：https://docs.urlscan.io/changelog （2026-10-01 Search history limit）

@@ -26,6 +26,21 @@ class CaptureError(Exception):
         super().__init__(code)
 
 
+def search_metadata(obj):
+    """Keep provider scope metadata; absent limits never mean unlimited history."""
+    result = {}
+    for field in ('search_date_limit_days', 'total', 'took'):
+        value = obj.get(field)
+        valid = type(value) is int and value >= 0
+        if field == 'search_date_limit_days' and valid:
+            valid = value <= 365000  # Bound date arithmetic on provider input.
+        result[field] = value if valid else None
+        result[field + '_state'] = 'reported' if valid else 'not_reported' if field not in obj else 'invalid'
+    result['has_more'] = obj.get('has_more') if type(obj.get('has_more')) is bool else None
+    result['has_more_semantics'] = 'provider_total_count_above_10000_not_page_exhaustion'
+    return result
+
+
 @dataclass
 class Response:
     status: int

@@ -26,7 +26,7 @@ jobs:
         run: python -m pip install -r research/urlscan_v1/requirements.txt
       - name: Offline client, provenance, review and dataset-isolation tests
         run: python -m unittest discover -s research/urlscan_v1 -p 'test_*.py' -v
-  live-smoke:
+  search-preflight:
     needs: offline
     # Same-repository controlled research branch only; no fork secrets or PR-target event.
     if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/urlscan-readonly-v1')
@@ -41,18 +41,15 @@ jobs:
           python-version: '3.12'
       - name: Install pinned encryption and similarity dependencies
         run: python -m pip install -r research/urlscan_v1/requirements.txt
-      - name: Retrieve an existing public example.com scan only
+      - name: Verify account search horizon and three public positive controls
         env:
           URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
-        run: python -m research.urlscan_v1.encrypted_batch --smoke --work "$RUNNER_TEMP/urlscan-smoke" --publish "$RUNNER_TEMP/urlscan-publish"
-      - name: Retain encrypted evidence and aggregate results
+        run: python -m research.urlscan_v1.search_preflight --output "$RUNNER_TEMP/urlscan-search-preflight"
+      - name: Retain sanitized search scope report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: urlscan-readonly-smoke-${{ github.run_id }}
+          name: urlscan-search-preflight-${{ github.run_id }}
           retention-days: 30
           if-no-files-found: warn
-          path: ${{ runner.temp }}/urlscan-publish/
-      - name: Remove transient untrusted evidence
-        if: always()
-        run: rm -rf -- "$RUNNER_TEMP/urlscan-smoke"
+          path: ${{ runner.temp }}/urlscan-search-preflight/

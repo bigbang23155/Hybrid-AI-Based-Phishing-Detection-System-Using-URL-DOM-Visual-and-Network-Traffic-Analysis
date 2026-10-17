@@ -14,7 +14,7 @@ from urllib.parse import urlsplit, urlunsplit
 import zlib
 
 from . import VERSION
-from .client import CaptureError, Client, json_object, scan_id
+from .client import CaptureError, Client, json_object, scan_id, search_metadata
 
 ROOT = Path(__file__).resolve().parents[2]
 QUEUE = ROOT / 'research/robustness_v1/evidence/intake/review_queue_blinded.jsonl'
@@ -160,7 +160,7 @@ def find_scan(client, url, record, *, diagnostics=False):
                 rejected['invalid_identity_or_time'] += 1
         diagnostic = {'strategy': strategy, 'returned': len(search['results']),
             'exact_public_matches': len(matches), 'rejected': dict(rejected),
-            'has_more': search.get('has_more') if isinstance(search.get('has_more'), bool) else None}
+            **search_metadata(search)}
         record['search_diagnostics'].append(diagnostic)
         record['search_candidates_returned'] = sum(d['returned'] for d in record['search_diagnostics'])
         record['search_exact_public_matches'] = len(matches)

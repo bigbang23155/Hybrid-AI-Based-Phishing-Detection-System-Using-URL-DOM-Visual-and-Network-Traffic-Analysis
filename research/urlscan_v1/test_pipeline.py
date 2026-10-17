@@ -13,7 +13,9 @@ from PIL import Image, ImageDraw
 
 from research.urlscan_v1.batch_plan import plan
 from research.urlscan_v1.collector import encoded, rows, sha
-from research.urlscan_v1.encrypted_batch import prepare_candidates, run
+from research.urlscan_v1.encrypted_batch import (prepare_candidates, run,
+    read_candidate_secret, split_candidate_secret, main, SECRET_PART_BYTES)
+from research.urlscan_v1.client import CaptureError
 from research.urlscan_v1.secure_store import (keygen, seal, unseal, pack, unpack,
     input_encrypt, input_decrypt, b64, seal_directory)
 from research.urlscan_v1.similarity import dom_signature, visual_signature, build
@@ -99,6 +101,60 @@ class PipelineTests(unittest.TestCase):
         for path,data in [(source/'packets_blinded.jsonl',packets),(self.root/'annotations.jsonl',annotations),(self.root/'queue.jsonl',packets)]:
             path.write_bytes(b''.join(encoded(r)+b'\n' for r in data))
         return source/'packets_blinded.jsonl',self.root/'annotations.jsonl',self.root/'queue.jsonl'
+
+    def test_secret_chunk_boundary_and_exact_reassembly(self):
+        for size in (1, 32000, 32001, 48668, 64000):
+            secret = 'a' * size
+            parts = split_candidate_secret(secret)
+            self.assertTrue(all(len(p.encode('ascii')) <= SECRET_PART_BYTES for p in parts))
+            config = {'version':2, 'input_secret_parts':len(parts), 'input_encoded_bytes':size}
+            env = {f'URLSCAN_CANDIDATES_GZIP_B64_{i:02d}':p+'\n' for i,p in enumerate(parts,1)}
+            self.assertEqual(read_candidate_secret(config,env),secret)
+            self.assertEqual(env,{})
+        for secret in ('', '\u975eASCII', 'a'*(8*32000+1)):
+            with self.assertRaises(ValueError):split_candidate_secret(secret)
+
+    def test_secret_chunks_fail_closed_for_missing_oversize_and_invalid_config(self):
+        config = {'version':2, 'input_secret_parts':2, 'input_encoded_bytes':48668}
+        valid = {'URLSCAN_CANDIDATES_GZIP_B64_01':'a'*32000, 'URLSCAN_CANDIDATES_GZIP_B64_02':'b'*16668}
+        for change in ({'URLSCAN_CANDIDATES_GZIP_B64_02':''},
+                       {'URLSCAN_CANDIDATES_GZIP_B64_01':'a'*32001},
+                       {'URLSCAN_CANDIDATES_GZIP_B64_02':'b'*16667},
+                       {'URLSCAN_CANDIDATES_GZIP_B64_02':'\u975e'*16668}):
+            with self.assertRaises(CaptureError):read_candidate_secret(config,dict(valid,**change))
+        with self.assertRaises(CaptureError):
+            read_candidate_secret(config,{'URLSCAN_CANDIDATES_GZIP_B64':'legacy-do-not-fallback'})
+        for count in (0,9,True,'2'):
+            with self.assertRaises(ValueError):read_candidate_secret(dict(config,input_secret_parts=count),dict(valid))
+
+    def test_chunked_pool_preserves_binding_and_rejects_same_size_tampering(self):
+        from research.urlscan_v1.collector import QUEUE
+        q = rows(QUEUE)[0]
+        data = encoded(dict(q,url='https://example.com/')) + b'\n'
+        blob = gzip.compress(data,mtime=0); secret = b64(blob)
+        config = {'version':2, 'enabled':True, 'input_secret_parts':1, 'input_encoded_bytes':len(secret),
+            'compressed_input_sha256':sha(blob), 'plaintext_input_sha256':sha(data),
+            'offset':0, 'limit':1, 'request_limit':5}
+        env = {'URLSCAN_CANDIDATES_GZIP_B64_01':secret}
+        self.assertEqual(prepare_candidates(config,read_candidate_secret(config,env)),[dict(q,url='https://example.com/')])
+        changed = ('A' if secret[0]!='A' else 'B')+secret[1:]
+        with self.assertRaisesRegex(ValueError,'compressed input binding'):
+            prepare_candidates(config,read_candidate_secret(config,{'URLSCAN_CANDIDATES_GZIP_B64_01':changed}))
+
+    def test_missing_chunk_stops_before_api_client_creation(self):
+        config = {'version':2, 'input_secret_parts':2, 'input_encoded_bytes':48668}
+        path=self.root/'config.json';path.write_text(json.dumps(config))
+        with patch('sys.argv',['batch','--work',str(self.root/'work'),'--publish',str(self.root/'out'),'--config',str(path)]), \
+             patch.dict('os.environ',{'URLSCAN_CANDIDATES_GZIP_B64_01':'a'*32000},clear=True), \
+             patch('research.urlscan_v1.encrypted_batch.Client') as client:
+            with self.assertRaises(CaptureError):main()
+            client.assert_not_called()
+        self.assertFalse((self.root/'work').exists())
+
+    def test_legacy_secret_uses_conservative_limit(self):
+        self.assertEqual(read_candidate_secret({'version':1},{'URLSCAN_CANDIDATES_GZIP_B64':'abc\n'}),'abc')
+        with self.assertRaises(CaptureError):
+            read_candidate_secret({'version':1},{'URLSCAN_CANDIDATES_GZIP_B64':'a'*32001})
 
     def test_plan_binding_uncertain_retention_and_determinism(self):
         packet,annotation,queue=self.packet_fixture()

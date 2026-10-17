@@ -94,11 +94,12 @@ Provider verdict 不會作為 label、模型輸入或獨立人工證據。`task.
 ## 本輪批次、加密與索引
 
 - `batch_plan.py` 逐筆核對 queue、packet、AI annotation 和原 snapshot bytes。271 筆可搜尋 uncertain 按固定 seed 排序，每批優先不同 hostname（不是 registered-domain 分組，也不是統計隨機抽樣），不丟棄重複主機。共 55 批，最後一批 1 筆。2 筆含 userinfo 的 URL 保留 blocked receipt，不擅自改寫 URL。
-- 完整候選清單只從 Secret `URLSCAN_CANDIDATES_GZIP_B64` 讀取，repository 不包含候選明文或候選密文。私有 JSONL 壓縮再 Base64，沒有 AI 理由或真人投票；本輪 271 筆共 48,668 ASCII bytes，低於 48 KiB Secret 限制。Base64／gzip 本身不是加密，保護由 GitHub Secrets 提供；不可將該字串放入 repository。未來超過限制時必須分批或改用受控私有儲存，不能截斷輸入。
+- 完整候選清單由 `URLSCAN_CANDIDATES_GZIP_B64_01` 與 `URLSCAN_CANDIDATES_GZIP_B64_02` 兩個 Secrets 讀取，repository 不包含候選明文或候選密文。私有 JSONL 壓縮再 Base64，沒有 AI 理由或真人投票。本輪 48,668 ASCII bytes 拆為 32,000 與 16,668 bytes；每段保守限制 32,000 bytes，不再貼近官方 48 KB 上限。舊單一 Secret 在實際介面被拒收，因此撤回先前「可直接上傳」的說明。Base64／gzip 本身不是加密，保護由 GitHub Secrets 提供；不可將字串放入 repository。
+- 設定 v2 明確指定段數與完整字串長度。依序拼接後仍核對原本的 compressed/plaintext SHA-256，再驗證完整 pool，最後選取同一批 5 筆。缺段、超長、截斷、順序錯誤與內容竄改都會在 API 請求前拒絕。舊的單一 Secret 不會當作缺段 fallback。讀取器最多支援 8 段，目前 workflow 明確注入 2 段；未來擴充須同步改 workflow/config。
 - `config/cloud_batch.json` 綁定 compressed/plaintext SHA-256 與收件公鑰 fingerprint。本批 offset=0、limit=5、最多 25 次 API requests、間隔至少 12 秒。完整 pool 先驗證才切片，失敗樣本留在 attrition report。
 - `secure_store.py` 使用 RSA-3072 OAEP-SHA256 包裝一次性 AES-256-GCM key；每個 archive 有隨機 key/nonce，header 作為 AAD。先驗證 GCM tag 再解 ZIP；拒絕路徑越界、symlink、重複成員和不安全覆寫。最大未壓縮 archive 512 MB；大量資料應維持小批次，避免超出上限。
 - `encrypted_batch.py` 在 API 請求前驗證公鑰/config/Secret 輸入；下載後建立相似度索引，整包加密才移到 upload 路徑。索引失敗時仍嘗試保留已抓取的加密證據。取消、runner crash 或超時仍可能使尚未封裝的資料遺失，不能宣稱任何失敗都可續跑。
-- `.github/workflows/urlscan-encrypted-batch.yml` 僅同 repository 受控研究分支的 PR（workflow/config 改變時）或手動觸發；不是排程，也不會一次跑完 55 批。缺 Secret 時在任何 API 請求前失敗，設定後可重新執行原 run。分支 workflow 尚不在 default branch 時，使用已有 PR run 的 **Re-run all jobs**。
+- `.github/workflows/urlscan-encrypted-batch.yml` 僅同 repository 受控研究分支的 PR（workflow/config 改變時）或手動觸發；不是排程，也不會一次跑完 55 批。缺 Secret 時在任何 API 請求前失敗，設定後必須重新執行包含本次分段修正的新 run，不能重跑舊 SHA 的 run。分支 workflow 尚不在 default branch 時，使用本次 PR 更新所產生的新 run 的 **Re-run all jobs**。
 - 小批次確認後才更新 offset，先逐批下載／驗證加密 artifact，再推進下一批。原 Collector 支援本地 resume；cloud wrapper 每次建立新 evidence run，不會跨 runner 自動 resume，也不會把再次搜尋到的較新 scan 當原 scan。
 
 ```bash
@@ -109,7 +110,7 @@ python -m research.urlscan_v1.secure_store decrypt --input /private/evidence.enc
 python -m research.urlscan_v1.similarity --packets /private/packets_blinded.jsonl --run /private/restored/capture --output /private/combined-index
 ```
 
-`encrypted_batch` 的兩個 Secret 均由環境注入，不放在命令列。證據解密私鑰只供下載後本地恢復，**不要設成 GitHub Secret**；CI 不需要它。加密只保護儲存與上傳，下載／解析期間 runner 仍會接觸明文，不能視為不可信網頁的執行沙箱。
+`encrypted_batch` 的 API key 與兩段候選 Secrets 均由環境注入，不放在命令列。證據解密私鑰只供下載後本地恢復，**不要設成 GitHub Secret**；CI 不需要它。加密只保護儲存與上傳，下載／解析期間 runner 仍會接觸明文，不能視為不可信網頁的執行沙箱。
 
 ### 相似度定義與限制
 

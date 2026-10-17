@@ -29,7 +29,8 @@ jobs:
       - name: Collect the bounded uncertain batch and encrypt before upload
         env:
           URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
-          URLSCAN_CANDIDATES_GZIP_B64: ${{ secrets.URLSCAN_CANDIDATES_GZIP_B64 }}
+          URLSCAN_CANDIDATES_GZIP_B64_01: ${{ secrets.URLSCAN_CANDIDATES_GZIP_B64_01 }}
+          URLSCAN_CANDIDATES_GZIP_B64_02: ${{ secrets.URLSCAN_CANDIDATES_GZIP_B64_02 }}
         run: |
           umask 077
           python -m research.urlscan_v1.encrypted_batch --work "$RUNNER_TEMP/urlscan-private-batch" --publish "$RUNNER_TEMP/urlscan-encrypted-output"

@@ -12,13 +12,55 @@ from .similarity import acquired_records, build
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT/'research/urlscan_v1/config'
+SECRET_PART_BYTES = 32_000  # Conservative headroom below GitHub's 48 KB limit.
+MAX_SECRET_PARTS = 8
+
+
+def split_candidate_secret(secret):
+    """Split ASCII Base64 without changing its bytes; never truncate the pool."""
+    if not isinstance(secret, str) or not secret or not secret.isascii():
+        raise ValueError('invalid candidate secret encoding')
+    if len(secret) > SECRET_PART_BYTES * MAX_SECRET_PARTS:
+        raise ValueError('candidate secret exceeds supported input size')
+    return [secret[i:i+SECRET_PART_BYTES] for i in range(0, len(secret), SECRET_PART_BYTES)]
+
+
+def read_candidate_secret(config, environ):
+    """Consume only the configured input scheme, before creating an API client."""
+    if config.get('version') == 1:
+        secret = environ.pop('URLSCAN_CANDIDATES_GZIP_B64', '').strip()
+        if not secret:
+            raise CaptureError('missing_private_candidates_secret')
+        if not secret.isascii() or len(secret) > SECRET_PART_BYTES:
+            raise CaptureError('candidate_secret_requires_chunked_setup')
+        return secret
+    count = config.get('input_secret_parts')
+    size = config.get('input_encoded_bytes')
+    if (config.get('version') != 2 or type(count) is not int or not 1 <= count <= MAX_SECRET_PARTS
+            or type(size) is not int or not 1 <= size <= count * SECRET_PART_BYTES):
+        raise ValueError('invalid chunked input config')
+    parts = []
+    for index in range(1, count + 1):
+        part = environ.pop(f'URLSCAN_CANDIDATES_GZIP_B64_{index:02d}', '').strip()
+        if not part:
+            raise CaptureError('missing_private_candidates_secret_part')
+        if not part.isascii() or len(part) > SECRET_PART_BYTES:
+            raise CaptureError('invalid_private_candidates_secret_part')
+        parts.append(part)
+    secret = ''.join(parts)
+    if len(secret) != size or parts != split_candidate_secret(secret):
+        raise CaptureError('private_candidates_secret_parts_size_mismatch')
+    return secret
 
 
 def prepare_candidates(config, secret):
-    if config.get('version') != 1 or config.get('enabled') is not True:
+    if config.get('version') not in (1, 2) or config.get('enabled') is not True:
         raise ValueError('batch disabled or invalid config')
-    if not secret or len(secret) > 48*1024:
+    max_size = SECRET_PART_BYTES if config['version'] == 1 else SECRET_PART_BYTES * MAX_SECRET_PARTS
+    if not secret or not secret.isascii() or len(secret) > max_size:
         raise ValueError('candidate secret missing or too large')
+    if config['version'] == 2 and len(secret) != config.get('input_encoded_bytes'):
+        raise ValueError('candidate secret size mismatch')
     blob = unb64(secret)
     if sha(blob) != config['compressed_input_sha256']:
         raise ValueError('compressed input binding mismatch')
@@ -75,9 +117,7 @@ def main():
         provenance = {'mode': 'encrypted_smoke'}
     else:
         config = json.loads(a.config.read_text())
-        secret = os.environ.pop('URLSCAN_CANDIDATES_GZIP_B64', '')
-        if not secret:
-            raise CaptureError('missing_private_candidates_secret')
+        secret = read_candidate_secret(config, os.environ)
         candidates = prepare_candidates(config, secret)
         del secret
         if fingerprint(public_key(a.public_key.read_bytes())) != config['recipient_sha256']:

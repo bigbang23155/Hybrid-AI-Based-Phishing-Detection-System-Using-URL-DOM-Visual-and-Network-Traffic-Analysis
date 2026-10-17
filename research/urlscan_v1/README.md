@@ -2,7 +2,7 @@
 
 基底：PR #18 的 `61b7e8da5b0a997c1f8f2f2dca10a68ec839ffd8`。
 本輪位於 `research/urlscan-readonly-v1`，不修改 Assignment 03 的 75 個 frozen files，
-也不重新訓練或呼叫正式 test。此模組僅使用 Python 3.12 標準函式庫。
+也不重新訓練或呼叫正式 test。Collector 核心使用 Python 3.12 標準函式庫；加密與相似度模組使用 `requirements.txt` 的固定依賴。
 
 ## 不受人工複核進度影響的工作
 
@@ -17,8 +17,8 @@
 | AI 初判獨立匯入 | 已實作並匯入本次附件 | 656 annotations；287 暫判 0、96 暫判 1、273 uncertain；真人新增 0 |
 | 人工 CSV 匯入保護 | 已補強 | 拒絕已明示 AI 的 reviewer ID/type；無法以程式驗證偽裝的人名或真正獨立性 |
 | GitHub Actions smoke | 已設定 | ubuntu-24.04／Python 3.12；僅 existing example.com public scan；實際成敗以 Actions run 為準 |
-| 歷史樣本批次補證 | 執行入口已完成，尚未執行 | 輸入原私有 packets，先小批量；本 XLSX 沒有完整 URL，不從 hostname 猜 URL |
-| 相似度引擎 | 待後續實作 | 本版僅保存 exact SHA-256；TLSH／MinHash／pHash、近似群組與門檻仍未完成 |
+| 歷史樣本批次補證 | 已接回原 packets、產生私有 Secret 輸入與 5 筆批次 | 273 uncertain 中 271 筆可搜尋；2 筆 userinfo URL 留待處理；雲端待新增輸入 Secret |
+| 相似度候選索引 | 已實作 tags SHA-256、MinHash64、pHash64、dHash64 | 已索引 656 歷史 DOM；視覺模組待新證據；TLSH 為未安裝的選用套件；無標籤繼承 |
 | 完整歷史／campaign novelty | 仍受舊缺口限制 | 保留 history v6 partial 狀態；unknown campaign 不能轉成 unseen |
 
 ## 最新架構與研究依賴
@@ -32,7 +32,7 @@
 7. **Research experiments**：依序頁面複雜度 → 正常登入誤報 → 融合新增錯誤 → 對抗性／開放環境驗證。Attention Fusion、模態 dropout、few-shot、PCAP、Anti-Cloaking 多視角實驗保留為後續工作。
 
 上述 656 筆來自舊 development，不是 656 筆新訓練資料。AI 的信心不是校準機率。
-已核對全部 review IDs 與表內 SHA-256 對應既有 queue；本輪沒有原 HTML bytes，沒有重新對 656 份 snapshot 計算 hash。
+已接回原 packets 並對 656 份原 HTML bytes 全部重新計算 SHA-256，與既有 queue 全部一致。
 原表的 `publisher_date` 不是 capture time，AI 審閱日期也不是 capture time。
 
 ## 執行
@@ -41,12 +41,13 @@
 不要寫入命令參數、檔案、log 或 repository。公開 smoke 不必新增 Secret。
 
 ```bash
+python -m pip install -r research/urlscan_v1/requirements.txt
 python -m unittest discover -s research/urlscan_v1 -p 'test_*.py' -v
 python -m research.urlscan_v1.collector --smoke --request-limit 15 --output /private/urlscan-smoke-001
 ```
 
 雲端 `.github/workflows/urlscan-readonly.yml` 在本支線同 repository 的 PR 變更觸發 offline tests，
-成功後執行 live smoke。也支援 workflow_dispatch（GitHub 通常要求 workflow 已存在於 default branch 才能手動啟動）。
+成功後執行加密保存的 live smoke。也支援 workflow_dispatch（GitHub 通常要求 workflow 已存在於 default branch 才能手動啟動）。
 Smoke 必須取得 Result、DOM、有效 PNG envelope 及非空 HTTP requests 才 exit 0。
 查無合適 scan、限流、附件缺失都會如實報告，不把「程式跑完」等同「資料完整」。
 PNG 驗證檢查 signature、chunk bounds／CRC／IHDR／IDAT／IEND，沒有完整解壓或影像語意驗證。
@@ -79,8 +80,9 @@ python -m research.urlscan_v1.ai_review --workbook /private/review_B_AI_complete
 - `public/dataset_attrition_report.json`：總量、取得數、未嘗試數、缺失／失敗原因、人審／訓練新增數。
 - `public/artifact_hashes.json`：只含 candidate hash、檔案 hash／bytes 與完整性狀態。
 
-雲端 smoke 僅上傳 `public/`，原始 evidence 在 runner 清理。**這個 smoke 不提供長期 raw evidence 保存**。
-正式 batch 需在受控執行環境保存 `private/`；公開 repo 的大量雲端批次尚需接上私有儲存或加密 artifact。
+雲端 smoke 與歷史 batch 僅上傳 `evidence.enc` 和彙總資料，原始 evidence 在 runner 清理。
+加密 artifact 保留 30 天，需下載至持久私有儲存；GitHub Actions artifact 不是永久保存。
+本地交接包保存解密私鑰；公開 repo 與 runner 都不持有證據解密私鑰。
 AI annotations 與填寫表格也不推送公開 GitHub；public summary 可以保留。
 
 完整性與內容可用性分開：即使 HTTP 403 或錯誤頁三份檔案齊全，也只代表取得完整，
@@ -89,15 +91,41 @@ Result 404 是未完成／不可用，attachment 404 是缺件，410 是已刪�
 Provider verdict 不會作為 label、模型輸入或獨立人工證據。`task.source` 只提示來源，
 同一 PhishTank/OpenPhish feed 的轉載不能當成兩個獨立來源家族。
 
-## 下一批不需等人工定案的工程
+## 本輪批次、加密與索引
 
-1. 將原私有 packets 與 AI annotations 依 review ID/hash 連接，先排 273 uncertain 的補證需求；盲審表維持獨立。
-2. 在私有／加密儲存就緒後，按固定小批次配額執行，逐批保留 attrition，不因取得失敗刪掉樣本。
-3. 以實際 DOM／Screenshot 建立 canonicalization 與 exact/fuzzy 候選索引，先使用合成 fixture 驗證程式。
-4. 人工標籤與 pairwise same-template 判讀可用後，才在獨立 development 校準相似度門檻。
+- `batch_plan.py` 逐筆核對 queue、packet、AI annotation 和原 snapshot bytes。271 筆可搜尋 uncertain 按固定 seed 排序，每批優先不同 hostname（不是 registered-domain 分組，也不是統計隨機抽樣），不丟棄重複主機。共 55 批，最後一批 1 筆。2 筆含 userinfo 的 URL 保留 blocked receipt，不擅自改寫 URL。
+- 完整候選清單只從 Secret `URLSCAN_CANDIDATES_GZIP_B64` 讀取，repository 不包含候選明文或候選密文。私有 JSONL 壓縮再 Base64，沒有 AI 理由或真人投票；本輪 271 筆共 48,668 ASCII bytes，低於 48 KiB Secret 限制。Base64／gzip 本身不是加密，保護由 GitHub Secrets 提供；不可將該字串放入 repository。未來超過限制時必須分批或改用受控私有儲存，不能截斷輸入。
+- `config/cloud_batch.json` 綁定 compressed/plaintext SHA-256 與收件公鑰 fingerprint。本批 offset=0、limit=5、最多 25 次 API requests、間隔至少 12 秒。完整 pool 先驗證才切片，失敗樣本留在 attrition report。
+- `secure_store.py` 使用 RSA-3072 OAEP-SHA256 包裝一次性 AES-256-GCM key；每個 archive 有隨機 key/nonce，header 作為 AAD。先驗證 GCM tag 再解 ZIP；拒絕路徑越界、symlink、重複成員和不安全覆寫。最大未壓縮 archive 512 MB；大量資料應維持小批次，避免超出上限。
+- `encrypted_batch.py` 在 API 請求前驗證公鑰/config/Secret 輸入；下載後建立相似度索引，整包加密才移到 upload 路徑。索引失敗時仍嘗試保留已抓取的加密證據。取消、runner crash 或超時仍可能使尚未封裝的資料遺失，不能宣稱任何失敗都可續跑。
+- `.github/workflows/urlscan-encrypted-batch.yml` 僅同 repository 受控研究分支的 PR（workflow/config 改變時）或手動觸發；不是排程，也不會一次跑完 55 批。缺 Secret 時在任何 API 請求前失敗，設定後可重新執行原 run。分支 workflow 尚不在 default branch 時，使用已有 PR run 的 **Re-run all jobs**。
+- 小批次確認後才更新 offset，先逐批下載／驗證加密 artifact，再推進下一批。原 Collector 支援本地 resume；cloud wrapper 每次建立新 evidence run，不會跨 runner 自動 resume，也不會把再次搜尋到的較新 scan 當原 scan。
 
-本版不實作自動 label inheritance、相似樣本自動刪除、正式訓練或新的 holdout 評估。
+```bash
+python -m research.urlscan_v1.batch_plan --packets /private/packets_blinded.jsonl --annotations /private/ai_annotations.jsonl --output /private/batch-plan
+python -m research.urlscan_v1.similarity --packets /private/packets_blinded.jsonl --output /private/history-index
+python -m research.urlscan_v1.encrypted_batch --work /private/run-001 --publish /private/encrypted-output
+python -m research.urlscan_v1.secure_store decrypt --input /private/evidence.enc --private-key /private/evidence-private-key.pem --output /private/restored
+python -m research.urlscan_v1.similarity --packets /private/packets_blinded.jsonl --run /private/restored/capture --output /private/combined-index
+```
+
+`encrypted_batch` 的兩個 Secret 均由環境注入，不放在命令列。證據解密私鑰只供下載後本地恢復，**不要設成 GitHub Secret**；CI 不需要它。加密只保護儲存與上傳，下載／解析期間 runner 仍會接觸明文，不能視為不可信網頁的執行沙箱。
+
+### 相似度定義與限制
+
+`similarity.py` v1 使用 HTMLParser 的起訖標籤序列（保留順序、忽略文字／屬性）產生 canonical SHA-256；5-token shingles 與固定 seed 的 64 個 MinHash 估計 Jaccard。這不是 browser 修復後的 DOM tree，可能將錯誤頁或共用 layout 歸為同結構。SHA 相同也不表示相同 campaign 或 label。
+
+PNG 經完整解碼、白底透明合成、等比例 letterbox 至 256×256，再產生 pHash／dHash。pHash 用 32×32 DCT 的左上 8×8、排除 DC 中位數、DC bit 固定 0（63 個有效位）；不得直接套用其他實作的距離門檻。極低對比影像保留索引但不做視覺近鄰檢索，該品質門檻不是 phishing 門檻。
+
+每筆每模態最多選 top-5，取聯集為候選 pairs；這只是人工工作量控制，**不是相似度判定門檻**。不做傳遞閉包、不自動合併、不刪除、不分配 split groups、不繼承標籤。缺失模態保留 null，不補成 0。TLSH 套件未安裝時明示不可用，不假造 TLSH 結果。pairwise 版本上限 5,000 evidence items，放大前需分片或 ANN。
+
+歷史實跑：656 DOM、0 Visual、2,647 pairs；32 個 canonical exact groups 涉及 125 筆。這是純標籤序列相同，不是經人驗證的 template duplicates。個別 pairs 與索引放私有交接包，repository 只保留彙總。正式標籤、pairwise same-template 標註及相似度門檻仍待獨立 development 人工驗證。
 
 API 依據（2026-10-17 檢查）：
 - https://urlscan.io/docs/api/ — Result/DOM/Screenshot、404/410、rate limit headers。
 - https://urlscan.io/docs/search/ — `task.url.keyword`、query escaping、最近結果優先；index 為 lowercase，所以仍需本地精確核對。
+
+加密與 Secrets 依據（2026-10-17）：
+- https://cryptography.io/en/stable/hazmat/primitives/aead/
+- https://cryptography.io/en/stable/hazmat/primitives/asymmetric/rsa/
+- https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets

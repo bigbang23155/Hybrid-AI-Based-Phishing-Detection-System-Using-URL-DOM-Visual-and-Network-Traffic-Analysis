@@ -1,0 +1,46 @@
+name: URLScan encrypted historical batch
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/urlscan-encrypted-batch.yml'
+      - 'research/urlscan_v1/config/cloud_batch.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: urlscan-private-acquisition
+  cancel-in-progress: false
+jobs:
+  encrypted-batch:
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/urlscan-readonly-v1') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/urlscan-readonly-v1')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned encryption and similarity dependencies
+        run: python -m pip install -r research/urlscan_v1/requirements.txt
+      - name: Offline privacy and provenance checks
+        run: python -m unittest discover -s research/urlscan_v1 -p 'test_*.py' -v
+      - name: Collect the bounded uncertain batch and encrypt before upload
+        env:
+          URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
+          URLSCAN_CANDIDATES_GZIP_B64: ${{ secrets.URLSCAN_CANDIDATES_GZIP_B64 }}
+        run: |
+          umask 077
+          python -m research.urlscan_v1.encrypted_batch --work "$RUNNER_TEMP/urlscan-private-batch" --publish "$RUNNER_TEMP/urlscan-encrypted-output"
+      - name: Retain ciphertext and non-sensitive aggregates only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: urlscan-encrypted-batch-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/urlscan-encrypted-output/
+      - name: Remove transient plaintext
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/urlscan-private-batch"

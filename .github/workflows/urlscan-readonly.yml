@@ -22,6 +22,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Install pinned encryption and similarity dependencies
+        run: python -m pip install -r research/urlscan_v1/requirements.txt
       - name: Offline client, provenance, review and dataset-isolation tests
         run: python -m unittest discover -s research/urlscan_v1 -p 'test_*.py' -v
   live-smoke:
@@ -37,18 +39,20 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Install pinned encryption and similarity dependencies
+        run: python -m pip install -r research/urlscan_v1/requirements.txt
       - name: Retrieve an existing public example.com scan only
         env:
           URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
-        run: python -m research.urlscan_v1.collector --smoke --request-limit 15 --output "$RUNNER_TEMP/urlscan-smoke"
-      - name: Retain aggregate results and hashes only
+        run: python -m research.urlscan_v1.encrypted_batch --smoke --work "$RUNNER_TEMP/urlscan-smoke" --publish "$RUNNER_TEMP/urlscan-publish"
+      - name: Retain encrypted evidence and aggregate results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: urlscan-readonly-smoke-${{ github.run_id }}
           retention-days: 30
           if-no-files-found: warn
-          path: ${{ runner.temp }}/urlscan-smoke/public/
+          path: ${{ runner.temp }}/urlscan-publish/
       - name: Remove transient untrusted evidence
         if: always()
-        run: rm -rf -- "$RUNNER_TEMP/urlscan-smoke/private"
+        run: rm -rf -- "$RUNNER_TEMP/urlscan-smoke"

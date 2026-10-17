@@ -1,0 +1,45 @@
+
+name: Test urlscan.io API
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-urlscan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Test API authentication
+        env:
+          URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import urllib.request
+          import urllib.error
+
+          key = os.environ.get("URLSCAN_API_KEY")
+          if not key:
+              raise SystemExit("ERROR: API Key is missing")
+
+          req = urllib.request.Request(
+              "https://urlscan.io/api/v1/quotas/",
+              headers={
+                  "api-key": key,
+                  "User-Agent": "phishing-research/0.1"
+              }
+          )
+
+          try:
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  print("HTTP Status:", r.status)
+                  print("API authentication successful.")
+                  print("Quota endpoint is accessible.")
+          except urllib.error.HTTPError as e:
+              print("API request failed. HTTP:", e.code)
+              raise SystemExit(1)
+          PY

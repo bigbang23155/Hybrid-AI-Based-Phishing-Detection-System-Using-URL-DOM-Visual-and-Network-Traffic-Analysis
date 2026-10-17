@@ -225,3 +225,7 @@ reports/tables/*
 artifacts/*.zip
 artifacts/*.bundle
 artifacts/export_staging/
+
+# Raw acquisition evidence and coordinator AI annotations stay private.
+research/urlscan_v1/runs/
+research/urlscan_v1/private/

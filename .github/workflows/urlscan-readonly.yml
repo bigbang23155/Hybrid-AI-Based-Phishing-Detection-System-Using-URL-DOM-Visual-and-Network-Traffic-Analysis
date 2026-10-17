@@ -1,0 +1,54 @@
+name: URLScan read-only collector
+on:
+  pull_request:
+    paths:
+      - 'research/urlscan_v1/**'
+      - 'research/robustness_v1/review_intake.py'
+      - '.github/workflows/urlscan-readonly.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: urlscan-readonly-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Offline client, provenance, review and dataset-isolation tests
+        run: python -m unittest discover -s research/urlscan_v1 -p 'test_*.py' -v
+  live-smoke:
+    needs: offline
+    # Same-repository controlled research branch only; no fork secrets or PR-target event.
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/urlscan-readonly-v1')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Retrieve an existing public example.com scan only
+        env:
+          URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
+        run: python -m research.urlscan_v1.collector --smoke --request-limit 15 --output "$RUNNER_TEMP/urlscan-smoke"
+      - name: Retain aggregate results and hashes only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: urlscan-readonly-smoke-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/urlscan-smoke/public/
+      - name: Remove transient untrusted evidence
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/urlscan-smoke/private"

@@ -1,6 +1,7 @@
 """Offline behavioral tests: no key, live requests, fitting or test inference."""
 import copy
 import csv
+import gzip
 import hashlib
 import json
 from pathlib import Path
@@ -11,7 +12,7 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 import zlib
 
-from research.urlscan_v1.client import Client, CaptureError, Response, json_object
+from research.urlscan_v1.client import Client, CaptureError, Response, json_object, decode_body
 from research.urlscan_v1.collector import (ROOT, QUEUE, capture, collect, encoded,
     normalized_url, rows, sha, validate_candidates, validate_png)
 from research.urlscan_v1.ai_review import HEADERS, import_ai
@@ -56,6 +57,20 @@ class Fake:
 
 
 class ClientTests(unittest.TestCase):
+    def test_compressed_dom_with_and_without_encoding_header(self):
+        raw = b'<html><body>Example domain</body></html>'
+        for headers in ({'Content-Encoding': 'gzip'}, {}):
+            decoded, info = decode_body(gzip.compress(raw), headers, 1000)
+            self.assertEqual(decoded, raw); self.assertEqual(info['decoded_from'], 'gzip')
+        decoded, _ = decode_body(zlib.compress(raw), {'Content-Encoding': 'deflate'}, 1000)
+        self.assertEqual(decoded, raw)
+
+    def test_compression_expansion_and_truncation_rejected(self):
+        with self.assertRaisesRegex(CaptureError, 'too_large'):
+            decode_body(gzip.compress(b'x'*1000), {}, 100)
+        with self.assertRaisesRegex(CaptureError, 'invalid_compressed'):
+            decode_body(gzip.compress(b'hello')[:-3], {}, 100)
+
     def test_search_escapes_query(self):
         f = Fake([response({'results': []})]); f.client.search('https://example.com/?x=a&y="z"')
         q = parse_qs(urlsplit(f.urls[0]).query)['q'][0]

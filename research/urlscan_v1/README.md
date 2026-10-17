@@ -50,6 +50,8 @@ python -m research.urlscan_v1.collector --smoke --request-limit 15 --output /pri
 Smoke 必須取得 Result、DOM、有效 PNG envelope 及非空 HTTP requests 才 exit 0。
 查無合適 scan、限流、附件缺失都會如實報告，不把「程式跑完」等同「資料完整」。
 PNG 驗證檢查 signature、chunk bounds／CRC／IHDR／IDAT／IEND，沒有完整解壓或影像語意驗證。
+HTTP gzip／deflate 及無 encoding header 的 gzip DOM object 會有界解壓，
+分別記錄傳輸 bytes 的 hash 與可讀內容 hash；兩者不可混用來判定原 snapshot 相同。
 
 批次原始輸入使用既有私有 `packets_blinded.jsonl`，每列須有 `review_id`、`sample_id`、
 `html_sha256`、完整 `url` 與 `scope=historical_development_audit`；本版拒絕不在既有 queue 的 ID。

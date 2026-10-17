@@ -4,11 +4,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+import hashlib
 import json
 import http.client
 import math
 import re
 import time
+import zlib
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urljoin, urlsplit
 from urllib.request import Request, HTTPRedirectHandler, build_opener
@@ -29,6 +31,35 @@ class Response:
     status: int
     headers: dict
     body: bytes
+    transfer: dict | None = None
+
+
+def decode_body(data, headers, max_bytes):
+    """urllib does not decode HTTP compression; urlscan DOM can be a gzip object."""
+    headers = {k.lower(): v for k, v in headers.items()}
+    encoding = headers.get('content-encoding', '').strip().lower()
+    gzip_magic = data.startswith(b'\x1f\x8b')
+    info = {'wire_sha256': hashlib.sha256(data).hexdigest(), 'wire_bytes': len(data),
+            'content_encoding': encoding or 'identity', 'gzip_magic': gzip_magic}
+    if encoding in ('gzip', 'x-gzip') or gzip_magic:
+        mode = 16 + zlib.MAX_WBITS
+    elif encoding == 'deflate':
+        mode = zlib.MAX_WBITS
+    elif encoding in ('', 'identity'):
+        return data, info
+    else:
+        raise CaptureError('unsupported_content_encoding')
+    try:
+        decoder = zlib.decompressobj(mode)
+        decoded = decoder.decompress(data, max_bytes + 1)
+        if len(decoded) > max_bytes or decoder.unconsumed_tail:
+            raise CaptureError('decoded_response_too_large')
+        if not decoder.eof or decoder.unused_data:
+            raise CaptureError('invalid_compressed_response')
+    except zlib.error:
+        raise CaptureError('invalid_compressed_response') from None
+    info['decoded_from'] = 'gzip' if mode != zlib.MAX_WBITS else 'deflate'
+    return decoded, info
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -52,7 +83,8 @@ def transport(url, headers, timeout, max_bytes):
             data = response.read(max_bytes + 1)
             if len(data) > max_bytes:
                 raise CaptureError('response_too_large')
-            return Response(response.status, dict(response.headers), data)
+            body, info = decode_body(data, dict(response.headers), max_bytes)
+            return Response(response.status, dict(response.headers), body, info)
     except (OSError, http.client.HTTPException):
         raise CaptureError('transport_error') from None
 
@@ -125,6 +157,7 @@ class Client:
                 self.last = self.clock()
                 try:
                     response = self.send(url, {'api-key': self.key,
+                        'Accept-Encoding': 'gzip, deflate',
                         'User-Agent': 'hybrid-phishing-research/1.0.0'}, self.timeout, self.max_bytes)
                 except CaptureError as exc:
                     if exc.code != 'transport_error' or attempt + 1 == self.attempts:

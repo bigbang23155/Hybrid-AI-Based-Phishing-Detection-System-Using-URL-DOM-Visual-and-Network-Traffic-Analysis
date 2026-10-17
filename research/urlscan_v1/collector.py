@@ -141,10 +141,10 @@ def capture(client, candidate, folder):
         'publisher_date': candidate.get('publisher_date'),
         'historical_equivalence': 'unverified'}
 
-    def save(kind, data, filename):
+    def save(kind, data, filename, transfer=None):
         path = folder / filename
         path.write_bytes(data)
-        record['artifacts'][kind] = {'file': filename, 'sha256': sha(data), 'bytes': len(data)}
+        record['artifacts'][kind] = {'file': filename, 'sha256': sha(data), 'bytes': len(data), 'transport': transfer}
 
     try:
         uuid = candidate.get('scan_uuid')
@@ -202,7 +202,7 @@ def capture(client, candidate, folder):
         record['http_request_count'] = len(requests) if isinstance(requests, list) else None
         if not record['http_requests_available']:
             record['quality_flags'].append('http_metadata_missing_or_empty')
-        save('result', response.body, 'result.json')
+        save('result', response.body, 'result.json', response.transfer)
         for kind, fetch, filename in (('dom', client.dom, 'dom.html.txt'),
                                       ('screenshot', client.screenshot, 'screenshot.png')):
             try:
@@ -219,7 +219,7 @@ def capture(client, candidate, folder):
                         record['historical_equivalence'] = 'exact_dom_bytes_only_time_and_label_unverified'
                 else:
                     record['screenshot_dimensions'] = validate_png(attachment.body)
-                save(kind, attachment.body, filename)
+                save(kind, attachment.body, filename, attachment.transfer)
             except (CaptureError, UnicodeError) as exc:
                 record['errors'][kind] = {'code': getattr(exc, 'code', 'invalid_utf8'),
                     'http_status': getattr(exc, 'status', None)}

@@ -8,6 +8,7 @@ import csv
 import copy
 from html.parser import HTMLParser
 import json
+import re
 from pathlib import Path
 import shutil
 from .intake import read_rows, write_rows, write_json, digest, adjudicate
@@ -103,6 +104,14 @@ def import_forms(packets_path, a_path, b_path, output):
             raise ValueError('duplicate or unknown review ID')
         forms.append({r['review_id']:r for r in rows})
         identities.append({r['reviewer_id'].strip() for r in rows if r.get('label','').strip()})
+        for r in rows:
+            if not r.get('label', '').strip():continue
+            identity = r.get('reviewer_id', '').strip().lower()
+            tokens = set(re.split(r'[^a-z0-9]+', identity))
+            if (tokens & {'ai', 'assistant', 'chatgpt', 'gpt', 'claude', 'bot', 'llm'}
+                    or 'not_human' in identity
+                    or r.get('reviewer_type', 'human').strip().lower() != 'human'):
+                raise ValueError('AI annotations cannot be imported as human reviews')
     if (identities[0]&identities[1]) or any('' in ids or len(ids)>1 for ids in identities):
         raise ValueError('one distinct human per form required')
     result=[]; imported=[]; completed=0

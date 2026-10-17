@@ -225,3 +225,11 @@ reports/tables/*
 artifacts/*.zip
 artifacts/*.bundle
 artifacts/export_staging/
+
+# Raw acquisition evidence and coordinator AI annotations stay private.
+research/urlscan_v1/runs/
+research/urlscan_v1/private/
+*private-key.pem
+URLSCAN_INPUT_KEY_B64.txt
+URLSCAN_CANDIDATES_GZIP_B64.txt
+research/urlscan_v1/config/uncertain-candidates.enc

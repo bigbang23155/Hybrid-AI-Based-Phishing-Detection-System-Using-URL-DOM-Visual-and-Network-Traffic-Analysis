@@ -1,0 +1,67 @@
+name: Four-modality offline evidence contracts
+on:
+  pull_request:
+    paths:
+      - 'research/multimodal_v1/**'
+      - 'research/urlscan_v1/**'
+      - 'src/phishing_url/features.py'
+      - 'src/phishing_url/dom_features.py'
+      - 'src/phishing_url/url_cleaning.py'
+      - '.github/workflows/multimodal-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned adapters and YARA
+        run: python -m pip install -r research/multimodal_v1/requirements.txt
+      - name: Verify offline HTTP, missingness, forensics, integration and frozen files
+        env:
+          PYTHONPATH: src
+          REQUIRE_YARA: '1'
+        run: python -m unittest discover -s research/multimodal_v1 -p 'test_*.py' -v
+  public-evidence-smoke:
+    needs: offline
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/research/urlscan-readonly-v1') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/urlscan-readonly-v1')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: multimodal-public-evidence-smoke
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned evidence and feature dependencies
+        run: python -m pip install -r research/multimodal_v1/requirements.txt
+      - name: Validate a fixed existing public scan and encrypt detailed evidence
+        env:
+          PYTHONPATH: src
+          URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
+          SOURCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          umask 077
+          python -m research.multimodal_v1.smoke --work "$RUNNER_TEMP/multimodal-public-work" --publish "$RUNNER_TEMP/multimodal-public-publish"
+      - name: Retain ciphertext and allowlisted quality aggregates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multimodal-public-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: ${{ runner.temp }}/multimodal-public-publish/
+      - name: Remove transient plaintext evidence
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/multimodal-public-work"

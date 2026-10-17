@@ -211,10 +211,14 @@ class Client:
             self.sleep(delay)
         raise CaptureError('retry_exhausted')
 
-    def search(self, url, size=10):
+    def search(self, url, size=10, *, field="task.url.keyword", public_only=False):
+        if field not in ("task.url.keyword", "page.url.keyword", "task.domain.keyword"):
+            raise ValueError("unsupported search field")
         # Escape Elasticsearch special characters, then transport-encode the query.
         escaped = re.sub(r'([+\-=!(){}\[\]^"~*?:\\/<>|&])', r'\\\1', url)
-        query = f'task.url.keyword:"{escaped}"'
+        query = f'{field}:"{escaped}"'
+        if public_only:
+            query += " AND task.visibility:public"
         obj = json_object(self.get('/api/v1/search/?' + urlencode({'q': query, 'size': size})))
         if not isinstance(obj.get('results'), list):
             raise CaptureError('invalid_search_shape')

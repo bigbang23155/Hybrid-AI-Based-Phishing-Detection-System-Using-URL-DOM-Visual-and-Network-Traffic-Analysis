@@ -149,6 +149,49 @@ class CollectorTests(unittest.TestCase):
         for value in ('https://', UUID, 'private-test-query', 'secret-test-value', 'Example domain'):
             self.assertNotIn(value, public)
 
+    def test_diagnostic_host_hit_cannot_replace_target(self):
+        other = dict(TASK, url='https://example.com/other')
+        f = Fake([response({'results': []}), response({'results': []}),
+                  response({'results': [{'_id': UUID, 'task': other}], 'has_more': True})])
+        r = capture(f.client, CANDIDATE, self.folder, search_diagnostics=True)
+        self.assertEqual(r['completeness'], 'NONE')
+        self.assertEqual(r['search_diagnostics'][-1]['rejected'], {'different_submitted_url': 1})
+        self.assertTrue(r['search_diagnostics'][-1]['has_more'])
+        self.assertEqual(f.client.requests, 3)
+
+    def test_diagnostic_recovers_exact_task_and_validates_result_again(self):
+        for mismatch in (False, True):
+            data = successful()
+            if mismatch:
+                data[1] = response({'task': dict(TASK, url='https://example.com/other'),
+                                    'page': {'url': CANDIDATE['url']}})
+            f = Fake([response({'results': []})] + data)
+            r = capture(f.client, CANDIDATE, self.folder, search_diagnostics=True)
+            self.assertEqual(r['selected_search_strategy'], 'final_url_exact')
+            self.assertEqual(r['completeness'], 'NONE' if mismatch else 'COMPLETE')
+            if mismatch:
+                self.assertEqual(r['errors']['capture']['code'], 'scan_identity_mismatch')
+
+    def test_diagnostic_budget_stops_and_public_report_has_no_urls(self):
+        f = Fake([response({'results': []})], budget=1)
+        result = collect([CANDIDATE], self.folder/'run', f.client,
+                         smoke=True, search_diagnostics=True)
+        self.assertEqual(result['run_status'], 'STOPPED')
+        self.assertEqual(f.client.requests, 1)
+        self.assertEqual(result['search_strategy_counts'], {'submitted_exact': 1})
+        self.assertNotIn('https://', ''.join(p.read_text() for p in (self.folder/'run/public').iterdir()))
+
+    def test_diagnostic_normalized_variant_and_query_injection_guard(self):
+        candidate = dict(CANDIDATE, url='https://EXAMPLE.com:443')
+        f = Fake([response({'results': []})] + successful())
+        r = capture(f.client, candidate, self.folder, search_diagnostics=True)
+        self.assertEqual(r['selected_search_strategy'], 'normalized_exact')
+        self.assertEqual(r['completeness'], 'COMPLETE')
+        q = parse_qs(urlsplit(f.urls[1]).query)['q'][0]
+        self.assertIn('AND task.visibility:public', q)
+        with self.assertRaises(ValueError):
+            f.client.search('x', field='task.url OR *')
+
     def test_partial_missing_attachments(self):
         data = successful(); data[2:] = [Response(404, {}, b''), Response(404, {}, b'')]
         r = capture(Fake(data).client, CANDIDATE, self.folder)

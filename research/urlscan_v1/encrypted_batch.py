@@ -80,7 +80,7 @@ def prepare_candidates(config, secret):
     return selected
 
 
-def run(work, publish, recipient, client, *, candidates, smoke=False, provenance=None):
+def run(work, publish, recipient, client, *, candidates, smoke=False, provenance=None, search_diagnostics=False):
     if work.exists() or publish.exists():
         raise ValueError('output already exists')
     # Validate encryption configuration before the first API request.
@@ -90,7 +90,7 @@ def run(work, publish, recipient, client, *, candidates, smoke=False, provenance
     write_json(work/'execution.json', provenance or {})
     summary = None
     try:
-        summary = collect(candidates, work/'capture', client, smoke=smoke)
+        summary = collect(candidates, work/'capture', client, smoke=smoke, search_diagnostics=search_diagnostics)
         similarity = build(list(acquired_records(work/'capture')), work/'similarity')
     finally:
         # A partial run is also encrypted. No uploader ever targets work/.
@@ -127,7 +127,8 @@ def main():
     provenance.update(git_sha=os.environ.get('GITHUB_SHA'), run_id=os.environ.get('GITHUB_RUN_ID'),
         run_attempt=os.environ.get('GITHUB_RUN_ATTEMPT'))
     client = Client(os.environ.pop('URLSCAN_API_KEY', ''), request_limit=budget, interval=interval)
-    result = run(a.work, a.publish, a.public_key, client, candidates=candidates, smoke=a.smoke, provenance=provenance)
+    result = run(a.work, a.publish, a.public_key, client, candidates=candidates, smoke=a.smoke, provenance=provenance,
+        search_diagnostics=False if a.smoke else config.get('search_diagnostics', False))
     print(encoded(result).decode())
     if result['run_status'] == 'STOPPED':
         raise SystemExit(3)

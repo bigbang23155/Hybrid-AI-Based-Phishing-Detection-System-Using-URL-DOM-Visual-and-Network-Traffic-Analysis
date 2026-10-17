@@ -129,7 +129,48 @@ def validate_png(data):
     raise CaptureError('invalid_png')
 
 
-def capture(client, candidate, folder):
+def find_scan(client, url, record, *, diagnostics=False):
+    """Bounded discovery; broader hits never relax the task-URL evidence gate."""
+    strategies = [('submitted_exact', 'task.url.keyword', url)]
+    if diagnostics:
+        canonical = normalized_url(url)
+        if canonical != url:
+            strategies.append(('normalized_exact', 'task.url.keyword', canonical))
+        strategies.extend([('final_url_exact', 'page.url.keyword', canonical),
+                           ('submitted_host_context', 'task.domain.keyword', urlsplit(url).hostname)])
+    record['search_diagnostics'] = []
+    record['search_window'] = 'latest_10_per_query_no_exhaustive_history_claim'
+    for strategy, field, value in strategies:
+        search = client.search(value, field=field, public_only=diagnostics)
+        matches, rejected = [], Counter()
+        for hit in search['results']:
+            try:
+                if not isinstance(hit, dict) or not isinstance(hit.get('task'), dict):
+                    rejected['invalid_hit'] += 1
+                    continue
+                task = hit['task']
+                if task.get('visibility') != 'public':
+                    rejected['non_public'] += 1
+                    continue
+                if normalized_url(task.get('url')) != normalized_url(url):
+                    rejected['different_submitted_url'] += 1
+                    continue
+                matches.append((timestamp(task.get('time')), scan_id(hit.get('_id'))))
+            except (CaptureError, AttributeError):
+                rejected['invalid_identity_or_time'] += 1
+        diagnostic = {'strategy': strategy, 'returned': len(search['results']),
+            'exact_public_matches': len(matches), 'rejected': dict(rejected),
+            'has_more': search.get('has_more') if isinstance(search.get('has_more'), bool) else None}
+        record['search_diagnostics'].append(diagnostic)
+        record['search_candidates_returned'] = sum(d['returned'] for d in record['search_diagnostics'])
+        record['search_exact_public_matches'] = len(matches)
+        if matches:
+            record['selected_search_strategy'] = strategy
+            return max(matches)[1]
+    raise CaptureError('no_exact_public_scan_in_search_window')
+
+
+def capture(client, candidate, folder, *, search_diagnostics=False):
     record = {'candidate_sha256': sha(encoded(candidate)), 'review_id': candidate['review_id'],
         'scope': candidate['scope'], 'requested_url': candidate['url'], 'retrieved_at': utc(),
         'provider': 'urlscan.io', 'collector_version': VERSION,
@@ -149,26 +190,7 @@ def capture(client, candidate, folder):
     try:
         uuid = candidate.get('scan_uuid')
         if not uuid:
-            search = client.search(candidate['url'])
-            matches = []
-            for hit in search['results']:
-                try:
-                    if not isinstance(hit, dict):
-                        continue
-                    task = hit.get('task') or {}
-                    if normalized_url(task.get('url')) != normalized_url(candidate['url']):
-                        continue
-                    if task.get('visibility') != 'public':
-                        continue
-                    matches.append((timestamp(task.get('time')), scan_id(hit.get('_id'))))
-                except (CaptureError, AttributeError):
-                    continue
-            record['search_candidates_returned'] = len(search['results'])
-            record['search_exact_public_matches'] = len(matches)
-            record['search_window'] = 'latest_10_returned_results_no_exhaustive_history_claim'
-            if not matches:
-                raise CaptureError('no_exact_public_scan_in_search_window')
-            uuid = max(matches)[1]
+            uuid = find_scan(client, candidate['url'], record, diagnostics=search_diagnostics)
         record['scan_uuid'] = scan_id(uuid)
         response = client.result(uuid)
         obj = json_object(response)
@@ -243,10 +265,11 @@ def verify_checkpoint(record, candidate, folder):
             raise ValueError('checkpoint artifact integrity failure')
 
 
-def collect(candidates, output, client, *, resume=False, retry_incomplete=False, smoke=False):
+def collect(candidates, output, client, *, resume=False, retry_incomplete=False, smoke=False, search_diagnostics=False):
     validate_candidates(candidates, smoke=smoke)
     identity = {'version': VERSION, 'input_sha256': sha(encoded(candidates)),
-        'candidates': len(candidates), 'search_size': 10, 'policy': 'exact_public_get_only'}
+        'candidates': len(candidates), 'search_size': 10, 'policy': 'exact_public_get_only',
+        'search_diagnostics': search_diagnostics}
     if resume:
         if json.loads((output/'run.json').read_text()) != identity:
             raise ValueError('resume identity mismatch')
@@ -266,7 +289,7 @@ def collect(candidates, output, client, *, resume=False, retry_incomplete=False,
         if not record or (retry_incomplete and record['completeness'] != 'COMPLETE'):
             if stopped:
                 continue  # Explicitly counted as unattempted below.
-            record = capture(client, candidate, folder)
+            record = capture(client, candidate, folder, search_diagnostics=search_diagnostics)
             write_json(checkpoint, record)
             stopped = any(e['code'] in ('authentication_or_access_denied', 'rate_limited',
                 'retry_deferred', 'request_budget_exhausted') for e in record['errors'].values())
@@ -278,6 +301,9 @@ def collect(candidates, output, client, *, resume=False, retry_incomplete=False,
         'quality_flag_counts': dict(Counter(f for r in records for f in r['quality_flags'])),
         'error_counts': dict(Counter(e['code'] for r in records for e in r['errors'].values())),
         'available_artifact_counts': dict(Counter(k for r in records for k in r['artifacts'])),
+        'search_strategy_counts': dict(Counter(d['strategy'] for r in records for d in r.get('search_diagnostics', []))),
+        'search_returned_hit_counts': dict(sum((Counter({d['strategy']: d['returned']}) for r in records for d in r.get('search_diagnostics', [])), Counter())),
+        'search_rejection_counts': dict(sum((Counter(d['rejected']) for r in records for d in r.get('search_diagnostics', [])), Counter())),
         'new_scans_submitted': 0, 'human_reviews_added': 0, 'training_eligible_added': 0,
         'original_dataset_writes': 0, 'model_fits': 0,
         'input_sha256': identity['input_sha256'], 'smoke_test': smoke,

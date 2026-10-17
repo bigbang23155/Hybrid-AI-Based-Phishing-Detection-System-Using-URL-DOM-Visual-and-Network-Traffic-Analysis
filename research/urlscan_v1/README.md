@@ -17,7 +17,7 @@
 | AI 初判獨立匯入 | 已實作並匯入本次附件 | 656 annotations；287 暫判 0、96 暫判 1、273 uncertain；真人新增 0 |
 | 人工 CSV 匯入保護 | 已補強 | 拒絕已明示 AI 的 reviewer ID/type；無法以程式驗證偽裝的人名或真正獨立性 |
 | GitHub Actions smoke | 已設定 | ubuntu-24.04／Python 3.12；僅 existing example.com public scan；實際成敗以 Actions run 為準 |
-| 歷史樣本批次補證 | 已接回原 packets、產生私有 Secret 輸入與 5 筆批次 | 273 uncertain 中 271 筆可搜尋；2 筆 userinfo URL 留待處理；雲端待新增輸入 Secret |
+| 歷史樣本批次補證 | 已接回原 packets、產生私有 Secret 輸入與 5 筆批次 | 273 uncertain 中 271 筆可搜尋；2 筆 userinfo URL 留待處理；首批已執行但 0/5 命中；正在補查及推進下一批 |
 | 相似度候選索引 | 已實作 tags SHA-256、MinHash64、pHash64、dHash64 | 已索引 656 歷史 DOM；視覺模組待新證據；TLSH 為未安裝的選用套件；無標籤繼承 |
 | 完整歷史／campaign novelty | 仍受舊缺口限制 | 保留 history v6 partial 狀態；unknown campaign 不能轉成 unseen |
 
@@ -95,8 +95,8 @@ Provider verdict 不會作為 label、模型輸入或獨立人工證據。`task.
 
 - `batch_plan.py` 逐筆核對 queue、packet、AI annotation 和原 snapshot bytes。271 筆可搜尋 uncertain 按固定 seed 排序，每批優先不同 hostname（不是 registered-domain 分組，也不是統計隨機抽樣），不丟棄重複主機。共 55 批，最後一批 1 筆。2 筆含 userinfo 的 URL 保留 blocked receipt，不擅自改寫 URL。
 - 完整候選清單由 `URLSCAN_CANDIDATES_GZIP_B64_01` 與 `URLSCAN_CANDIDATES_GZIP_B64_02` 兩個 Secrets 讀取，repository 不包含候選明文或候選密文。私有 JSONL 壓縮再 Base64，沒有 AI 理由或真人投票。本輪 48,668 ASCII bytes 拆為 32,000 與 16,668 bytes；每段保守限制 32,000 bytes，不再貼近官方 48 KB 上限。舊單一 Secret 在實際介面被拒收，因此撤回先前「可直接上傳」的說明。Base64／gzip 本身不是加密，保護由 GitHub Secrets 提供；不可將字串放入 repository。
-- 設定 v2 明確指定段數與完整字串長度。依序拼接後仍核對原本的 compressed/plaintext SHA-256，再驗證完整 pool，最後選取同一批 5 筆。缺段、超長、截斷、順序錯誤與內容竄改都會在 API 請求前拒絕。舊的單一 Secret 不會當作缺段 fallback。讀取器最多支援 8 段，目前 workflow 明確注入 2 段；未來擴充須同步改 workflow/config。
-- `config/cloud_batch.json` 綁定 compressed/plaintext SHA-256 與收件公鑰 fingerprint。本批 offset=0、limit=5、最多 25 次 API requests、間隔至少 12 秒。完整 pool 先驗證才切片，失敗樣本留在 attrition report。
+- 設定 v2 明確指定段數與完整字串長度。依序拼接後仍核對原本的 compressed/plaintext SHA-256，再驗證完整 pool，最後按 offset/limit 選取批次。缺段、超長、截斷、順序錯誤與內容竄改都會在 API 請求前拒絕。舊的單一 Secret 不會當作缺段 fallback。讀取器最多支援 8 段，目前 workflow 明確注入 2 段；未來擴充須同步改 workflow/config。
+- `config/cloud_batch.json` 綁定 compressed/plaintext SHA-256 與收件公鑰 fingerprint。初始批次 offset=0、limit=5、最多 25 次 API requests；目前診斷批次見文末、間隔至少 12 秒。完整 pool 先驗證才切片，失敗樣本留在 attrition report。
 - `secure_store.py` 使用 RSA-3072 OAEP-SHA256 包裝一次性 AES-256-GCM key；每個 archive 有隨機 key/nonce，header 作為 AAD。先驗證 GCM tag 再解 ZIP；拒絕路徑越界、symlink、重複成員和不安全覆寫。最大未壓縮 archive 512 MB；大量資料應維持小批次，避免超出上限。
 - `encrypted_batch.py` 在 API 請求前驗證公鑰/config/Secret 輸入；下載後建立相似度索引，整包加密才移到 upload 路徑。索引失敗時仍嘗試保留已抓取的加密證據。取消、runner crash 或超時仍可能使尚未封裝的資料遺失，不能宣稱任何失敗都可續跑。
 - `.github/workflows/urlscan-encrypted-batch.yml` 僅同 repository 受控研究分支的 PR（workflow/config 改變時）或手動觸發；不是排程，也不會一次跑完 55 批。缺 Secret 時在任何 API 請求前失敗，設定後必須重新執行包含本次分段修正的新 run，不能重跑舊 SHA 的 run。分支 workflow 尚不在 default branch 時，使用本次 PR 更新所產生的新 run 的 **Re-run all jobs**。
@@ -130,3 +130,25 @@ API 依據（2026-10-17 檢查）：
 - https://cryptography.io/en/stable/hazmat/primitives/aead/
 - https://cryptography.io/en/stable/hazmat/primitives/asymmetric/rsa/
 - https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+
+## 2026-10-17 未命中診斷與下一批
+
+已下載並解密 run `38994129840` attempt 2 的 artifact `12086296762`：
+首批 5 筆均為 API 回傳 0 筆，非本地 URL／visibility／時間過濾掉結果。
+原查詢為 `task.url.keyword`、size=10，沒有顯式日期條件；帳號可見歷史仍可能受方案限制。
+首批沒有 query 或 fragment，正規化沒有改變 URL；其中 1 筆有大小寫路徑。
+不能由 0 筆推論網站死亡、從未被掃描或標籤。
+
+新增 opt-in `search_diagnostics`：原始 task URL → 有差異才查 normalized task URL →
+page URL → task hostname，每項最多最近 10 筆、加 public filter、共用請求與限流上限。
+每次保留回傳數、has_more（若供應商提供）、精確符合數與拒收原因。
+同 hostname、不同 path/scheme/query/fragment 的結果只供診斷，不能取代原 URL 證據；
+任何成功候選在 Result 下載後仍重新驗證 task URL/UUID/visibility/time。
+沒有搜尋全文歷史、放寬標籤、轉成 POST 掃描或自動跨批次執行。
+
+本次配置 offset=0、limit=10：重查原首批 5 筆，再處理原排程第 2 批 5 筆。
+request_limit=70 包含重試，間隔至少 12 秒；遇限流或預算耗盡停止，未處理數另記。
+原 Secrets、排序與金鑰不變。完成後須查看命中／失敗與保存產物，再決定 offset=10 的批次。
+
+搜尋欄位依官方文件：https://urlscan.io/docs/search/
+`task.url.keyword` 是原提交 URL；`page.url.keyword` 是跳轉後 URL；domain 搜尋不是頁面等價證明。

@@ -1,0 +1,31 @@
+{
+  "verification_passed": true,
+  "freeze_sha256": "be19ad2c728704d75afd2eb605e023b9edfb8544d7700735e6fe071e906763e0",
+  "test_rows": 742,
+  "test_groups": 588,
+  "cells": 6,
+  "predictions": 4452,
+  "slices_independently_recalculated": 216,
+  "paired_change_records": 357,
+  "bootstrap_replicates_independently_checked": 2000,
+  "bootstrap_checks": "all six F1 intervals and four paired F1 intervals, explicit group resampling with sklearn",
+  "metrics_checked": [
+    "accuracy",
+    "precision",
+    "recall",
+    "f1",
+    "fpr",
+    "roc_auc",
+    "average_precision",
+    "tn",
+    "fp",
+    "fn",
+    "tp",
+    "brier_score"
+  ],
+  "no_second_inference": true,
+  "limits": [
+    "Slice metadata depend on frozen extraction; independent source-label adjudication not performed.",
+    "AUC/AP/Brier bootstrap intervals use frozen previously tested metric code; only point metrics and F1 intervals are independently recomputed here."
+  ]
+}

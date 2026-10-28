@@ -1,0 +1,95 @@
+name: Assignment 03 one-time frozen test
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/phishing_url/final_test.py'
+      - 'tests/test_final_test.py'
+      - 'scripts/claim_final_test.py'
+      - 'scripts/verify_final_test.py'
+      - 'config/assignment03_final_test_execution_v1.json'
+      - '.github/workflows/assignment03-final-test.yml'
+permissions:
+  contents: write
+concurrency:
+  group: assignment03-final-test-v1-single-use
+  cancel-in-progress: false
+jobs:
+  final-test:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'codex/assignment03-final-test' &&
+      github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      PYTHONPATH: src
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      EXECUTION_COMMIT: ${{ github.event.pull_request.head.sha }}
+      EVALUATION_RUN_ID: ${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Record execution and validate code before test access
+        run: |
+          mkdir -p "$RUNNER_TEMP/final/meta" "$RUNNER_TEMP/final/output"
+          git rev-parse HEAD > "$RUNNER_TEMP/final/meta/project_commit.txt"
+          cp config/assignment03_final_evaluation_v1.json config/assignment03_final_test_execution_v1.json "$RUNNER_TEMP/final/meta/"
+          python -m pip install -r requirements-assignment03-final.txt
+          python -m pytest -q
+          python -m phishing_url.final_evaluation_contract --root . --output "$RUNNER_TEMP/final/meta/frozen_preflight.json"
+      - name: Acquire the six fixed source shards
+        run: |
+          python -m phishing_url.formal_candidates --download --source-root "$RUNNER_TEMP/final/input" --frame config/assignment03_paired_source_frame_v1.json --policy config/assignment03_paired_release_policy_v1.json
+      - name: Build immutable runtime and test executor
+        run: |
+          docker build -f docker/Dockerfile.assignment03-final -t assignment03-final .
+          docker image inspect assignment03-final --format '{{.Id}}' > "$RUNNER_TEMP/final/meta/image_id.txt"
+          docker run --rm --network=none --read-only --entrypoint python assignment03-final -m pip freeze > "$RUNNER_TEMP/final/meta/container_packages.txt"
+          lscpu > "$RUNNER_TEMP/final/meta/cpu.txt"
+      - name: Reproduce development features and all six exact frozen models
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --pids-limit=128 --memory=5g --cpus=2 \
+            --user "$(id -u):$(id -g)" --tmpfs /tmp:rw,nosuid,nodev,noexec,size=128m \
+            -e EXECUTION_COMMIT -e EVALUATION_RUN_ID \
+            -v "$RUNNER_TEMP/final/input:/input:ro" -v "$RUNNER_TEMP/final/output:/output:rw" \
+            -v "$GITHUB_WORKSPACE:/repo:ro" --entrypoint python assignment03-final \
+            -m phishing_url.final_test prepare --root /repo --source-root /input --output /output/run
+      - name: Atomically claim the one-time test authorization
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FINAL_OUTPUT: ${{ runner.temp }}/final/output/run
+        run: python scripts/claim_final_test.py
+      - name: Perform exactly one complete six-cell test evaluation
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --pids-limit=128 --memory=5g --cpus=2 \
+            --user "$(id -u):$(id -g)" --tmpfs /tmp:rw,nosuid,nodev,noexec,size=128m \
+            -e EXECUTION_COMMIT -e EVALUATION_RUN_ID \
+            -v "$RUNNER_TEMP/final/input:/input:ro" -v "$RUNNER_TEMP/final/output:/output:rw" \
+            -v "$GITHUB_WORKSPACE:/repo:ro" --entrypoint python assignment03-final \
+            -m phishing_url.final_test evaluate --root /repo --source-root /input --output /output/run \
+            --claim /output/run/public/persistent_claim.json
+      - name: Independently recalculate metrics without another inference
+        run: |
+          python scripts/verify_final_test.py --root . --public "$RUNNER_TEMP/final/output/run/public" --output "$RUNNER_TEMP/final/output/run/public/independent_verification.json"
+      - name: Preserve sanitized evidence including partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment03-final-test-${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/final/meta/
+            ${{ runner.temp }}/final/input/acquisition.json
+            ${{ runner.temp }}/final/output/run/public/

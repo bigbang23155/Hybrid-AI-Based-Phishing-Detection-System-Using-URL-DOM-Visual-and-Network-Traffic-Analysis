@@ -1,0 +1,18 @@
+{
+  "expected_rows": 4203,
+  "failures": 0,
+  "no_backfill": true,
+  "payloads_seen": 4203,
+  "per_partition": {
+    "train": 3461,
+    "validation": 742
+  },
+  "schema_dimensions": {
+    "dom_only": 23,
+    "url_dom": 41,
+    "url_only": 18
+  },
+  "successes": 4203,
+  "test_feature_rows": 0,
+  "test_payloads_converted_to_python": 0
+}

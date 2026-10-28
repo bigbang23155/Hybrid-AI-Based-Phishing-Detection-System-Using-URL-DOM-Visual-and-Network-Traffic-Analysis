@@ -1,0 +1,115 @@
+name: Assignment 03 development review
+on:
+  pull_request:
+    paths:
+      - 'src/phishing_url/development_review.py'
+      - 'tests/test_development_review.py'
+      - 'src/phishing_url/final_evaluation_contract.py'
+      - 'tests/test_final_evaluation_contract.py'
+      - 'config/assignment03_final_evaluation_v1.json'
+      - 'scripts/verify_development_review.py'
+      - 'config/assignment03_development_review_v1.json'
+      - '.github/workflows/assignment03-development-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  development:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.ref == 'codex/assignment03-review-freeze')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: src
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Select review or frozen-specification preflight
+        id: phase
+        run: |
+          if [ -f config/assignment03_final_evaluation_v1.json ]; then
+            echo "mode=final-specification" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=development-review" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install pinned software and run full suite
+        run: |
+          if [ -f requirements-assignment03-final.txt ]; then
+            python -m pip install -r requirements-assignment03-final.txt
+          else
+            python -m pip install -r requirements-dom.txt
+          fi
+          python -m pytest -q
+      - name: Verify definition and membership locks
+        run: |
+          mkdir -p "$RUNNER_TEMP/development/meta" "$RUNNER_TEMP/development/output"
+          python -m phishing_url.modality_contract --output "$RUNNER_TEMP/development/meta/contract.json"
+          git rev-parse HEAD > "$RUNNER_TEMP/development/meta/project_commit.txt"
+          python -m pip freeze > "$RUNNER_TEMP/development/meta/python_packages.txt"
+          lscpu > "$RUNNER_TEMP/development/meta/cpu.txt"
+          cp config/assignment03_modeling_protocol_v1.json config/assignment03_development_review_v1.json "$RUNNER_TEMP/development/meta/"
+      - name: Acquire only six fixed source shards
+        if: steps.phase.outputs.mode == 'development-review'
+        run: |
+          python -m phishing_url.formal_candidates --download --source-root "$RUNNER_TEMP/development/input" --frame config/assignment03_paired_source_frame_v1.json --policy config/assignment03_paired_release_policy_v1.json
+      - name: Build passive offline execution image
+        if: steps.phase.outputs.mode == 'development-review'
+        run: |
+          docker pull python:3.12-slim
+          docker build -f docker/Dockerfile.dom-data -t assignment03-development .
+          docker image inspect python:3.12-slim --format '{{json .RepoDigests}}' > "$RUNNER_TEMP/development/meta/base_image_digests.json"
+          docker image inspect assignment03-development --format '{{.Id}}' > "$RUNNER_TEMP/development/meta/image_id.txt"
+          docker run --rm --network=none --read-only --entrypoint python assignment03-development -m pip freeze > "$RUNNER_TEMP/development/meta/container_packages.txt"
+      - name: Reproduce development features and six models, then diagnose errors
+        if: steps.phase.outputs.mode == 'development-review'
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --pids-limit=128 --memory=5g --cpus=2 \
+            --user "$(id -u):$(id -g)" \
+            --tmpfs /tmp:rw,nosuid,nodev,noexec,size=128m \
+            -v "$RUNNER_TEMP/development/input:/input:ro" \
+            -v "$RUNNER_TEMP/development/output:/output:rw" \
+            -v "$GITHUB_WORKSPACE:/repo:ro" \
+            --entrypoint python assignment03-development -m phishing_url.development_review \
+            --root /repo --source-root /input --output /output/run
+      - name: Independently verify review evidence
+        if: steps.phase.outputs.mode == 'development-review'
+        run: |
+          python scripts/verify_development_review.py --root . --public "$RUNNER_TEMP/development/output/run/public" --output "$RUNNER_TEMP/development/output/run/public/independent_verification.json"
+      - name: Verify frozen specification and committed review evidence
+        if: steps.phase.outputs.mode == 'final-specification'
+        run: |
+          docker build -f docker/Dockerfile.assignment03-final -t assignment03-final .
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --user "$(id -u):$(id -g)" --tmpfs /tmp:rw,nosuid,nodev,noexec,size=128m \
+            -v "$GITHUB_WORKSPACE:/repo:ro" -v "$RUNNER_TEMP/development/meta:/out:rw" \
+            assignment03-final --root /repo --output /out/container_final_preflight.json
+          python -m phishing_url.final_evaluation_contract --root . --output "$RUNNER_TEMP/development/meta/final_specification_preflight.json"
+          python scripts/verify_development_review.py --root . --public results/assignment03/review_v1 --output "$RUNNER_TEMP/development/meta/review_independent_verification.json"
+      - name: Execute the review notebook
+        if: steps.phase.outputs.mode == 'final-specification'
+        run: |
+          python -m pip install nbformat==5.11.1 nbclient==0.11.0 ipykernel==7.4.0
+          python scripts/execute_review_notebook.py --output "$RUNNER_TEMP/development/meta/assignment03_development_review_executed.ipynb"
+      - name: Preserve sanitized execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment03-${{ steps.phase.outputs.mode }}-${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/development/meta/
+            ${{ runner.temp }}/development/input/acquisition.json
+            ${{ runner.temp }}/development/output/run/public/

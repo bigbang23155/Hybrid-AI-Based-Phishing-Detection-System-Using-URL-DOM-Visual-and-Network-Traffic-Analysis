@@ -1,0 +1,36 @@
+{
+  "cloud_tests": {
+    "passed": 167,
+    "seconds": 29.65
+  },
+  "first_attempt": {
+    "artifact_id": 11601611151,
+    "reason": "base image tag absent from Docker daemon after BuildKit build; explicit pull fixed provenance recording",
+    "run_id": 37897955600,
+    "status": "failed_before_extraction"
+  },
+  "freeze_artifact_id": 11601747828,
+  "freeze_execution_commit": "7113302db0f2279671b28c71fb9270cfc6ce5a16",
+  "freeze_run_id": 37899396181,
+  "freeze_sha256": "be19ad2c728704d75afd2eb605e023b9edfb8544d7700735e6fe071e906763e0",
+  "freeze_zip_sha256": "53bd54827b7e388ac562ab4023d3c0f37b3cf843f8922c4313c90517818aba35",
+  "independent_review_reports_equal": true,
+  "local_cloud_container_freeze_reports_equal": true,
+  "local_tests": {
+    "passed": 167,
+    "seconds": 23.03
+  },
+  "locked_files": 75,
+  "maximum_validation_score_difference": 0.0,
+  "model_byte_reproduction_matches": 6,
+  "notebook_executed_code_cells": 4,
+  "review_artifact_id": 11601054214,
+  "review_execution_commit": "edb641f424d7c6ca42bd45bc5e8b16be55abb9f4",
+  "review_run_id": 37898355594,
+  "review_zip_sha256": "4f3ff304419986e8ede184097824b19cfc4201f6c1b68a398e06fbdbb6d599c6",
+  "schema_version": "assignment03-review-and-final-freeze-checkpoint-v1",
+  "scope": "Requested steps 1 and 2 complete; actual test executor, test evaluation and submission report remain subsequent work",
+  "status": "review_complete_final_specification_cloud_verified_test_sealed",
+  "test_features": 0,
+  "test_predictions": 0
+}

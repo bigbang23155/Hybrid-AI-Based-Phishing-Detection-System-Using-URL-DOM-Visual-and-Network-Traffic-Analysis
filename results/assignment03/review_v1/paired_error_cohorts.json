@@ -1,0 +1,162 @@
+[
+  {
+    "benign": 29,
+    "comparator": "url_only",
+    "kind": "fixes",
+    "median_tag_count": 465.0,
+    "model": "random_forest",
+    "n": 63,
+    "password_present": 22,
+    "phishing": 34
+  },
+  {
+    "benign": 7,
+    "comparator": "url_only",
+    "kind": "breaks",
+    "median_tag_count": 496.5,
+    "model": "random_forest",
+    "n": 18,
+    "password_present": 6,
+    "phishing": 11
+  },
+  {
+    "benign": 19,
+    "comparator": "url_only",
+    "kind": "both_wrong",
+    "median_tag_count": 561.5,
+    "model": "random_forest",
+    "n": 46,
+    "password_present": 15,
+    "phishing": 27
+  },
+  {
+    "benign": 314,
+    "comparator": "url_only",
+    "kind": "both_correct",
+    "median_tag_count": 497.0,
+    "model": "random_forest",
+    "n": 615,
+    "password_present": 102,
+    "phishing": 301
+  },
+  {
+    "benign": 25,
+    "comparator": "dom_only",
+    "kind": "fixes",
+    "median_tag_count": 178.5,
+    "model": "random_forest",
+    "n": 46,
+    "password_present": 12,
+    "phishing": 21
+  },
+  {
+    "benign": 9,
+    "comparator": "dom_only",
+    "kind": "breaks",
+    "median_tag_count": 654.0,
+    "model": "random_forest",
+    "n": 21,
+    "password_present": 8,
+    "phishing": 12
+  },
+  {
+    "benign": 17,
+    "comparator": "dom_only",
+    "kind": "both_wrong",
+    "median_tag_count": 439.0,
+    "model": "random_forest",
+    "n": 43,
+    "password_present": 13,
+    "phishing": 26
+  },
+  {
+    "benign": 318,
+    "comparator": "dom_only",
+    "kind": "both_correct",
+    "median_tag_count": 509.0,
+    "model": "random_forest",
+    "n": 632,
+    "password_present": 112,
+    "phishing": 314
+  },
+  {
+    "benign": 31,
+    "comparator": "url_only",
+    "kind": "fixes",
+    "median_tag_count": 553.0,
+    "model": "gradient_boosting",
+    "n": 51,
+    "password_present": 14,
+    "phishing": 20
+  },
+  {
+    "benign": 8,
+    "comparator": "url_only",
+    "kind": "breaks",
+    "median_tag_count": 499.0,
+    "model": "gradient_boosting",
+    "n": 20,
+    "password_present": 6,
+    "phishing": 12
+  },
+  {
+    "benign": 19,
+    "comparator": "url_only",
+    "kind": "both_wrong",
+    "median_tag_count": 541.5,
+    "model": "gradient_boosting",
+    "n": 50,
+    "password_present": 22,
+    "phishing": 31
+  },
+  {
+    "benign": 311,
+    "comparator": "url_only",
+    "kind": "both_correct",
+    "median_tag_count": 495.0,
+    "model": "gradient_boosting",
+    "n": 621,
+    "password_present": 103,
+    "phishing": 310
+  },
+  {
+    "benign": 34,
+    "comparator": "dom_only",
+    "kind": "fixes",
+    "median_tag_count": 289.0,
+    "model": "gradient_boosting",
+    "n": 52,
+    "password_present": 16,
+    "phishing": 18
+  },
+  {
+    "benign": 7,
+    "comparator": "dom_only",
+    "kind": "breaks",
+    "median_tag_count": 745.0,
+    "model": "gradient_boosting",
+    "n": 21,
+    "password_present": 12,
+    "phishing": 14
+  },
+  {
+    "benign": 20,
+    "comparator": "dom_only",
+    "kind": "both_wrong",
+    "median_tag_count": 440.0,
+    "model": "gradient_boosting",
+    "n": 49,
+    "password_present": 16,
+    "phishing": 29
+  },
+  {
+    "benign": 308,
+    "comparator": "dom_only",
+    "kind": "both_correct",
+    "median_tag_count": 510.0,
+    "model": "gradient_boosting",
+    "n": 620,
+    "password_present": 101,
+    "phishing": 312
+  }
+]

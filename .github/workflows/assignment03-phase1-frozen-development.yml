@@ -1,0 +1,196 @@
+name: Assignment 03 Phase 1 frozen development
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recover-and-develop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install pinned dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Recover exact upstream source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_COMMIT="90b394d8f9fb5d5dc48400e8bf46b001ce42999f"
+          rm -rf scratch
+          mkdir -p scratch/raw scratch/evidence
+
+          git clone --quiet --no-checkout https://github.com/ebubekirbbr/pdd.git scratch/upstream
+          git -C scratch/upstream fetch --quiet --depth=1 origin "${SOURCE_COMMIT}"
+          git -C scratch/upstream checkout --quiet --detach "${SOURCE_COMMIT}"
+
+          LEGIT="$(find scratch/upstream -type f -name 'data_legitimate_36400.json' -print -quit)"
+          PHISH="$(find scratch/upstream -type f -name 'data_phishing_37175.json' -print -quit)"
+          test -n "${LEGIT}"
+          test -n "${PHISH}"
+
+          cp "${LEGIT}" scratch/raw/data_legitimate_36400.json
+          cp "${PHISH}" scratch/raw/data_phishing_37175.json
+
+          printf '%s  %s\n' \
+            '5e8fbcc88d6ba25f46bd85ed48d8aed9f56e2afc9deb712d13496112b8158ab4' \
+            'scratch/raw/data_legitimate_36400.json' \
+            'c513d1f11b0ce159d43a23b465af2a65f752c6f65a816c2a8084f2a2adf2ebf6' \
+            'scratch/raw/data_phishing_37175.json' \
+            > scratch/evidence/source_checksums.expected
+
+          sha256sum -c scratch/evidence/source_checksums.expected
+          sha256sum scratch/raw/*.json > scratch/evidence/source_checksums.actual
+          git -C scratch/upstream rev-parse HEAD > scratch/evidence/upstream_commit.txt
+          test "$(cat scratch/evidence/upstream_commit.txt)" = "${SOURCE_COMMIT}"
+
+      - name: Rebuild frozen historical URL dataset
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m phishing_url.historical_benchmark audit \
+            --raw scratch/raw \
+            --config config/historical_baseline_v2.json \
+            --output scratch/audit
+
+          PYTHONPATH=src python -m phishing_url.historical_benchmark freeze \
+            --raw scratch/raw \
+            --config config/historical_baseline_v2.json \
+            --audit scratch/audit \
+            --seed-plan config/baseline_seed_plan_v2.json \
+            --output scratch/frozen
+
+      - name: Verify recovered urls.csv is byte-identical to frozen dataset
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_DATASET_SHA="a45a5609dec304be42616b4f100b731c8d7fe315d93e5d758afb6aae1e8df549"
+          ACTUAL_DATASET_SHA="$(sha256sum scratch/frozen/urls.csv | awk '{print $1}')"
+          test "${ACTUAL_DATASET_SHA}" = "${EXPECTED_DATASET_SHA}"
+
+          EXPECTED_ROWS=4001
+          ACTUAL_LINES="$(wc -l < scratch/frozen/urls.csv)"
+          test "${ACTUAL_LINES}" -eq "${EXPECTED_ROWS}"
+
+          EXPECTED_DATASET_SHA="${EXPECTED_DATASET_SHA}" ACTUAL_DATASET_SHA="${ACTUAL_DATASET_SHA}" python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          frozen = json.loads(Path("scratch/frozen/frozen_manifest.json").read_text())
+          committed = json.loads(Path("results/assignment02/historical_baseline_v2/frozen_manifest.json").read_text())
+          seed_bytes = Path("config/baseline_seed_plan_v2.json").read_bytes()
+          evidence = {
+              "status": "verified_byte_identical",
+              "expected_dataset_sha256": os.environ["EXPECTED_DATASET_SHA"],
+              "actual_dataset_sha256": os.environ["ACTUAL_DATASET_SHA"],
+              "generated_manifest_dataset_sha256": frozen["dataset_sha256"],
+              "committed_manifest_dataset_sha256": committed["dataset_sha256"],
+              "seed_plan_sha256": hashlib.sha256(seed_bytes).hexdigest(),
+              "expected_seed_plan_sha256": committed["seed_plan_sha256"],
+              "rows": sum(1 for _ in Path("scratch/frozen/urls.csv").open()) - 1,
+              "scope": committed["scope"],
+          }
+          assert evidence["actual_dataset_sha256"] == evidence["expected_dataset_sha256"]
+          assert evidence["generated_manifest_dataset_sha256"] == evidence["expected_dataset_sha256"]
+          assert evidence["committed_manifest_dataset_sha256"] == evidence["expected_dataset_sha256"]
+          assert evidence["seed_plan_sha256"] == evidence["expected_seed_plan_sha256"]
+          assert evidence["rows"] == 4000
+          Path("scratch/evidence/recovery_verification.json").write_text(
+              json.dumps(evidence, indent=2) + "\n"
+          )
+          PY
+
+      - name: Run Phase 1 development experiment after checksum gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m phishing_url.experiment run \
+            --input scratch/frozen/urls.csv \
+            --output scratch/phase1_development \
+            --seed-plan config/baseline_seed_plan_v2.json \
+            --feature-sets baseline no_https
+
+      - name: Run Phase 1 stability diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m phishing_url.phase1_diagnostics \
+            --dataset scratch/frozen/urls.csv \
+            --development scratch/phase1_development \
+            --output scratch/phase1_diagnostics
+
+      - name: Build compact Phase 1 evidence summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          dev = Path("scratch/phase1_development")
+          diag = Path("scratch/phase1_diagnostics")
+          selected = pd.read_csv(dev / "selected_hyperparameters.csv")
+          metrics = pd.read_csv(dev / "selected_validation_seed_metrics.csv")
+          validation = (
+              metrics.groupby(["feature_set", "model"])
+              .agg(
+                  f1_mean=("f1", "mean"),
+                  f1_std=("f1", "std"),
+                  precision_mean=("precision", "mean"),
+                  recall_mean=("recall", "mean"),
+                  roc_auc_mean=("roc_auc", "mean"),
+                  average_precision_mean=("average_precision", "mean"),
+              )
+              .reset_index()
+          )
+          size = pd.read_csv(diag / "training_size_summary.csv")
+          split = pd.read_csv(diag / "split_strategy_summary.csv")
+          recovery = json.loads(Path("scratch/evidence/recovery_verification.json").read_text())
+
+          summary = {
+              "dataset_recovery": recovery,
+              "development_scope": "validation-only; held-out test not scored",
+              "models": sorted(validation["model"].unique().tolist()),
+              "feature_sets": sorted(validation["feature_set"].unique().tolist()),
+              "selected_hyperparameters": selected.to_dict(orient="records"),
+              "validation_summary": validation.to_dict(orient="records"),
+              "training_size_summary": size.to_dict(orient="records"),
+              "split_strategy_summary": split.to_dict(orient="records"),
+          }
+          Path("scratch/evidence/phase1_summary.json").write_text(
+              json.dumps(summary, indent=2) + "\n"
+          )
+          validation.to_csv("scratch/evidence/four_model_validation_summary.csv", index=False)
+          PY
+
+      - name: Upload frozen recovery and Phase 1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment03-phase1-frozen-development
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            scratch/evidence/
+            scratch/frozen/urls.csv
+            scratch/frozen/frozen_manifest.json
+            scratch/frozen/row_provenance.csv
+            scratch/phase1_development/
+            scratch/phase1_diagnostics/

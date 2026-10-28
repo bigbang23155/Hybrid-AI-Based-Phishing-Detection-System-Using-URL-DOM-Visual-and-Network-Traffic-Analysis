@@ -71,7 +71,7 @@ Because preparation constructs every Tranco record with an `https://` scheme, th
 `uses_https` feature contains source-specific collection bias and must not be
 interpreted as an independently observed security property for those records.
 
-## Assignment 02: model and sampling foundation
+## 02: model and sampling foundation
 
 Current status (September 26, 2026): the existing Assignment 02 implementation is
 preserved and revised. No approved Dataset v2 exists and no formal model metrics
@@ -136,7 +136,7 @@ PYTHONPATH=src python -m phishing_url.experiment predict \
   'https://example.com/'
 ```
 
-## Assignment 03 Phase 1: complete and freeze the URL baseline
+## 03 Phase 1: complete and freeze the URL baseline
 
 Assignment 03 starts by completing the URL-only baseline before DOM work. The
 development protocol now compares Logistic Regression, Decision Tree, Random

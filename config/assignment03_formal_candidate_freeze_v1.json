@@ -1,0 +1,21 @@
+{
+  "schema_version": "formal-candidate-freeze-v1",
+  "status": "candidate_membership_frozen",
+  "execution_commit": "47b4427b666738a551a8e34603d77336d675f2af",
+  "run_id": 37694449692,
+  "artifact_id": 11514374137,
+  "artifact_zip_sha256": "2a403aee9a0e4ba8b9e3f9d7d9fb6d1f04d5373287f2c7f87921e24de41541b9",
+  "candidate_count": 5000,
+  "selected_per_label": {
+    "0": 2500,
+    "1": 2500
+  },
+  "candidate_replay_sha256": "4f4ab4fd6567e84f0de91e061d61cf905574643e771ebf59504861843188a955",
+  "candidate_manifest_sha256": "82d1b01fc4c1548087279fc604c57bbdf99af4de1cc5b39b95d5b96b6c536444",
+  "source_frame_sha256": "2dc4eabe9498db672e26a44850a77c1198eec08f7724f13585497f44dde295b9",
+  "policy_sha256": "432b1797189404d81aa105643ea561674faed511368cdf81dc95bb8993e59424",
+  "training_approved": false,
+  "html_inspected": false,
+  "final_partition_created": false,
+  "next_step": "selected_html_materialization_and_quality_bias_audit"
+}

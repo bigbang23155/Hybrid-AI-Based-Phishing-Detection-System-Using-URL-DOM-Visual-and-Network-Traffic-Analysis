@@ -1,0 +1,14 @@
+{
+  "development_status_records": 4203,
+  "independent_resampled_row_f1_intervals": true,
+  "independent_sklearn_metric_recompute": true,
+  "limitation": "Train metrics are execution evidence; only validation scores are independently recomputed here.",
+  "maximum_metric_difference": 3.3306690738754696e-16,
+  "paired_f1_intervals_verified": true,
+  "sealed_test_prediction_overlap": 0,
+  "train_metrics_recomputed": false,
+  "validation_conditions": 70,
+  "validation_predictions": 51940,
+  "validation_rows_per_condition": 742,
+  "verification_passed": true
+}

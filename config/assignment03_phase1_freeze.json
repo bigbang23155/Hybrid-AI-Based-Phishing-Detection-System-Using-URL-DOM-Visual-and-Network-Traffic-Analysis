@@ -1,0 +1,49 @@
+{
+  "freeze_id": "assignment03-url-development-baseline-v1",
+  "status": "development_baseline_frozen",
+  "scope": "Historical URL-only source-label benchmark; not a deployed classifier or a final hybrid evaluation.",
+  "source_head_commit": "9850fb06b67e51b6eb842e9dc3180e10a1d7386d",
+  "execution_commit": "f74bd6f90f28a85cf7cf80cc059a03fd35725d42",
+  "source_pr": 10,
+  "main_merge_confirmed_at_freeze": false,
+  "workflow_run_id": 37393358105,
+  "artifact_id": 11382107637,
+  "artifact_sha256": "6fa3a35ba926fd39778e5fbcc082830c32392427d4614ec265269dafca4ada24",
+  "dataset_id": "assignment02_ebbu2017_historical_v2",
+  "dataset_sha256": "a45a5609dec304be42616b4f100b731c8d7fe315d93e5d758afb6aae1e8df549",
+  "rows": 4000,
+  "seed_plan_path": "config/baseline_seed_plan_v2.json",
+  "seed_plan_sha256": "2a91a5e8de207ef0aa807ab8b513a163815f2d5285e7c83af6772e79ac14df71",
+  "feature_sets": ["baseline", "no_https"],
+  "models": ["logistic_regression", "decision_tree", "random_forest", "gradient_boosting"],
+  "selection": "mean validation F1 across the five recorded development splits",
+  "threshold": 0.5,
+  "phase1_test_evaluated": false,
+  "historical_assignment02_test_previously_evaluated": true,
+  "final_model_artifacts_exported": false,
+  "primary_reference_model_for_next_comparison": "random_forest",
+  "retained_boosting_comparator": "gradient_boosting",
+  "implementation_sha256": {
+    "experiment.py": "b02675a8c0ed24e29b357509ad0597101be639d919d32449c7720f2d0310841a",
+    "feature_registry.py": "de96a29fcf498b25429963f4d71652c642585a5289f562988430e70054dae02b",
+    "features.py": "12cd98f70a38471d4cc72ce96bbe96b9a269fd493832162f9dd6e74c4f6ccf50",
+    "url_cleaning.py": "aec3826ab71e1fa9cb152d82450cd4d37b7274c8c05e9d7d721a32289f0ab262",
+    "randomness.py": "13b646c7d015ae07f4db5dd7a1f2f8b8d05ca08de5c4546075065d9858a75db1"
+  },
+  "artifact_member_sha256": {
+    "phase1_development/experiment_config.json": "8cdbf03a3c047042c5baf302616d4faafae3a323bf69153a744061569d30cf1b",
+    "phase1_development/development_split_manifest.csv": "58a92d13045e4c598812bd8ccdfbad5ff02da30c44930f9bc257b893bf694cb3",
+    "phase1_development/selected_hyperparameters.csv": "e06915915279104f697a67198d3b8ced3cfe9cccf28ce4e8ae9e2a6073bd864d",
+    "evidence/four_model_validation_summary.csv": "e84f50b745dfcde67c5c168d14ad05c86dce0d2d0d8943ca4864bd066b6d05aa",
+    "phase1_diagnostics/diagnostic_config.json": "ca87094fe5ae524b1d2e89a21edf1da255e9740aa1e143288521be8fc6e8e408"
+  },
+  "interpretation_limits": [
+    "Freeze records the completed development protocol and evidence, not a Git tag, main merge, or production release.",
+    "The old Assignment 02 test was already evaluated. Phase 1 did not evaluate it again; it is not a fresh final holdout.",
+    "Five overlapping development splits do not provide independent confidence intervals or prove RF superiority.",
+    "25/50/75/100 percent diagnostics vary the existing training pool, not a newly expanded external URL corpus. Subsets were not nested.",
+    "Source, period, and HTTPS bias remain; no claim of current real-world performance.",
+    "Paired URL/DOM work requires a separately versioned dataset and a new unused domain-grouped holdout."
+  ],
+  "change_policy": "Do not retune or overwrite this historical baseline. Fixes require a new explicitly versioned experiment; DOM changes are separate modules."
+}

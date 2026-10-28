@@ -1,0 +1,58 @@
+{
+  "artifact_id": 11516378401,
+  "artifact_zip_sha256": "460f078be9de5a38fb3feb8210fcef22b3d7c680db2544ef8a46308bcd9c715b",
+  "bias_audit_completed": true,
+  "candidate_count": 5000,
+  "candidate_replay_sha256": "4f4ab4fd6567e84f0de91e061d61cf905574643e771ebf59504861843188a955",
+  "content_diagnostics_sha256": "5b256c3f817051b565eb3ac6108d0075ff1c49847398c5e2c875cd60924619bc",
+  "cross_label_exact_html_conflicts": 0,
+  "distinct_usable_html": 4749,
+  "excluded_by_label": {
+    "0": {
+      "oversize_html": 44
+    },
+    "1": {
+      "oversize_html": 11
+    }
+  },
+  "execution_commit": "bf1674c5d14e3b2f9f30108596d46c71e442d58d",
+  "failed_candidate_replacement": false,
+  "final_dom_dataset_frozen": false,
+  "final_partition_created": false,
+  "hard_leakage_components": 4079,
+  "independent_verification": {
+    "all_numeric_n_plus_missing_equals_cohort_n": true,
+    "corrected_run_paired_manifest_sha_identical_to_first_run": true,
+    "corrected_run_sample_audit_byte_identical_to_first_run": true,
+    "duplicate_and_component_accounting_checked": true,
+    "numeric_profiles_recomputed_from_public_sample_audit": true,
+    "ratio_denominators_checked": true,
+    "sample_membership_matches_original_freeze": true
+  },
+  "largest_hard_component": 26,
+  "limitations": [
+    "Technical usable does not certify rendered completeness or independently verified labels.",
+    "English content markers are review flags, not exclusions.",
+    "Coarse structural matches are not a complete near-duplicate analysis.",
+    "Cross-pilot domain/content equivalence review is still required before claiming an unexposed holdout.",
+    "No raw HTML/URLs republished; recreate ephemeral cloud dataset from pinned sources."
+  ],
+  "model_training_performed": false,
+  "paired_manifest_sha256": "a89fc9a32e5b272122a916047a627c65f1f3b0fde8738d991a1d8cde915d2895",
+  "quality_report_sha256": "bb7bc5d7e98b3a32e6371be13fa82fca4cad14b6bc154dff350213ba01377e0b",
+  "research_decision_pending": true,
+  "run_id": 37698952013,
+  "sample_audit_sha256": "985411edef6cbb953154def02b8f49f68ae9804cb8ae30113a3c2b1c34a9bd07",
+  "schema_version": "selected-html-checkpoint-v1",
+  "software_tests_passed": 105,
+  "status": "technical_quality_pass_research_decision_pending",
+  "superseded_missingness_report_run_id": 37698201811,
+  "technical_gate_pass": true,
+  "test_evaluated": false,
+  "training_approved": false,
+  "usable_by_label": {
+    "0": 2456,
+    "1": 2489
+  },
+  "usable_pair_count": 4945
+}

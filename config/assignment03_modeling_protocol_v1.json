@@ -1,0 +1,31 @@
+{
+  "schema_version": "assignment03-modeling-protocol-v1",
+  "status": "definitions_frozen_no_formal_feature_run_or_training",
+  "partition_manifest_sha256": "49e9dc599fe11e243ac6ba18307900ddc854eeabb3cd700eb9f39fbf05f2deb0",
+  "sample_counts": {"train": 3461, "validation": 742, "test": 742, "excluded": 55},
+  "modalities": {"url_only": "baseline", "dom_only": "static_dom_v1", "url_dom": "baseline+static_dom_v1"},
+  "sensitivity_url_sets": ["no_https", "hostname_only"],
+  "model_seeds": [4941401, 4941402, 4941403, 4941404, 4941405],
+  "primary_model_seed": 4941401,
+  "seed_interpretation": "model randomness only; never resplit, select best seed, or ensemble seeds",
+  "models": {
+    "random_forest": {"n_estimators": 100, "criterion": "gini", "max_depth": null, "min_samples_split": 2, "min_samples_leaf": 1, "max_features": "sqrt", "bootstrap": true, "class_weight": null, "n_jobs": 1},
+    "gradient_boosting": {"loss": "log_loss", "n_estimators": 100, "learning_rate": 0.1, "subsample": 1.0, "criterion": "friedman_mse", "min_samples_split": 2, "min_samples_leaf": 1, "max_depth": 3, "max_features": null, "n_iter_no_change": null}
+  },
+  "primary_model": "random_forest",
+  "preprocessing": {"imputation": "none_fail_closed", "scaling": "none", "missingness_indicators": false, "feature_selection": "none", "calibration": "none", "class_resampling": "none"},
+  "hyperparameter_search": false,
+  "threshold": 0.5,
+  "positive_class": 1,
+  "positive_rule": "score >= threshold",
+  "primary_validation_metric": "f1",
+  "metrics": ["accuracy", "precision", "recall", "f1", "fpr", "roc_auc", "average_precision", "tn", "fp", "fn", "tp", "brier_score"],
+  "zero_predicted_positive_precision": 0.0,
+  "single_class_auc": "undefined_not_zero",
+  "uncertainty": {"method": "paired_whole_leakage_component_bootstrap", "resamples": 2000, "seed": 4941490, "confidence": 0.95, "primary_seed_only": true, "interval": "percentile", "single_class_replicates": "skip_auc_ap_only_and_report_valid_count", "contrasts": ["url_dom-minus-url_only", "url_dom-minus-dom_only"], "multiple_comparisons": "descriptive_not_confirmatory_significance"},
+  "reporting": {"primary": "all_six_primary_modality_model_cells_at_primary_seed", "seed_sensitivity": "all_five_seed_values_mean_and_sample_standard_deviation_not_confidence_interval", "paired_errors": true, "group_level_error_counts": true, "latency": "feature_extraction_and_prediction_separately_with_hardware_and_batch_size", "no_deployment_prevalence_claim": true},
+  "data_access": {"development_partitions": ["train", "validation"], "test_feature_inspection": false, "test_evaluation_authorized": false, "formal_feature_materialization_performed": false, "model_training_performed": false, "automatic_training_authorized": false, "refit_on_train_plus_validation": false},
+  "failure_policy": "Any eligible-row extraction/schema/join failure blocks the experiment; preserve status, do not drop rows or backfill. Fix/version extractor and rerun all modalities before accessing test.",
+  "final_test_gate": "Separate approved evaluation entry point after development decisions and artifact hashes lock; evaluate all prespecified primary cells once, never select using test.",
+  "open_world_track": "separate_new_temporal_source_campaign_holdouts; never replace the existing internal test"
+}

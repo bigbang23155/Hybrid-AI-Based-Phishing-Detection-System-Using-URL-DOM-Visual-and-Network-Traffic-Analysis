@@ -1,0 +1,44 @@
+{
+  "schema_version": "paired-source-frame-v1",
+  "status": "source_file_inventory_frozen_sampling_not_started",
+  "source": "phreshphish_publication",
+  "revision": "eabec4b7a66324b79cc8a0ad856d1731dc26fe1a",
+  "source_inventory": {
+    "inventory_sha256": "137dca2bb7b457a37fbb2e87bc5ab8567f4fe7750cd30db20870b81cc9614523",
+    "train_shard_count": 56,
+    "train_total_bytes": 27400613420,
+    "source_test_file_count_excluded": 21,
+    "inventory_workflow_run_id": 37574396325,
+    "inventory_artifact_id": 11462170616,
+    "inventory_artifact_zip_sha256": "79567f531d5b2618c81b1ffbf6693b0ce91591fdb1e000d10a19f84885d14703",
+    "inventory_recreation": "Rerun source_inventory against the same exact Git revision; require the canonical inventory_sha256 to match."
+  },
+  "sampling_frame": {
+    "source_split": "train",
+    "official_source_test_split_used": false,
+    "exclude_pilot_shard": "data/train-000.parquet",
+    "reason": "Entire shard excluded conservatively because the 256-sample pilot was already reviewed.",
+    "selection_method": "sort remaining train shard paths by SHA-256 of assignment03:source-shard:4941301:<path>, select first six",
+    "selection_seed": 4941301,
+    "fixed_shard_count": 6,
+    "fixed_shards": [
+      {"path": "data/train-022.parquet", "sha256": "48bb12db73d2920adf6fab9065aef6458cef4c68a63bdf8d17cef31411ed9dbd", "size_bytes": 519913293},
+      {"path": "data/train-007.parquet", "sha256": "6ea74e3fe2fb8e60aeb1e839b768c63f847a53a4b522eaeb039f646fef7e6d99", "size_bytes": 470883056},
+      {"path": "data/train-032.parquet", "sha256": "5b066986fff36d56ef9fa9f0de918504db4b9bf4774c0feed07d4ec34ed48f2d", "size_bytes": 516975992},
+      {"path": "data/train-001.parquet", "sha256": "260cb9c93299f6b244d48321fe115523159770f4e73446b382473628c6e81d74", "size_bytes": 322018201},
+      {"path": "data/train-051.parquet", "sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845", "size_bytes": 526031430},
+      {"path": "data/train-054.parquet", "sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c", "size_bytes": 547814803}
+    ],
+    "expected_total_source_bytes": 2903636775,
+    "sample_target_before_content_inspection": 2500,
+    "per_label": true,
+    "insufficient_class_rows": "report shortfall and stop, no alternate shard or replacement without a new protocol version",
+    "dataset_not_yet_approved_for_training": true
+  },
+  "limitations": [
+    "Frozen shard choice is deterministic but not guaranteed to represent the full publication.",
+    "The six source data files have not been downloaded or parsed in this checkpoint.",
+    "Sample-size and label availability are unverified until the metadata-only selection run.",
+    "This is a source sampling-frame lock, not a frozen paired dataset or a final split."
+  ]
+}

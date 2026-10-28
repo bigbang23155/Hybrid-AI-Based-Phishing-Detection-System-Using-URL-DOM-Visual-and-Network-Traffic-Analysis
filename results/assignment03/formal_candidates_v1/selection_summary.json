@@ -1,0 +1,238 @@
+{
+  "source_rows": 52399,
+  "metadata_exclusions": {
+    "invalid_or_schemeless_url": 430,
+    "duplicate_normalized_url": 6
+  },
+  "unique_eligible_url_rows": 51963,
+  "per_label": {
+    "0": {
+      "eligible_unique_urls": 28701,
+      "eligible_domains": 15900,
+      "domain_capped_capacity": 19561,
+      "excluded_by_domain_cap": 9140,
+      "selected": 2500,
+      "shortfall": 0,
+      "selected_domains": 2201,
+      "maximum_urls_per_domain": 3,
+      "largest_domain_share": 0.0012,
+      "root_path_rate": 0.0756,
+      "https_rate": 0.9944,
+      "missing_date": 0,
+      "date_month_counts": {
+        "2024-07": 1,
+        "2024-08": 776,
+        "2024-09": 673,
+        "2024-10": 134,
+        "2025-06": 51,
+        "2025-07": 388,
+        "2025-08": 394,
+        "2025-09": 83
+      },
+      "language_counts": {
+        "None": 13,
+        "bn": 1,
+        "de": 7,
+        "el": 2,
+        "en": 2199,
+        "es": 9,
+        "fa": 1,
+        "fi": 1,
+        "fr": 21,
+        "hu": 1,
+        "id": 1,
+        "is": 2,
+        "it": 61,
+        "ja": 142,
+        "nl": 13,
+        "no": 1,
+        "pl": 4,
+        "pt": 7,
+        "ru": 2,
+        "sv": 5,
+        "tr": 5,
+        "vi": 1,
+        "zh": 1
+      },
+      "selected_per_shard": {
+        "data/train-001.parquet": 273,
+        "data/train-007.parquet": 442,
+        "data/train-022.parquet": 468,
+        "data/train-032.parquet": 434,
+        "data/train-051.parquet": 460,
+        "data/train-054.parquet": 423
+      }
+    },
+    "1": {
+      "eligible_unique_urls": 23262,
+      "eligible_domains": 6930,
+      "domain_capped_capacity": 8504,
+      "excluded_by_domain_cap": 14758,
+      "selected": 2500,
+      "shortfall": 0,
+      "selected_domains": 2088,
+      "maximum_urls_per_domain": 3,
+      "largest_domain_share": 0.0012,
+      "root_path_rate": 0.4972,
+      "https_rate": 0.764,
+      "missing_date": 0,
+      "date_month_counts": {
+        "2024-07": 320,
+        "2024-08": 107,
+        "2024-09": 257,
+        "2024-10": 319,
+        "2024-11": 192,
+        "2024-12": 77,
+        "2025-01": 382,
+        "2025-02": 88,
+        "2025-03": 44,
+        "2025-04": 29,
+        "2025-06": 91,
+        "2025-07": 242,
+        "2025-08": 283,
+        "2025-09": 69
+      },
+      "language_counts": {
+        "None": 155,
+        "ar": 1,
+        "bn": 4,
+        "ca": 3,
+        "cs": 4,
+        "da": 4,
+        "de": 48,
+        "en": 1505,
+        "es": 54,
+        "et": 2,
+        "fa": 4,
+        "fr": 55,
+        "he": 4,
+        "hu": 5,
+        "id": 1,
+        "it": 12,
+        "ja": 450,
+        "km": 2,
+        "ko": 25,
+        "mr": 1,
+        "nl": 7,
+        "no": 4,
+        "pl": 23,
+        "pt": 46,
+        "ru": 25,
+        "si": 1,
+        "sk": 1,
+        "sr": 1,
+        "sv": 2,
+        "th": 13,
+        "tr": 14,
+        "uk": 10,
+        "uz": 1,
+        "vi": 3,
+        "war": 1,
+        "zh": 9
+      },
+      "selected_per_shard": {
+        "data/train-001.parquet": 282,
+        "data/train-007.parquet": 393,
+        "data/train-022.parquet": 434,
+        "data/train-032.parquet": 433,
+        "data/train-051.parquet": 478,
+        "data/train-054.parquet": 480
+      }
+    }
+  },
+  "candidate_target_met": true,
+  "schema_version": "formal-metadata-selection-v1",
+  "dataset_id": "assignment03_phreshphish_paired_v1",
+  "status": "candidate_membership_frozen",
+  "source_revision": "eabec4b7a66324b79cc8a0ad856d1731dc26fe1a",
+  "source_inventory": [
+    {
+      "path": "data/train-022.parquet",
+      "sha256": "48bb12db73d2920adf6fab9065aef6458cef4c68a63bdf8d17cef31411ed9dbd",
+      "size_bytes": 519913293,
+      "rows": 9388,
+      "source_labels": {
+        "benign": 5296,
+        "phish": 4092
+      }
+    },
+    {
+      "path": "data/train-007.parquet",
+      "sha256": "6ea74e3fe2fb8e60aeb1e839b768c63f847a53a4b522eaeb039f646fef7e6d99",
+      "size_bytes": 470883056,
+      "rows": 8470,
+      "source_labels": {
+        "phish": 3775,
+        "benign": 4695
+      }
+    },
+    {
+      "path": "data/train-032.parquet",
+      "sha256": "5b066986fff36d56ef9fa9f0de918504db4b9bf4774c0feed07d4ec34ed48f2d",
+      "size_bytes": 516975992,
+      "rows": 9637,
+      "source_labels": {
+        "phish": 4312,
+        "benign": 5325
+      }
+    },
+    {
+      "path": "data/train-001.parquet",
+      "sha256": "260cb9c93299f6b244d48321fe115523159770f4e73446b382473628c6e81d74",
+      "size_bytes": 322018201,
+      "rows": 5780,
+      "source_labels": {
+        "phish": 2596,
+        "benign": 3184
+      }
+    },
+    {
+      "path": "data/train-051.parquet",
+      "sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845",
+      "size_bytes": 526031430,
+      "rows": 9641,
+      "source_labels": {
+        "phish": 4247,
+        "benign": 5394
+      }
+    },
+    {
+      "path": "data/train-054.parquet",
+      "sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c",
+      "size_bytes": 547814803,
+      "rows": 9483,
+      "source_labels": {
+        "benign": 5233,
+        "phish": 4250
+      }
+    }
+  ],
+  "candidate_count": 5000,
+  "candidate_manifest_sha256": "82d1b01fc4c1548087279fc604c57bbdf99af4de1cc5b39b95d5b96b6c536444",
+  "candidate_replay_sha256": "4f4ab4fd6567e84f0de91e061d61cf905574643e771ebf59504861843188a955",
+  "source_frame_sha256": "2dc4eabe9498db672e26a44850a77c1198eec08f7724f13585497f44dde295b9",
+  "policy_sha256": "432b1797189404d81aa105643ea561674faed511368cdf81dc95bb8993e59424",
+  "implementation_sha256": "ad54746a5ac966bbc3cc444daf2ef6ba7b18e7d2d4e8f8a006d485f037070d58",
+  "sampling_seed": 4941301,
+  "metadata_columns_read": [
+    "url",
+    "label",
+    "date",
+    "sha256",
+    "target",
+    "lang",
+    "lang_score"
+  ],
+  "html_column_read": false,
+  "html_inspected": false,
+  "html_present_in_downloaded_parquet": true,
+  "selection_precedes_html_inspection": true,
+  "official_source_test_split_used": false,
+  "pilot_shard_excluded": "data/train-000.parquet",
+  "failed_candidate_replacement": false,
+  "training_approved": false,
+  "model_training_performed": false,
+  "final_partition_created": false,
+  "final_dom_dataset_frozen": false,
+  "test_evaluated": false
+}

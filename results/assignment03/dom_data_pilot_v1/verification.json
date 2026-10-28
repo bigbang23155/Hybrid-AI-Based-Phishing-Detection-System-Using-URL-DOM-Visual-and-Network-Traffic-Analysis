@@ -1,0 +1,71 @@
+{
+  "dataset_id": "assignment03_phreshphish_bounded_pilot_v1",
+  "execution_commit": "a3674730c586a73a0066b0b75c8e15004dccb24b",
+  "workflow_run_id": 37396035696,
+  "workflow_job_id": 112052093592,
+  "workflow_conclusion": "success",
+  "software_tests": {"passed": 84, "duration_seconds": 37.06, "python_version": "3.12.14"},
+  "artifact_id": 11382518633,
+  "artifact_bytes": 25939,
+  "artifact_sha256": "c6c1237bb11f74308799203d6470f1e0f9abb3c84c49d0cfe50bc772b00c8be3",
+  "artifact_summary_sha256": "eb11bfb60178543a9fa88e5e7c37e4c78396362cb92b9879d4c24035fe8559ec",
+  "artifact_replay_index_sha256": "0c08e9aadec1454b5a18dd1354e105836392e783d48fe6c04345754c27b7eda7",
+  "source_integrity": {
+    "retrieved_at_utc": "2026-10-06T00:51:04.021100+00:00",
+    "revision": "eabec4b7a66324b79cc8a0ad856d1731dc26fe1a",
+    "source_file": "data/train-000.parquet",
+    "bytes": 49639686,
+    "expected_sha256": "9a9c693a95daeddb127c4446df4c5673b3f1a39e457ffe964b9849069bd739fe",
+    "actual_sha256": "9a9c693a95daeddb127c4446df4c5673b3f1a39e457ffe964b9849069bd739fe",
+    "match": true
+  },
+  "source_rows": 1000,
+  "invalid_or_schemeless_url_rows_excluded_before_sampling": 12,
+  "unique_eligible_url_rows": 988,
+  "selected_candidates": 256,
+  "selected_per_label": {"0": 128, "1": 128},
+  "selection_preceded_html_inspection": true,
+  "failed_candidates_replaced": false,
+  "parse_status_counts": {"parsed_markup": 255, "oversize_html": 1},
+  "usable_pairs": 255,
+  "per_label": {
+    "0": {"usable_pairs": 127, "domains": 116, "root_path_url_count": 7, "password_input_present_count": 20},
+    "1": {"usable_pairs": 128, "domains": 106, "root_path_url_count": 63, "password_input_present_count": 34}
+  },
+  "distinct_html": 253,
+  "leakage_components": 220,
+  "pilot_split_counts": {
+    "train": {"total": 177, "label_0": 88, "label_1": 89},
+    "validation": {"total": 38, "label_0": 19, "label_1": 19},
+    "test": {"total": 40, "label_0": 20, "label_1": 20}
+  },
+  "replay_index_checks": {
+    "rows": 256,
+    "sample_ids_unique": true,
+    "eligible_rows_assigned_once": true,
+    "maximum_splits_per_leakage_component": 1,
+    "maximum_splits_per_exact_html_hash": 1,
+    "checked_after_downloading_original_artifact": true
+  },
+  "container_image_id": "sha256:1378ce059d4ee6006bdb0e7fbd6b786e4428113f341556c56b6dda633f6dfbae",
+  "container_python_version": "3.12.15",
+  "dom_preparation_implementation_sha256": "e9f59767fabef14b57afeb313c9be11a20e6c0a0f47cf39bde61e76742367d9b",
+  "paired_manifest_sha256": "a01a4ce217651205d596aae03f22d0e0754c6c0ba1fe9777908cc626495dc415",
+  "technical_status": "technical_pilot_pass",
+  "training_approved": false,
+  "model_training_performed": false,
+  "test_evaluated": false,
+  "final_dom_dataset_frozen": false,
+  "live_webpage_requests": 0,
+  "prior_live_observation_pilot_restarted": false,
+  "limitations": [
+    "This is a one-shard convenience feasibility pilot, not a representative full-corpus study or the authors' benchmark.",
+    "Published source labels remain separate from project human adjudication. Technical acceptance is not final training approval.",
+    "Parsed markup is not a complete rendered-DOM validation or a content/label correctness judgment.",
+    "The pilot's root-path and password-input differences warrant bias investigation, not score-driven resampling or automatic labels.",
+    "Unknown final URLs, HTTP status, redirects and source verification times were not invented.",
+    "The provisional pilot holdout is not the final fresh holdout; all pilot diagnostics are exploratory.",
+    "Exact HTML/domain connected grouping does not remove all near-template or campaign leakage.",
+    "The public artifact contains only aggregate evidence and replay IDs. Full raw paired HTML/URL outputs were not republished or permanently retained there."
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "cloud_artifact_id": 11518617781,
+  "cloud_artifact_zip_sha256": "d42833184e34b451ea6a8ee16c6f241754337d0cdea48ece99c19e716dbecd3d",
+  "cloud_execution_commit": "372b48003f4dff90c0a85503e9e8c7c0cea54a9a",
+  "cloud_partition_byte_identical_to_local": true,
+  "cloud_replay_must_match_local_partition_sha256": true,
+  "cloud_software_tests": {
+    "duration_seconds": 38.92,
+    "passed": 112
+  },
+  "cross_partition_domain_overlap": 0,
+  "cross_partition_exact_html_overlap": 0,
+  "cross_partition_structural_signature_overlap": 0,
+  "eligible_membership_frozen": true,
+  "eligible_pairs": 4945,
+  "excluded_pairs": 55,
+  "execution_commit": "e7f4ff10c56c219855927962bca2baec4ccfa356",
+  "execution_location": "local_workspace_and_GitHub_Actions",
+  "final_group_count": 3669,
+  "final_partition_created": true,
+  "formal_candidate_replay_sha256": "4f4ab4fd6567e84f0de91e061d61cf905574643e771ebf59504861843188a955",
+  "github_actions_run_id": 37703227484,
+  "github_pushed": true,
+  "holdout_scope": "internal same-cohort modality comparison; not a prospective or deployment benchmark",
+  "largest_group": 97,
+  "limitations": [
+    "Internal historical-cohort holdout, not prospective or externally blinded.",
+    "Structural equality is a conservative proxy, not complete near-duplicate/campaign detection.",
+    "Source labels and rendered content are not independently adjudicated."
+  ],
+  "model_training_performed": false,
+  "original_pilot_manifest_projection_sha256": "a01a4ce217651205d596aae03f22d0e0754c6c0ba1fe9777908cc626495dc415",
+  "overlap": {
+    "exposed_formal_components": 96,
+    "formal_all_candidates_direct_matches": {
+      "domain": 192,
+      "html": 52,
+      "sample": 0,
+      "structure": 207,
+      "url": 0
+    },
+    "formal_usable_direct_matches": {
+      "domain": 192,
+      "html": 52,
+      "sample": 0,
+      "structure": 207,
+      "url": 0
+    },
+    "pilot_candidates": 256,
+    "pilot_exposed_test_rows": 0,
+    "pilot_exposed_validation_rows": 0,
+    "train_only_due_to_pilot_rows": 464,
+    "transitive_additional_train_only_rows": 76,
+    "usable_directly_matched_rows": 388
+  },
+  "partition_counts": {
+    "test": {
+      "benign": 369,
+      "fraction": 0.15005055611729018,
+      "groups": 588,
+      "phishing": 373,
+      "total": 742
+    },
+    "train": {
+      "benign": 1718,
+      "fraction": 0.6998988877654196,
+      "groups": 2525,
+      "phishing": 1743,
+      "total": 3461
+    },
+    "validation": {
+      "benign": 369,
+      "fraction": 0.15005055611729018,
+      "groups": 556,
+      "phishing": 373,
+      "total": 742
+    }
+  },
+  "partition_manifest_sha256": "49e9dc599fe11e243ac6ba18307900ddc854eeabb3cd700eb9f39fbf05f2deb0",
+  "policy_sha256": "b6720f55582922f99a5ac68ea5eef6a3311d330bf433007b407407ade44ba480",
+  "professor_original_pdf_verified": true,
+  "schema_version": "assignment03-holdout-freeze-checkpoint-v1",
+  "software_tests": {
+    "duration_seconds": 37.81,
+    "passed": 112
+  },
+  "status": "holdout_frozen_cloud_verified",
+  "test_evaluated": false,
+  "training_approved": false
+}

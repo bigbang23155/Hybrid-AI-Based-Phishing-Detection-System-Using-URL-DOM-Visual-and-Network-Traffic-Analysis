@@ -1,0 +1,221 @@
+{
+  "completed_fits": 70,
+  "definition_lock_sha256": "332503c9473d6976dbea545f0b12fcd915f3af24283c8aa2f092d91e9c0fa039",
+  "environment": {
+    "numpy": "2.2.6",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.41",
+    "processor": "",
+    "python": "3.12.15",
+    "sklearn": "1.7.2"
+  },
+  "feature_integrity": {
+    "expected_rows": 4203,
+    "failures": 0,
+    "no_backfill": true,
+    "payloads_seen": 4203,
+    "per_partition": {
+      "train": 3461,
+      "validation": 742
+    },
+    "schema_dimensions": {
+      "dom_only": 23,
+      "url_dom": 41,
+      "url_only": 18
+    },
+    "successes": 4203,
+    "test_feature_rows": 0,
+    "test_payloads_converted_to_python": 0
+  },
+  "fit_partition": "train",
+  "generalization_or_robustness_demonstrated": false,
+  "implementation_sha256": "9d8e3efaed5cfc9911326e83fbbb958e96958ac05494d1fbbd77f49e03de653d",
+  "metrics_rows": 140,
+  "model_retention": "hashes recorded; fitted models remain ephemeral in execution workspace and are not a deployment release",
+  "model_training_performed": true,
+  "no_backfill": true,
+  "original_exclusions_retained": 55,
+  "parquet_note": "Parquet pages include neighboring test rows; only development scalars are converted, inspected or featurized.",
+  "partition_manifest_sha256": "49e9dc599fe11e243ac6ba18307900ddc854eeabb3cd700eb9f39fbf05f2deb0",
+  "primary_validation": [
+    {
+      "accuracy": 0.8530997304582211,
+      "average_precision": 0.8854642671917202,
+      "brier_score": 0.11530378936184761,
+      "condition": "random_forest/url_only/baseline",
+      "f1": 0.8512960436562074,
+      "fn": 61.0,
+      "fp": 48.0,
+      "fpr": 0.13008130081300814,
+      "n": 742,
+      "partition": "validation",
+      "precision": 0.8666666666666667,
+      "recall": 0.8364611260053619,
+      "roc_auc": 0.9085456672261093,
+      "seed": 4941401,
+      "tn": 321.0,
+      "tp": 312.0
+    },
+    {
+      "accuracy": 0.8800539083557951,
+      "average_precision": 0.9522861209579493,
+      "brier_score": 0.09234774428401596,
+      "condition": "random_forest/dom_only/baseline",
+      "f1": 0.8798920377867746,
+      "fn": 47.0,
+      "fp": 42.0,
+      "fpr": 0.11382113821138211,
+      "n": 742,
+      "partition": "validation",
+      "precision": 0.8858695652173914,
+      "recall": 0.8739946380697051,
+      "roc_auc": 0.948600303697407,
+      "seed": 4941401,
+      "tn": 327.0,
+      "tp": 326.0
+    },
+    {
+      "accuracy": 0.9137466307277629,
+      "average_precision": 0.9645349532196785,
+      "brier_score": 0.07376549865229112,
+      "condition": "random_forest/url_dom/baseline",
+      "f1": 0.9128065395095368,
+      "fn": 38.0,
+      "fp": 26.0,
+      "fpr": 0.07046070460704607,
+      "n": 742,
+      "partition": "validation",
+      "precision": 0.9279778393351801,
+      "recall": 0.8981233243967829,
+      "roc_auc": 0.9623429746361807,
+      "seed": 4941401,
+      "tn": 343.0,
+      "tp": 335.0
+    },
+    {
+      "accuracy": 0.8638814016172507,
+      "average_precision": 0.9295925675532791,
+      "brier_score": 0.10698125922256164,
+      "condition": "gradient_boosting/url_only/baseline",
+      "f1": 0.8644295302013423,
+      "fn": 51.0,
+      "fp": 50.0,
+      "fpr": 0.13550135501355012,
+      "n": 742,
+      "partition": "validation",
+      "precision": 0.8655913978494624,
+      "recall": 0.8632707774798928,
+      "roc_auc": 0.9222374797474516,
+      "seed": 4941401,
+      "tn": 319.0,
+      "tp": 322.0
+    },
+    {
+      "accuracy": 0.8638814016172507,
+      "average_precision": 0.936952447398054,
+      "brier_score": 0.10176567816027556,
+      "condition": "gradient_boosting/dom_only/baseline",
+      "f1": 0.8658698539176627,
+      "fn": 47.0,
+      "fp": 54.0,
+      "fpr": 0.14634146341463414,
+      "n": 742,
+      "partition": "validation",
+      "precision": 0.8578947368421053,
+      "recall": 0.8739946380697051,
+      "roc_auc": 0.936096398497497,
+      "seed": 4941401,
+      "tn": 315.0,
+      "tp": 326.0
+    },
+    {
+      "accuracy": 0.9056603773584906,
+      "average_precision": 0.9605024659426784,
+      "brier_score": 0.07386270401311612,
+      "condition": "gradient_boosting/url_dom/baseline",
+      "f1": 0.9041095890410958,
+      "fn": 43.0,
+      "fp": 27.0,
+      "fpr": 0.07317073170731707,
+      "n": 742,
+      "partition": "validation",
+      "precision": 0.9243697478991597,
+      "recall": 0.8847184986595175,
+      "roc_auc": 0.9542710172410035,
+      "seed": 4941401,
+      "tn": 342.0,
+      "tp": 330.0
+    }
+  ],
+  "sealed_test_rows": 742,
+  "source_inventory": [
+    {
+      "path": "data/train-022.parquet",
+      "rows": 9388,
+      "sha256": "48bb12db73d2920adf6fab9065aef6458cef4c68a63bdf8d17cef31411ed9dbd",
+      "size_bytes": 519913293,
+      "source_labels": {
+        "benign": 5296,
+        "phish": 4092
+      }
+    },
+    {
+      "path": "data/train-007.parquet",
+      "rows": 8470,
+      "sha256": "6ea74e3fe2fb8e60aeb1e839b768c63f847a53a4b522eaeb039f646fef7e6d99",
+      "size_bytes": 470883056,
+      "source_labels": {
+        "benign": 4695,
+        "phish": 3775
+      }
+    },
+    {
+      "path": "data/train-032.parquet",
+      "rows": 9637,
+      "sha256": "5b066986fff36d56ef9fa9f0de918504db4b9bf4774c0feed07d4ec34ed48f2d",
+      "size_bytes": 516975992,
+      "source_labels": {
+        "benign": 5325,
+        "phish": 4312
+      }
+    },
+    {
+      "path": "data/train-001.parquet",
+      "rows": 5780,
+      "sha256": "260cb9c93299f6b244d48321fe115523159770f4e73446b382473628c6e81d74",
+      "size_bytes": 322018201,
+      "source_labels": {
+        "benign": 3184,
+        "phish": 2596
+      }
+    },
+    {
+      "path": "data/train-051.parquet",
+      "rows": 9641,
+      "sha256": "d8006a6d88d129a6e320b5607632c23cb2bd78b67de387917ec0339f9d53a845",
+      "size_bytes": 526031430,
+      "source_labels": {
+        "benign": 5394,
+        "phish": 4247
+      }
+    },
+    {
+      "path": "data/train-054.parquet",
+      "rows": 9483,
+      "sha256": "f862faba880c17573779cdfd4e93b4152edcaa12fb0ac237deae0a2adfa7674c",
+      "size_bytes": 547814803,
+      "source_labels": {
+        "benign": 5233,
+        "phish": 4250
+      }
+    }
+  ],
+  "status": "development_complete_test_sealed",
+  "test_evaluated": false,
+  "test_feature_rows": 0,
+  "test_predictions": 0,
+  "threshold": 0.5,
+  "train_id_sha256": "b42d62b8ae0ffd8d136007e771ba542c83377c875f662b698d60063a5566c0cd",
+  "train_rows": 3461,
+  "validation_id_sha256": "ac8eb9bb19d2a5da59cf42f12114ed5210f6ed799573051ee7d9dcb9207b4ba5",
+  "validation_rows": 742
+}

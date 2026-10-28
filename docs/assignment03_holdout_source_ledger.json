@@ -1,0 +1,38 @@
+{
+  "independence_note": "Dataset card and PhreshPhish paper belong to one source family; TESSERACT and scikit-learn provide independent methodological corroboration. Local artifacts are separate empirical evidence.",
+  "retrieved_utc": "2026-10-07",
+  "sources": [
+    {
+      "decision_support": "Entities and similar pages can leak across splits; temporal separation alone is insufficient. Paper v1 methodology is guidance, not proof of the pinned newer corpus contents.",
+      "http_status": 200,
+      "id": "phresh_paper",
+      "retrieved_body_sha256": "014e990f031fb48e2c60eb2836b6ddf988a7d2f74a0805bf1e964bbcc2604bea",
+      "title": "PhreshPhish paper v1, sections 2.2, 3.3, 4.1",
+      "url": "https://arxiv.org/html/2507.10854v1"
+    },
+    {
+      "decision_support": "Version 1.0.1 adds 2025 data and downsampling, unlike the original paper period. Use verified shards, not published aggregate totals; card test total differs from its class-count sum.",
+      "http_status": 200,
+      "id": "phresh_card",
+      "retrieved_body_sha256": "ebef41ee66a22e1c383bbccf01a54097b21f6e698d0fc1f5a7698267bf367c29",
+      "title": "Pinned PhreshPhish dataset card",
+      "url": "https://huggingface.co/datasets/phreshphish/phreshphish/raw/eabec4b7a66324b79cc8a0ad856d1731dc26fe1a/README.md"
+    },
+    {
+      "decision_support": "Keep model choices and learned preprocessing out of test. Fit transformations only on training data; validation drives development.",
+      "http_status": 200,
+      "id": "sklearn_pitfalls",
+      "retrieved_body_sha256": "21fac11c181ab35624dcf8673f0475d403d4f6ecf0f9bead01a573d7642b515c",
+      "title": "scikit-learn official documentation, section 12.2",
+      "url": "https://scikit-learn.org/stable/common_pitfalls.html"
+    },
+    {
+      "decision_support": "Independent malware-domain evidence that spatial and temporal evaluation biases inflate results. Transfer the evaluation principle; do not claim its numerical results establish phishing thresholds.",
+      "http_status": 200,
+      "id": "usenix_tesseract",
+      "retrieved_body_sha256": "c5ac4a4e665459d81a2accc3110e68b28e63e4e52f5c555d91f2b11016d25d88",
+      "title": "TESSERACT, USENIX Security 2019",
+      "url": "https://www.usenix.org/conference/usenixsecurity19/presentation/pendlebury"
+    }
+  ]
+}

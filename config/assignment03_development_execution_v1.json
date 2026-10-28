@@ -1,0 +1,19 @@
+{
+  "version": "assignment03-development-execution-v1",
+  "authorization": "User explicitly requested development-only extraction, integrity checks and common modeling on 2026-10-07 America/Chicago.",
+  "development_training_authorized": true,
+  "test_evaluation_authorized": false,
+  "definition_lock_sha256": "332503c9473d6976dbea545f0b12fcd915f3af24283c8aa2f092d91e9c0fa039",
+  "expected_development_rows": 4203,
+  "expected_model_fits": 70,
+  "max_failure_count_before_training": 0,
+  "write_test_features": false,
+  "fit_partitions": ["train"],
+  "evaluation_partitions": ["train", "validation"],
+  "threshold_tuning": false,
+  "feature_selection": false,
+  "source_replacement": false,
+  "public_artifact": "aggregate diagnostics, hashes, sanitized validation predictions, model configuration and uncertainty; no raw URLs/HTML, feature vectors or fitted models",
+  "fitted_model_retention": "hashes recorded; fitted models remain ephemeral in execution workspace and are not a deployment release",
+  "latency": "single-process sequential batch prediction, 1 cold call then 5 warm calls, batch size and environment recorded; not per-page end-to-end latency"
+}

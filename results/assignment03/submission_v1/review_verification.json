@@ -1,0 +1,16 @@
+{
+  "verification_passed": true,
+  "reference_probabilities_checked": 4452,
+  "independent_slice_checks": 240,
+  "prior_language_month_password_counts_equal": true,
+  "paired_change_rows_verified": 292,
+  "permutation_repeats_aggregated": 960,
+  "primary_password_gap_intervals_independently_verified": true,
+  "complexity_standardized_rates_independently_verified": true,
+  "development_statuses": 4203,
+  "test_feature_rows": 0,
+  "limitations": [
+    "Permutation predictions require private model/features; verified via runner tests and aggregates, not recomputed from public evidence.",
+    "Detailed feature profiles and bin assignments depend on the hash-matched extraction; source labels were not manually adjudicated."
+  ]
+}

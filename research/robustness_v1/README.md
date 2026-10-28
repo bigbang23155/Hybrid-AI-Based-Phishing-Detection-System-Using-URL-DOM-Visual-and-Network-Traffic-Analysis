@@ -1,5 +1,8 @@
 # Assignment 03 之後的獨立補強研究 v1
 
+新增獨立資料工程支線：[urlscan.io Collector v1](../urlscan_v1/README.md)。
+可在真人複核未完成時進行 read-only 證據下載與 AI annotation 匯入；不改變以下研究順序及標籤門檻。
+
 這個目錄承接新的研究；Assignment 03 的報告、資料分區、75 個鎖定檔案與正式結果維持原樣。
 基底是 PR #17 合併後的 `ff45088e0ca5ff60c15923e15158553219898365`，不是仍停在舊進度的 main。
 分支：`research/post-assignment03-robustness-v1`。

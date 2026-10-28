@@ -1,4 +1,10 @@
+# Hybrid Phishing Detection Project
 
+## Current Assignment 03 submission
+
+Updated 21 October 2026. The URL baseline, static DOM extractor and same-sample URL-only / DOM-only / URL + DOM development comparisons are complete. Start with the [submission index](docs/submission03/README.md), [English progress report](docs/submission03/progress_report.md), and [dataset and feature documentation](docs/submission03/dataset_and_features.md).
+
+The paired test was excluded during development and subsequently evaluated once; it is now consumed. Current report results are validation results. The later urlscan / four-modality research foundation is separate and has no trained attention model. Earlier sections below are historical workflow documentation; the submission index states the cumulative status.
 
 ## Installation
 

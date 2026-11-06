@@ -1,0 +1,105 @@
+{
+  "historical_a03": [
+    {
+      "partition": "train",
+      "publisher_label": 0,
+      "rows": 1718,
+      "paired_url_html_rows": 1718,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "train",
+      "publisher_label": 1,
+      "rows": 1743,
+      "paired_url_html_rows": 1743,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "validation",
+      "publisher_label": 0,
+      "rows": 369,
+      "paired_url_html_rows": 369,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "validation",
+      "publisher_label": 1,
+      "rows": 373,
+      "paired_url_html_rows": 373,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "test",
+      "publisher_label": 0,
+      "rows": 369,
+      "paired_url_html_rows": 369,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "test",
+      "publisher_label": 1,
+      "rows": 373,
+      "paired_url_html_rows": 373,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "excluded",
+      "publisher_label": 0,
+      "rows": 44,
+      "paired_url_html_rows": 0,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    },
+    {
+      "partition": "excluded",
+      "publisher_label": 1,
+      "rows": 11,
+      "paired_url_html_rows": 0,
+      "matched_screenshot_rows": null,
+      "matched_http_rows": null,
+      "note": "Historical A03 metadata, not a new A04 cohort. Unknown coverage is null."
+    }
+  ],
+  "forced_training": {
+    "rows": 464,
+    "groups": 96
+  },
+  "review_queue": {
+    "rows": 656,
+    "publisher_label_counts": {
+      "0": 296,
+      "1": 360
+    },
+    "recorded_human_entries": 0,
+    "pending_at_archived_import": 656,
+    "snapshots_verified_in_archive": 656,
+    "exact_capture_timestamps_in_archive": 0,
+    "note": "Archived repository status; does not inspect unsynced human review files."
+  },
+  "a04_cohort": {
+    "status": "not_materialized_or_approved",
+    "class_counts": null,
+    "coverage": null,
+    "new_test_locked": false,
+    "training_executed": false
+  },
+  "source_sha256": {
+    "results/assignment03/holdout_v1/partition_manifest.jsonl.gz": "2c69beb41c13aa70194904e993efe96ecebf5cf76a496c571af05e70597b8b54",
+    "research/robustness_v1/evidence/intake/coordinator_key.jsonl": "d6e056417706048a7c1b77c76ad03f5856236228c97f459cd628b9b7b6220acf",
+    "research/robustness_v1/evidence/review_v2/blank_import_summary.json": "5ada1a54e01de1182f3cba3f9e70cf62464b3b2592e8c70003c46afee00643dd",
+    "research/robustness_v1/evidence/review_v2/material_summary.json": "d2b8d9f0bb6f04911eac0d803fc5642aa7bb3eaee30f110185d8814258f97340"
+  }
+}

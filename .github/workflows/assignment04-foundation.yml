@@ -1,0 +1,33 @@
+name: Assignment 04 offline foundation
+on:
+  push:
+    branches: [research/assignment04-foundation-v1]
+  pull_request:
+    paths:
+      - 'research/assignment04_v1/**'
+      - '.github/workflows/assignment04-foundation.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r research/assignment04_v1/requirements.txt
+      - run: PYTHONPATH=src:. python -m unittest research.assignment04_v1.test_foundation research.multimodal_v1.test_multimodal.HTTPTests -v
+      - name: Reproduce archived development diagnostics
+        run: |
+          PYTHONPATH=src:. python -m research.assignment04_v1.audit_a03 --output /tmp/a03_audit.json
+          PYTHONPATH=src:. python -m research.assignment04_v1.repository_inventory --output /tmp/inventory.json
+          python - <<'PY'
+          import json, hashlib
+          from pathlib import Path
+          lock = json.load(open("config/assignment03_final_evaluation_v1.json"))
+          for path, expected in lock["file_sha256"].items():
+              assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == expected, path
+          for a,b in [('/tmp/a03_audit.json','results/assignment04/foundation_v1/a03_audit.json'),('/tmp/inventory.json','results/assignment04/foundation_v1/repository_inventory.json')]:
+              assert json.load(open(a)) == json.load(open(b)), b
+          PY

@@ -1,0 +1,18 @@
+{
+  "run_id": 42716764026,
+  "artifact_id": 13719425389,
+  "artifact_zip_sha256": "423648b2a8fab5530d7d6bf0f483b1eb89b9ebbde7742652ced3de764cdb896b",
+  "execution_commit": "5cf439f77d7bea91b492b8980ebaa9c332ac4d29",
+  "cloud_local_predictions_equal": true,
+  "cloud_local_analysis_equal_except_time_environment": true,
+  "local_environment": {
+    "python": "3.12.14",
+    "numpy": "2.2.6",
+    "sklearn": "1.7.2"
+  },
+  "new_test_evaluated": false,
+  "local_model_fits": 12,
+  "cloud_model_fits": 12,
+  "total_model_fits_this_followup": 24,
+  "published_results": "cloud run; local repetition is reproduction, not additional independent evidence"
+}

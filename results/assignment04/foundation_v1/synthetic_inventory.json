@@ -1,0 +1,45 @@
+{
+  "synthetic_only": true,
+  "inventory": {
+    "attempted": 1,
+    "by_source_assertion_not_adjudicated_label": {
+      "unknown": {
+        "attempted": 1,
+        "all_four_usable": 1,
+        "modalities": {
+          "url": {
+            "available": 1,
+            "usable": 1,
+            "states": {
+              "available/ok/not_applicable": 1
+            }
+          },
+          "dom": {
+            "available": 1,
+            "usable": 1,
+            "states": {
+              "available/ok/fresh": 1
+            }
+          },
+          "visual": {
+            "available": 1,
+            "usable": 1,
+            "states": {
+              "available/ok/fresh": 1
+            }
+          },
+          "network_http": {
+            "available": 1,
+            "usable": 1,
+            "states": {
+              "available/ok/fresh": 1
+            }
+          }
+        }
+      }
+    },
+    "training_eligible": 0,
+    "test_evaluated": false,
+    "note": "Usable means at least one usable feature, not complete coverage or label validity."
+  }
+}

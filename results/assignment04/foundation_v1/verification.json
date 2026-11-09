@@ -1,0 +1,17 @@
+{
+  "base_commit": "c9995bc24fdc854aa37413f3916a063998509e2d",
+  "tests_passed": 20,
+  "frozen_files_verified": 75,
+  "pinned_audit_reproduced_exactly": true,
+  "new_test_access": false,
+  "new_model_fits": 0,
+  "live_collection": false,
+  "demo": "synthetic evidence-only HTML; browser rendering could not be checked because local Chromium socket creation is unavailable",
+  "pending": [
+    "joint HTML-byte-size control",
+    "464-row exclusion refit",
+    "new paired cohort and human review",
+    "new independent holdout establishment",
+    "trained visual/HTTP models and comparative evaluation"
+  ]
+}

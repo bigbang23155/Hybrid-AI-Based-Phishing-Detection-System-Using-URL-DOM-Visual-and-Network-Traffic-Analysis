@@ -1,0 +1,28 @@
+{
+  "synthetic_only": true,
+  "browser": "chromium",
+  "checks": [
+    {
+      "viewport": "desktop",
+      "width": 1150,
+      "height": 750,
+      "rows": 5,
+      "external_requests": 0,
+      "document_overflow": false
+    },
+    {
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "rows": 5,
+      "external_requests": 0,
+      "document_overflow": false
+    }
+  ],
+  "run_id": 42716764026,
+  "artifact_id": 13719050655,
+  "artifact_zip_sha256": "fe1ad531c3c3bb728931411d316e1328860d1b1297b3bc1a650dd389f98215e1",
+  "execution_head": "5cf439f77d7bea91b492b8980ebaa9c332ac4d29",
+  "visual_inspection": "Desktop 1150x750 and mobile 390x844 screenshots inspected. Text legible, no overlap; mobile table intentionally horizontally scrollable. Synthetic/no-prediction disclosure visible.",
+  "prediction_model_available": false
+}

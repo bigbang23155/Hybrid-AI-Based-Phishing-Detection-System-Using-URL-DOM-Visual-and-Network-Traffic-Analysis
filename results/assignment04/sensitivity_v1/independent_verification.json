@@ -1,0 +1,13 @@
+{
+  "status": "independently_verified",
+  "validation_rows": 742,
+  "model_conditions": 12,
+  "metrics_checked_per_condition": 18,
+  "paired_intervals_checked": 10,
+  "bootstrap_draws": 2000,
+  "new_test_read": false,
+  "files_sha256": {
+    "summary.json": "3e9489ba305dab618c3a2391f3d785a0b6daa1a0e56154e250b4bdd7cd65255d",
+    "validation_predictions.jsonl.gz": "4aa31160c16e417e4e4a5fe6010e9b39f728ae55296f85b568c9554036e810b8"
+  }
+}

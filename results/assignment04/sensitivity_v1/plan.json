@@ -1,0 +1,24 @@
+{
+  "version": "a04-development-sensitivity-v1",
+  "partitions": [
+    "train",
+    "validation"
+  ],
+  "primary_seed": 4941401,
+  "threshold": 0.5,
+  "fits": 12,
+  "conditions": [
+    "all_training",
+    "exclude_exposed_components"
+  ],
+  "joint_bins": "training medians of HTML UTF-8 bytes and tag count; >= median is upper bin",
+  "standardization": "equal mass for each class x supported joint bin; fixed common-support bins",
+  "bootstrap": {
+    "draws": 2000,
+    "seed": 4940411,
+    "unit": "whole validation group"
+  },
+  "claims": "post-exposure descriptive sensitivity; not independent confirmation",
+  "new_test_evaluation": false,
+  "hyperparameter_tuning": false
+}

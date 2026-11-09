@@ -1,7 +1,8 @@
 # A04 offline foundation v1
 
-No model fitting, label adoption, network collection or test evaluation commands
-are exposed. Use this alongside the [progress and evidence](../../docs/assignment04/README.md).
+The integration CLI has no model fitting, label adoption, live collection or test
+evaluation command. The separate sensitivity CLI refits only historical A03
+training data and evaluates the unchanged validation cohort. Use this alongside the [progress and evidence](../../docs/assignment04/README.md).
 
 ## Environment and validation
 
@@ -97,3 +98,31 @@ Future fitting must independently verify review decisions, domain/content disjoi
 historical exposure and consistent registry/provenance. Train-only preprocessing,
 paired validation comparisons, missing-modality fallbacks and calibration remain
 future model work. An all-missing view gives nulls and no prediction.
+
+## Completed development reconstruction and sensitivity
+
+See [results and interpretation](../../docs/assignment04/development_sensitivity.md).
+Use Python 3.12 with `requirements-dom.txt` for this separate analysis; it does not
+need the Visual environment. The immutable source download is about 2.9 GB:
+
+```bash
+PYTHONPATH=src:. python -m phishing_url.formal_candidates --download \
+  --source-root /private/a04-source --frame config/assignment03_paired_source_frame_v1.json \
+  --policy config/assignment03_paired_release_policy_v1.json
+PYTHONPATH=src:. python -m research.assignment04_v1.sensitivity \
+  --source-root /private/a04-source --output /private/a04-sensitivity
+PYTHONPATH=src:. python -m research.assignment04_v1.verify_sensitivity \
+  --directory /private/a04-sensitivity/public --output /private/verified.json
+```
+
+The workflow runs parsing/fitting in a network-disabled Docker container. Source
+HTML is passive input, never browser-executed. Only selected development scalars
+are featurized. Baseline prediction replay must match the archive within 1e-12
+before continuing. All twelve conditions retain fixed parameters/seed/validation;
+no tuning or independent-test evaluation occurs. These are post-exposure analyses.
+Raw URLs, HTML, full feature vectors and fitted models are not published.
+
+After successful results are retained, CI independently verifies those predictions
+and intervals instead of repeating model fits. Changes to the implementation or
+hashed inputs require reconstruction. The cloud and local executions in the receipt
+are reproductions, not separate statistical experiments.

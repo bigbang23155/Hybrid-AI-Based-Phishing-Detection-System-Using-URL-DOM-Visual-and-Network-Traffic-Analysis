@@ -29,10 +29,31 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -r requirements-dom.txt
       - run: python -m unittest research.assignment04_v1.test_sensitivity -v
+      - name: Verify retained evidence or request reconstruction
+        id: evidence
+        run: |
+          python - <<'PYCODE'
+          import hashlib, json, os
+          from pathlib import Path
+          path = Path('results/assignment04/sensitivity_v1/summary.json')
+          retained = False
+          if path.exists():
+              r = json.loads(path.read_text())
+              retained = r['implementation_sha256'] == hashlib.sha256(Path('research/assignment04_v1/sensitivity.py').read_bytes()).hexdigest()
+              retained = retained and all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p,h in r['input_sha256'].items())
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('retained=' + str(retained).lower() + '\n')
+          PYCODE
+      - name: Independently verify retained results without refitting
+        if: steps.evidence.outputs.retained == 'true'
+        run: python -m research.assignment04_v1.verify_sensitivity --directory results/assignment04/sensitivity_v1 --output /tmp/verified.json
       - name: Acquire six immutable shards only
+        if: steps.evidence.outputs.retained != 'true'
         run: python -m phishing_url.formal_candidates --download --source-root "$RUNNER_TEMP/source" --frame config/assignment03_paired_source_frame_v1.json --policy config/assignment03_paired_release_policy_v1.json
-      - run: docker build -f docker/Dockerfile.dom-data -t a04-rebuild .
+      - if: steps.evidence.outputs.retained != 'true'
+        run: docker build -f docker/Dockerfile.dom-data -t a04-rebuild .
       - name: Reconstruct and fit development only without network
+        if: steps.evidence.outputs.retained != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/a04-result"
           docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=128 --memory=5g --cpus=2 \
@@ -41,7 +62,7 @@ jobs:
             -v "$RUNNER_TEMP/a04-result:/output:rw" --entrypoint python a04-rebuild \
             -m research.assignment04_v1.sensitivity --root /repo --source-root /source --output /output/run
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.evidence.outputs.retained != 'true'
         with:
           name: a04-development-sensitivity-${{ github.run_id }}
           path: ${{ runner.temp }}/a04-result/run/public/

@@ -39,7 +39,7 @@ reshuffling exposed samples.
 Sources: `config/assignment03_final_test_checkpoint_v1.json`,
 `results/assignment03/final_test_v1/{test_access_started,test_summary}.json`.
 
-## Controlled complexity comparison
+## Controlled complexity comparison: first milestone
 
 We reuse the archived primary validation predictions on the same 742 rows for
 all six cells. No model is refitted. Training-defined tag-count quartile cuts
@@ -60,12 +60,12 @@ All 1,000 draws retained the eight required cells. These are descriptive percent
 intervals with no multiple-comparison correction. The RF benefit persists under
 this coarse complexity control; the GBDT benefit is much less clear.
 
-**Unfinished:** joint HTML-byte-size and complexity control. Retained review
-artifacts contain complexity bins, not per-row HTML byte sizes. Reconstruct the
-approved development-only feature table before making that claim. No test
-features should be reconstructed for this work. Source, capture time and residual
-within-bin differences remain possible confounders. The sparse simplest benign
-and most complex phishing strata make weighted estimates more variable.
+**Follow-up completed:** [joint HTML-size/complexity control and 464-row exclusion
+sensitivity](development_sensitivity.md) now reconstruct development features from
+the six fixed shards. Both analyses are retained: their weighting targets and bin
+resolution differ, so the more favorable comparison must not replace the other.
+Residual source/time/within-bin confounding remains. No test features were
+reconstructed or scored.
 
 ## The 464 rows and the train-validation gap
 
@@ -82,11 +82,13 @@ near-perfect training fit is consistent with overfitting but does not by itself
 identify its cause. Domain/content grouping and source differences can also
 contribute. Seed stability is not evidence of cross-source generalization.
 
-An exclusion sensitivity experiment would refit on training with the 96 exposed
-components removed, retaining identical validation membership and fixed settings.
-That experiment is **not executed**: model-ready development features are not in
-this checkout. No claim is made that the 464 rows caused or resolved the gap.
-Do not spend the remainder of A04 optimizing this historical baseline.
+The follow-up removed all 464 rows (96 components), retaining the same 742-row
+validation cohort. Training shrank from 3,461 to 2,997 rows. RF hybrid validation
+F1 changed from 91.28% to 90.08%; GBDT hybrid from 90.41% to 91.11%. Training gaps
+were 9.92 and 4.06 pp after exclusion. Removal changes class balance and data size,
+so it does not isolate a causal effect of prior exposure. See the detailed follow-up
+for all six cells, joint control, uncertainty and independent verification.
+This completes the bounded A03 sensitivity work; prioritize the new multimodal cohort.
 
 ## Dataset inventory
 
@@ -130,8 +132,10 @@ and usable-field counts. The committed demo uses a clearly marked synthetic fixt
 
 Local validation passed 20 focused software tests in the pinned environment; all
 75 frozen-file hashes remained unchanged. The audit and inventory reproduced exactly.
-HTML rendering could not be visually verified because local Chromium cannot create
-its process socket in this environment; the preview is not claimed as visually QA-approved.
+The follow-up added four sensitivity tests and completed cloud Chromium rendering.
+Desktop and mobile screenshots were visually inspected; the mobile table scrolls
+horizontally. See `results/assignment04/demo_browser_v1/verification.json`. The demo
+still displays synthetic evidence, not a trained prediction.
 
 See [implementation and commands](../../research/assignment04_v1/README.md).
 

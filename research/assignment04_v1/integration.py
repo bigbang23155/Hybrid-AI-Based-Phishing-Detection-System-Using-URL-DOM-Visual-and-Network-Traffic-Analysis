@@ -111,7 +111,7 @@ def evidence_demo(record):
         '</td><td>'+html.escape(m['extraction_status'])+'</td><td>'+html.escape(m['temporal']['status'])+
         '</td><td>'+str(sum(m['usable_mask'].values()))+'/'+str(len(m['usable_mask']))+'</td></tr>'
         for n,m in checked['modalities'].items())
-    return '<!doctype html><meta charset="utf-8"><title>A04 evidence preview</title><style>body{font:18px system-ui;max-width:900px;margin:50px auto;padding:20px;color:#182b42}td,th{padding:14px;text-align:left;border-bottom:1px solid #ddd}table{border-collapse:collapse}</style><h1>Multimodal evidence preview</h1><p><b>Prediction unavailable: no approved trained multimodal model.</b></p><p>Engineering preview only. Labels remain pending; test evaluation is disabled.</p><table><tr><th>Modality</th><th>Acquisition</th><th>Extraction</th><th>Freshness</th><th>Usable fields</th></tr>'+rows+'</table>'
+    return '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A04 evidence preview</title><style>body{font:18px system-ui;max-width:900px;margin:50px auto;padding:20px;color:#182b42}td,th{padding:14px;text-align:left;border-bottom:1px solid #ddd}table{border-collapse:collapse}.table-scroll{overflow-x:auto;max-width:100%}@media(max-width:600px){body{margin:16px auto;padding:12px;font-size:16px}td,th{padding:10px}}</style><h1>Multimodal evidence preview</h1><p><b>Prediction unavailable: no approved trained multimodal model.</b></p><p>Engineering preview only. Labels remain pending; test evaluation is disabled.</p><div class="table-scroll"><table><tr><th>Modality</th><th>Acquisition</th><th>Extraction</th><th>Freshness</th><th>Usable fields</th></tr>'+rows+'</table></div>'
 
 
 def main():
